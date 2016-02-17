@@ -34,7 +34,7 @@ class TestTrajectory
   tf2_ros::TransformListener tf_listener_;
   image_geometry::PinholeCameraModel cam_model_;
   CvFont font_;
-  bool generate,firstDepthFrame_;
+  bool firstDepthFrame_, generate;
 
   ros::Timer timer, depth_timer;
   std::vector<cv::Point3d> co_offsets_;
@@ -52,12 +52,14 @@ public:
     : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(false)
   {
 
+    std::cout << "Hello" << std::endl;
 
     std::string depth_image_topic = nh_.resolveName("depth_image");
     std::string depth_info_topic = nh_.resolveName("depth_info");
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &FrameDrawer::depthImageCb, this);
 
+    ROS_INFO_STREAM("Initializing node. Depth image topic: " << depth_image_topic << "; depth info topic: " << depth_info_topic);
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
@@ -88,7 +90,7 @@ public:
     std::cout << "depth callback" << std::endl;
 
     std::string stationary_frame("odom");
-    std::string tracking_frame_id("base_link");
+    std::string base_frame_id("base_link");
     ros::Duration timeout(1.0 / 30);
 
 
@@ -97,7 +99,7 @@ public:
         try
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
-          geometry_msgs::TransformStamped depth_base_transform = tfBuffer_.lookupTransform(info_msg->header.frame_id, "base_link", ros::Time(0), timeout);
+          geometry_msgs::TransformStamped depth_base_transform = tfBuffer_.lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
           
           traj_tester_ = new GenAndTest(co_offsets_, depth_base_transform);
           
@@ -149,6 +151,6 @@ public:
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_trajectory");
-  TestTrajectory tester();
+  TestTrajectory tester;
   ros::spin();
 }
