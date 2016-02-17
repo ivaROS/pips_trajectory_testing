@@ -1,19 +1,5 @@
-#include <ros/ros.h>
-#include <iostream>     // std::cout
-#include <algorithm>    // std::min
-
-
-#include <boost/foreach.hpp>
-#include <sensor_msgs/image_encodings.h>
-
-#include <sensor_msgs/Image.h>
-
 
 #include <chrono>
-
-
-#include <collision_checker.h>
-#include <trajectory_generator_ros_interface.h>
 
 #include "GenAndTest.h"
 
@@ -45,18 +31,10 @@ public:
 //]
 
 
-class GenAndTest
-{
-
-  std::vector<cv::Point3d> co_offsets_;
-  geometry_msgs::TransformStampedConstPtr depth_base_transform_;
-
-  CollisionChecker* cc_;
-  TrajectoryGeneratorBridge traj_gen_bridge_;
 
 
-public:
-  GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStampedConstPtr& depth_base_transform)
+
+  GenAndTest::GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
     :co_offsets_(co_offsets),  depth_base_transform_(depth_base_transform)
   {
       traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
@@ -67,8 +45,8 @@ public:
 //Get the transform that takes point in base frame and transforms it to odom frame
 //geometry_msgs::TransformStamped base_odom_transform = tfBuffer_.lookupTransform("odom", "base_link", ros::Time(0), timeout);
 
-  void run(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg, const geometry_msgs::TransformStampedConstPtr& base_odom_transform)
+  void GenAndTest::run(const sensor_msgs::ImageConstPtr& image_msg,
+               const sensor_msgs::CameraInfoConstPtr& info_msg, geometry_msgs::TransformStamped& base_odom_transform)
   {
     std::cout << "Generating trajectories..." << std::endl;
     
@@ -102,7 +80,7 @@ public:
   }
   
   
-  bool evaluateTrajectory(ni_trajectory& traj, geometry_msgs::TransformStamped base_odom_transform )
+  bool GenAndTest::evaluateTrajectory(ni_trajectory& traj, geometry_msgs::TransformStamped base_odom_transform )
   {
       bool collided = false;
       for(int i = 0; !collided && i < traj.num_states(); i++)
@@ -129,7 +107,7 @@ public:
 
   }
 
-};
+
 
 
 

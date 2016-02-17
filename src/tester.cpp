@@ -7,9 +7,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <tf2_ros/transform_listener.h>
 #include <boost/foreach.hpp>
-#include <sensor_msgs/image_encodings.h>
-#include <tf/transform_broadcaster.h>
-#include <tf2_ros/static_transform_broadcaster.h>
+
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -19,7 +17,7 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <chrono>
-#include "collision_checker.h"
+#include "GenAndTest.h"
 
 
 
@@ -38,8 +36,6 @@ class TestTrajectory
   CvFont font_;
   bool generate,firstDepthFrame_;
 
-  tf::StampedTransform starting_frame_transform_,depth_starting_frame_transform_;
-  tf2_ros::StaticTransformBroadcaster br;
   ros::Timer timer, depth_timer;
   std::vector<cv::Point3d> co_offsets_;
   CollisionChecker* cc_;
@@ -124,9 +120,9 @@ public:
           //Get the transform that takes point in base frame and transforms it to odom frame
           geometry_msgs::TransformStamped base_transform = tfBuffer_.lookupTransform("odom", "base_link", info_msg->header.stamp, timeout);
           
-          const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
+          //const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
           
-          traj_tester_->run(image_msg, info_msg, base_transformPtr);
+          traj_tester_->run(image_msg, info_msg, base_transform);
           
           
           
@@ -145,64 +141,6 @@ public:
    
   }
   
-   void depthImageInfoCb(const sensor_msgs::CameraInfoConstPtr& info_msg)
-  {
-
-    std::cout << "depth info callback" << std::endl;
-
-    std::string stationary_frame("odom");
-    std::string tracking_frame_id("base_link");
-    std::string starting_frame_id("depth_start_frame");
-    ros::Duration timeout(1.0 / 30);
-
-
-
-
-        try
-        {
-          //Get the transform that takes a point in the base frame and transforms it to the depth optical
-          geometry_msgs::TransformStamped depth_base_transform = tfBuffer_.lookupTransform(info_msg->header.frame_id, "base_link", ros::Time(0), timeout);
-          
-          traj_tester_ = new GenAndTest(co_offsets_, depth_base_transform);
-          
-          cc_ = new CollisionChecker(image_msg, info_msg, depth_base_transform, co_offsets_, false);
-          
-          ROS_INFO("Saved first depth frame");
-
-        }
-        catch (tf2::TransformException &ex) {
-          ROS_WARN("%s",ex.what());
-          return;
-        }
-
-
-
-    
-      
-      geometry_msgs::TransformStamped transform;
-        try
-        {
-          ros::Time acquisition_time = info_msg->header.stamp;
-          transform = tfBuffer_.lookupTransform("depth_start_frame", ros::Time(0), "base_link", ros::Time(0), "odom", timeout);
-          
-        }
-        catch (tf2::TransformException &ex) {
-          ROS_WARN("[draw_frames] TF exception:\n%s",ex.what());
-          return;
-        }
-
-
-      geometry_msgs::Vector3 pt = transform.transform.translation;    
-      double coords[3];
-      coords[0] = pt.x;
-      coords[1] = pt.y;
-      coords[2] = pt.z;
-      
-      cc_->testCollision(coords);
-    
-    
-   
-  }
 
 };
 

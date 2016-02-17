@@ -54,23 +54,32 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -O3 -march=native -std=c++11")
 
 
 ## Declare a cpp library
-# add_library(pips_trajectory_testing
-#   src/${PROJECT_NAME}/pips_trajectory_testing.cpp
-# )
-
-## Declare a cpp executable
-add_executable(GenAndTest
+add_library(traj_gen_test
    src/GenAndTest.cpp
 )
+
+## Declare a cpp executable
+add_executable(tester
+   src/tester.cpp
+)
+
+
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(pips_trajectory_testing_node pips_trajectory_testing_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(GenAndTest
+target_link_libraries(traj_gen_test
    ${catkin_LIBRARIES}
 )
+
+target_link_libraries(tester
+   ${catkin_LIBRARIES} 
+   traj_gen_test
+)
+
 
 
 
