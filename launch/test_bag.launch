@@ -4,9 +4,10 @@
 <arg name="type" default="tester"/>
 
 <arg name="rgb_image" value="camera/rgb/image_color"/>
-<arg name="depth_image" value="camera/depth/image"/>
+<arg name="depth_image" value="camera/depth/image_raw"/>
 <arg name="depth_info" value="camera/depth/camera_info"/>
 
+<!-- If using with rosbag_play_turtlebot.launch, then don't need this-->
 <include file="$(find tbkinect)/launch/play_bag.launch"/>
 
 <node name="$(arg type)" pkg="pips_trajectory_testing" type="$(arg type)" args="/base_link" output="screen">
@@ -15,10 +16,12 @@
     <remap from="depth_info" to="$(arg depth_info)" />
   </node>
 
+<!--
 <node name="depth_input_viewer" pkg="image_view" type="image_view">
     <remap from="image" to="$(arg depth_image)" />
     <param name="autosize" value="False" />
   </node>
+  -->
 
 <node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock --pause -s $(arg start_time) -r 1" />
 

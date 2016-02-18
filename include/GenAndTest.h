@@ -15,12 +15,14 @@
 
 class GenAndTest
 {
-
+  ros::NodeHandle nh_;
   std::vector<cv::Point3d> co_offsets_;
   geometry_msgs::TransformStamped depth_base_transform_;
 
   CollisionChecker* cc_;
   TrajectoryGeneratorBridge traj_gen_bridge_;
+  
+  ros::Publisher colliding_path_pub_, noncolliding_path_pub_;
 
 
 public:

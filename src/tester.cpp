@@ -29,6 +29,8 @@ class TestTrajectory
   image_transport::Publisher pub_,depthpub_,depthpub2_;
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
+  
+  ros::Subscriber trigger_sub_;
 
   tf2_ros::Buffer tfBuffer_;
   tf2_ros::TransformListener tf_listener_;
@@ -49,7 +51,7 @@ class TestTrajectory
 
 public:
   TestTrajectory()
-    : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(false)
+    : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(true)
   {
 
     std::cout << "Hello" << std::endl;
@@ -58,6 +60,9 @@ public:
     std::string depth_info_topic = nh_.resolveName("depth_info");
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &FrameDrawer::depthImageCb, this);
+
+    trigger_sub_ = nh_.subscribe("enable", 10, &TestTrajectory::trigger, this);
+
 
     ROS_INFO_STREAM("Initializing node. Depth image topic: " << depth_image_topic << "; depth info topic: " << depth_info_topic);
     depthsub_.subscribe(nh_, depth_image_topic, 10);
@@ -82,6 +87,11 @@ public:
   }
 
 
+  void trigger(const std_msgs::Empty& msg)
+  {
+      generate = true;
+  
+  }
 
   void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg)
@@ -113,14 +123,17 @@ public:
           return;
         }
     }
-    
+    else
+    {
     if(generate)
     {
-        generate = false;
+        //generate = false;
         try
         {
           //Get the transform that takes point in base frame and transforms it to odom frame
           geometry_msgs::TransformStamped base_transform = tfBuffer_.lookupTransform("odom", "base_link", info_msg->header.stamp, timeout);
+          
+          ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
           
           //const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
           
@@ -141,6 +154,7 @@ public:
     
     
    
+  }
   }
   
 
