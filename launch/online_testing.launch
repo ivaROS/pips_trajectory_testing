@@ -1,0 +1,13 @@
+<launch>
+
+<arg name="rgb_image" value="camera/rgb/image_color"/>
+<arg name="depth_image" value="camera/depth/image_raw"/>
+<arg name="depth_info" value="camera/depth/camera_info"/>
+
+<node name="trajectory_tester" pkg="pips_trajectory_testing" type="tester" output="screen">
+    <remap from="rgb_image" to="$(arg rgb_image)" />
+    <remap from="depth_image" to="$(arg depth_image)" />
+    <remap from="depth_info" to="$(arg depth_info)" />
+  </node>
+  
+</launch>
