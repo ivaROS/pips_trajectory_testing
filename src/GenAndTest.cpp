@@ -63,16 +63,17 @@ public:
     std::vector<ni_trajectory> colliding_trajectories;
     std::vector<ni_trajectory> noncolliding_trajectories;
     
-    double v = .5;
+    double v = .25;
+    size_t num_paths = dep_angles.size();
     
-    for(int i = 0; i < dep_angles.size(); i++)
+    for(int i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];
         angled_straight_traj_func trajf(dep_angle, v);
     
         traj_func* trajpntr = &trajf;
       
-        ROS_INFO_STREAM("Angle: " << dep_angle << std::endl);
+        ROS_DEBUG_STREAM("Angle: " << dep_angle << std::endl);
 
         ni_trajectory traj = traj_gen_bridge_.generate_trajectory(trajpntr);
         traj.frame_id = base_odom_transform.child_frame_id;
@@ -95,8 +96,8 @@ public:
     
     if(true)
     {
-        traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories);
-        traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories);
+        traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories, num_paths);
+        traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories, num_paths);
     }
     
 
