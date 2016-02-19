@@ -8,7 +8,10 @@
 <arg name="depth_info" value="camera/depth/camera_info"/>
 
 <!-- If using with rosbag_play_turtlebot.launch, then don't need this-->
+<!-- Probably best if I just assume that I will always run the above launch file when using recorded data... -->
+<!--
 <include file="$(find tbkinect)/launch/play_bag.launch"/>
+-->
 
 <node name="$(arg type)" pkg="pips_trajectory_testing" type="$(arg type)" args="/base_link" output="screen">
     <remap from="rgb_image" to="$(arg rgb_image)" />

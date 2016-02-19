@@ -19,7 +19,7 @@
 #include <chrono>
 #include "GenAndTest.h"
 
-
+#define DEBUG false
 
 class TestTrajectory
 {
@@ -53,8 +53,6 @@ public:
   TestTrajectory()
     : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(true)
   {
-
-    std::cout << "Hello" << std::endl;
 
     std::string depth_image_topic = nh_.resolveName("depth_image");
     std::string depth_info_topic = nh_.resolveName("depth_info");
@@ -97,7 +95,7 @@ public:
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
 
-    std::cout << "depth callback" << std::endl;
+    if(DEBUG)std::cout << "depth callback" << std::endl;
 
     std::string stationary_frame("odom");
     std::string base_frame_id("base_link");
@@ -115,7 +113,7 @@ public:
           
           firstDepthFrame_ = false;
 
-          ROS_INFO("Created trajectory testing instance");
+          if(DEBUG)ROS_INFO("Created trajectory testing instance");
 
         }
         catch (tf2::TransformException &ex) {
@@ -133,7 +131,7 @@ public:
           //Get the transform that takes point in base frame and transforms it to odom frame
           geometry_msgs::TransformStamped base_transform = tfBuffer_.lookupTransform("odom", "base_link", info_msg->header.stamp, timeout);
           
-          ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
+          if(DEBUG)ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
           
           //const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
           
