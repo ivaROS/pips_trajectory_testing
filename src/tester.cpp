@@ -57,7 +57,7 @@ public:
     std::string depth_image_topic = nh_.resolveName("depth_image");
     std::string depth_info_topic = nh_.resolveName("depth_info");
     
-    //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &FrameDrawer::depthImageCb, this);
+    //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &TestTrajectory::depthImageCb, this);
 
     trigger_sub_ = nh_.subscribe("enable", 10, &TestTrajectory::trigger, this);
 
@@ -131,14 +131,18 @@ public:
           //Get the transform that takes point in base frame and transforms it to odom frame
           geometry_msgs::TransformStamped base_transform = tfBuffer_.lookupTransform("odom", "base_link", info_msg->header.stamp, timeout);
           
-          if(DEBUG)ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
+          ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
           
           //const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
           
+          
+          auto t1 = std::chrono::high_resolution_clock::now();
+
           traj_tester_->run(image_msg, info_msg, base_transform);
           
-          
-          
+          auto t2 = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+          ROS_INFO_STREAM("Trajectory gen/test took " << fp_ms.count() << " ms" << std::endl);
           
 
         }
