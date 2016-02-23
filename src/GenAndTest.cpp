@@ -73,7 +73,7 @@ public:
     bool collided[8];
     auto t1 = std::chrono::high_resolution_clock::now();
  
-    #pragma omp parallel //schedule(dynamic)
+    //#pragma omp parallel //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];
