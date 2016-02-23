@@ -60,19 +60,21 @@ public:
     }
     
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
-    std::vector<ni_trajectory> trajectories;
+
 
     
     double v = .25;
     size_t num_paths = dep_angles.size();
     
-    
+    std::vector<ni_trajectory> trajectories;
+    trajectories.reserve(num_paths);
 
     
     bool collided[8];
-    
+    auto t1 = std::chrono::high_resolution_clock::now();
+ 
     #pragma omp parallel //schedule(dynamic)
-    for(int i = 0; i < num_paths; i++)
+    for(size_t i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];
         angled_straight_traj_func trajf(dep_angle, v);
@@ -84,16 +86,16 @@ public:
         ni_trajectory traj = traj_gen_bridge_.generate_trajectory(trajpntr);
         traj.frame_id = base_odom_transform.child_frame_id;
         
-        trajectories.push_back(traj);
+        trajectories[i] = traj;
         
-        collided[i] = GenAndTest::evaluateTrajectory(traj)
+        collided[i] = GenAndTest::evaluateTrajectory(traj);
         
     }
     
     
     std::vector<ni_trajectory> colliding_trajectories;
     std::vector<ni_trajectory> noncolliding_trajectories;
-    for(int i = 0; i < num_paths; i++)
+    for(size_t i = 0; i < num_paths; i++)
     {
         if(collided[i])
         {
@@ -104,7 +106,12 @@ public:
             noncolliding_trajectories.push_back(trajectories[i]);
         }
     }
-    if(DEBUG)ROS_DEBUG_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories");
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
+
+    if(DEBUG)ROS_INFO_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories in " << fp_ms.count() << " ms");
         
     
     
@@ -126,7 +133,7 @@ public:
           collision_points.header.frame_id = traj.frame_id;
 
       bool collided = false;
-      for(int i = 0; !collided && i < traj.num_states(); i++)
+      for(size_t i = 0; !collided && i < traj.num_states(); i++)
       {
 
         geometry_msgs::Vector3 pt = traj.getPoint(i);    
