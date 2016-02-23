@@ -32,7 +32,7 @@ public:
   void run(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg, geometry_msgs::TransformStamped& base_odom_transform);
                
-  bool evaluateTrajectory(ni_trajectory& traj);
+  bool evaluateTrajectory(ni_trajectory* traj);
 
 
 };

@@ -66,8 +66,8 @@ public:
     double v = .25;
     size_t num_paths = dep_angles.size();
     
-    std::vector<ni_trajectory> trajectories;
-    trajectories.reserve(num_paths);
+    std::vector<ni_trajectory*> trajectories(num_paths);
+    //trajectories.reserve(num_paths);
 
     
     bool collided[8];
@@ -83,8 +83,8 @@ public:
       
         ROS_DEBUG_STREAM("Angle: " << dep_angle << std::endl);
 
-        ni_trajectory traj = traj_gen_bridge_.generate_trajectory(trajpntr);
-        traj.frame_id = base_odom_transform.child_frame_id;
+        ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr);
+        traj->frame_id = base_odom_transform.child_frame_id;
         
         trajectories[i] = traj;
         
@@ -99,11 +99,11 @@ public:
     {
         if(collided[i])
         {
-            colliding_trajectories.push_back(trajectories[i]);
+            colliding_trajectories.push_back(*trajectories[i]);
         }
         else
         {
-            noncolliding_trajectories.push_back(trajectories[i]);
+            noncolliding_trajectories.push_back(*trajectories[i]);
         }
     }
 
@@ -127,16 +127,16 @@ public:
   }
   
   
-  bool GenAndTest::evaluateTrajectory(ni_trajectory& traj)
+  bool GenAndTest::evaluateTrajectory(ni_trajectory* traj)
   {
           geometry_msgs::PoseArray collision_points;
-          collision_points.header.frame_id = traj.frame_id;
+          collision_points.header.frame_id = traj->frame_id;
 
       bool collided = false;
-      for(size_t i = 0; !collided && i < traj.num_states(); i++)
+      for(size_t i = 0; !collided && i < traj->num_states(); i++)
       {
 
-        geometry_msgs::Vector3 pt = traj.getPoint(i);    
+        geometry_msgs::Vector3 pt = traj->getPoint(i);    
         double coords[3];
         coords[0] = pt.x;
         coords[1] = pt.y;
