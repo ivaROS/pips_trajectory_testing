@@ -60,11 +60,16 @@ public:
     }
     
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
-    std::vector<ni_trajectory> colliding_trajectories;
-    std::vector<ni_trajectory> noncolliding_trajectories;
+    std::vector<ni_trajectory> trajectories;
+
     
     double v = .25;
     size_t num_paths = dep_angles.size();
+    
+    
+    #pragma omp parallel schedule(dynamic)
+    
+    bool collided[8];
     
     for(int i = 0; i < num_paths; i++)
     {
@@ -78,7 +83,18 @@ public:
         ni_trajectory traj = traj_gen_bridge_.generate_trajectory(trajpntr);
         traj.frame_id = base_odom_transform.child_frame_id;
         
-        if(GenAndTest::evaluateTrajectory(traj))
+        trajectories.push_back(traj);
+        
+        collided[i] = GenAndTest::evaluateTrajectory(traj)
+        
+    }
+    
+    
+    std::vector<ni_trajectory> colliding_trajectories;
+    std::vector<ni_trajectory> noncolliding_trajectories;
+    for(int i = 0; i < num_paths; i++)
+    {
+        if(collided[i])
         {
             colliding_trajectories.push_back(traj);
         }
@@ -86,12 +102,9 @@ public:
         {
             noncolliding_trajectories.push_back(traj);
         }
-        
-        if(DEBUG)ROS_DEBUG_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories");
-        
-        
     }
-    
+    if(DEBUG)ROS_DEBUG_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories");
+        
     
     
     if(true)

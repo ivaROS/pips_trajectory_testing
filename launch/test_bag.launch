@@ -1,4 +1,14 @@
 <launch>
+
+
+<arg name="onboard-machine" default="odroid"/>
+<arg name="offboard-machine" default="wolverine"/>
+
+
+<machine name="odroid" address="odroid.zapto.xyz" env-loader="~/env_loader.sh" default="true"/>
+<machine name="wolverine" address="wolverine.zapto.xyz" env-loader="~/env_loader.sh" default="true"/>
+
+
 <arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
 <arg name="start_time" default="13"/>
 <arg name="type" default="tester"/>
@@ -13,7 +23,7 @@
 <include file="$(find tbkinect)/launch/play_bag.launch"/>
 -->
 
-<node name="$(arg type)" pkg="pips_trajectory_testing" type="$(arg type)" args="/base_link" output="screen">
+<node machine="$(arg offboard-machine)" name="$(arg type)" pkg="pips_trajectory_testing" type="$(arg type)" args="/base_link" output="screen">
     <remap from="rgb_image" to="$(arg rgb_image)" />
     <remap from="depth_image" to="$(arg depth_image)" />
     <remap from="depth_info" to="$(arg depth_info)" />
@@ -26,6 +36,6 @@
   </node>
   -->
 
-<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock --pause -s $(arg start_time) -r 1" />
+<node machine="$(arg offboard-machine)" name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) -r .50 " />
 
 </launch>
