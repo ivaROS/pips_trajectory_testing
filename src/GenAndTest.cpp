@@ -67,10 +67,11 @@ public:
     size_t num_paths = dep_angles.size();
     
     
-    #pragma omp parallel schedule(dynamic)
+
     
     bool collided[8];
     
+    #pragma omp parallel //schedule(dynamic)
     for(int i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];
@@ -96,11 +97,11 @@ public:
     {
         if(collided[i])
         {
-            colliding_trajectories.push_back(traj);
+            colliding_trajectories.push_back(trajectories[i]);
         }
         else
         {
-            noncolliding_trajectories.push_back(traj);
+            noncolliding_trajectories.push_back(trajectories[i]);
         }
     }
     if(DEBUG)ROS_DEBUG_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories");
