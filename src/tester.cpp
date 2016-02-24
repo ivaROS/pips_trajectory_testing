@@ -54,8 +54,8 @@ public:
     : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(true)
   {
 
-    std::string depth_image_topic = nh_.resolveName("depth_image");
-    std::string depth_info_topic = nh_.resolveName("depth_info");
+    std::string depth_image_topic = "camera/depth/image_raw"; //nh_.resolveName("depth_image");
+    std::string depth_info_topic = "camera/depth/camera_info"; //nh_.resolveName("depth_info");
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &TestTrajectory::depthImageCb, this);
 

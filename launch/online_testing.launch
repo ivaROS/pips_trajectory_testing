@@ -1,8 +1,12 @@
 <launch>
 
-<arg name="rgb_image" value="/camera/rgb/image_raw"/>
-<arg name="depth_image" value="/camera/depth/image_raw"/>
-<arg name="depth_info" value="/camera/depth/camera_info"/>
+<arg name="rgb_image" default="/camera/rgb/image_raw"/>
+<arg name="depth_image" default="/camera/depth/image_raw"/>
+<arg name="depth_info" default="/camera/depth/camera_info"/>
+
+<arg name="parfor" default="true"/>
+
+<param name="enable_parallel_loop" value="$(arg parfor)"/>
 
 <node name="trajectory_tester" pkg="pips_trajectory_testing" type="tester" output="screen">
     <remap from="rgb_image" to="$(arg rgb_image)" />

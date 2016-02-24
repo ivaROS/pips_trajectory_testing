@@ -38,6 +38,15 @@ public:
       colliding_path_pub_ = nh_.advertise<nav_msgs::Path>("colliding_paths", 5);
       noncolliding_path_pub_ = nh_.advertise<nav_msgs::Path>("noncolliding_paths", 5);
       pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
+      
+      
+      std::string key;
+    
+      if(ros::param::search("enable_parallel_loop", key))
+      {
+        ros::param::get(key, parallelism_enabled_); 
+      }
+      
   }
 
 
@@ -47,8 +56,17 @@ public:
 
   void GenAndTest::run(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg, geometry_msgs::TransformStamped& base_odom_transform)
+
   {
-    if(DEBUG)ROS_INFO_STREAM("Generating Trajectories");
+    num_frames=num_frames+1;
+    
+            ROS_INFO_STREAM("Num frames: " << num_frames);
+    
+    if(DEBUG)
+    {
+        ROS_INFO_STREAM("Generating Trajectories");
+
+    }
     
     if(cc_ == NULL)
     {
@@ -70,10 +88,11 @@ public:
     //trajectories.reserve(num_paths);
 
     
-    bool collided[8];
+    bool collided[num_paths];
     auto t1 = std::chrono::high_resolution_clock::now();
  
-    #pragma omp parallel //schedule(dynamic)
+    
+    #pragma omp parallel for if(parallelism_enabled_) //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];

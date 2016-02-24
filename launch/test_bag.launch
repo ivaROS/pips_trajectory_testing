@@ -13,15 +13,15 @@
 <arg name="start_time" default="13"/>
 <arg name="type" default="tester"/>
 
-<arg name="rgb_image" value="camera/rgb/image_color"/>
-<arg name="depth_image" value="camera/depth/image_raw"/>
-<arg name="depth_info" value="camera/depth/camera_info"/>
+<arg name="rgb_image" default="camera/rgb/image_color"/>
+<arg name="depth_image" default="camera/depth/image_raw"/>
+<arg name="depth_info" default="camera/depth/camera_info"/>
 
-<!-- If using with rosbag_play_turtlebot.launch, then don't need this-->
-<!-- Probably best if I just assume that I will always run the above launch file when using recorded data... -->
-<!--
-<include file="$(find tbkinect)/launch/play_bag.launch"/>
--->
+<arg name="parfor" default="true"/>
+
+<param name="enable_parallel_loop" value="$(arg parfor)"/>
+
+<!-- Note: assumes using tb rosbag_play_turtlebot.launch-->
 
 <node machine="$(arg offboard-machine)" name="$(arg type)" pkg="pips_trajectory_testing" type="$(arg type)" args="/base_link" output="screen">
     <remap from="rgb_image" to="$(arg rgb_image)" />
@@ -36,6 +36,6 @@
   </node>
   -->
 
-<node machine="$(arg offboard-machine)" name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) -r .50 " />
+<node machine="$(arg offboard-machine)" name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) -r 1 " />
 
 </launch>
