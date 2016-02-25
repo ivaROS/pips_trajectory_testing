@@ -21,7 +21,7 @@
 
 #define DEBUG false
 
-class TestTrajectory
+class StandAloneTestTrajectory
 {
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
@@ -50,7 +50,7 @@ class TestTrajectory
     boost::shared_ptr<image_synchronizer> synced_images;
 
 public:
-  TestTrajectory()
+  StandAloneTestTrajectory()
     : it_(nh_), tf_listener_(tfBuffer_), firstDepthFrame_(true), generate(true)
   {
 
@@ -59,14 +59,14 @@ public:
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &TestTrajectory::depthImageCb, this);
 
-    trigger_sub_ = nh_.subscribe("enable", 10, &TestTrajectory::trigger, this);
+    trigger_sub_ = nh_.subscribe("enable", 10, &StandAloneTestTrajectory::trigger, this);
 
 
     ROS_INFO_STREAM("Initializing node. Depth image topic: " << depth_image_topic << "; depth info topic: " << depth_info_topic);
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
-    synced_images->registerCallback(bind(&TestTrajectory::depthImageCb, this, _1, _2));
+    synced_images->registerCallback(bind(&StandAloneTestTrajectory::depthImageCb, this, _1, _2));
 
 
     double radius = .25;
@@ -167,6 +167,6 @@ public:
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_trajectory");
-  TestTrajectory tester;
+  StandAloneTestTrajectory tester;
   ros::spin();
 }

@@ -69,7 +69,7 @@ add_library(trajgencore
 )
 
 ## Declare a cpp library
-add_library(trajgennodelet
+add_library(PipsTrajectoryNodelet
    src/nodelet.cpp
 )
 
@@ -95,7 +95,7 @@ target_link_libraries(trajgencore
    traj_gen_test
 )
 
-target_link_libraries(trajgennodelet
+target_link_libraries(PipsTrajectoryNodelet
    ${catkin_LIBRARIES} 
    trajgencore
 )

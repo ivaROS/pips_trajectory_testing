@@ -92,7 +92,7 @@ public:
     auto t1 = std::chrono::high_resolution_clock::now();
  
     
-    #pragma omp parallel for if(parallelism_enabled_) //schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
         double dep_angle = dep_angles[i];

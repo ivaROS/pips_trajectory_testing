@@ -1,18 +1,18 @@
 <launch>
 
-<arg name="rgb_image" default="/camera/rgb/image_raw"/>
-<arg name="depth_image" default="/camera/depth/image_raw"/>
-<arg name="depth_info" default="/camera/depth/camera_info"/>
+<arg name="rgb_image" default="camera/rgb/image_raw"/>
+<arg name="depth_image" default="camera/depth/image_raw"/>
+<arg name="depth_info" default="camera/depth/camera_info"/>
 
 <arg name="parfor" default="true"/>
 
 
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
-<node name="PipsTrajectoryNodelet" pkg="nodelet" type="nodelet" args="load PipsTrajectoryNodelet camera/camera_nodelet_manager" output="screen">
-    <remap from="rgb_image" to="$(arg rgb_image)" />
-    <remap from="depth_image" to="$(arg depth_image)" />
-    <remap from="depth_info" to="$(arg depth_info)" />
+<node  name="PipsTrajectoryNodelet" pkg="nodelet" type="nodelet" args="load PipsTrajectoryNodelet camera/camera_nodelet_manager" output="screen">
+    <remap from="/camera/rgb_image" to="$(arg rgb_image)" />
+    <remap from="/camera/depth_image" to="$(arg depth_image)" />
+    <remap from="/camera/depth_info" to="$(arg depth_info)" />
 </node>
   
 </launch>

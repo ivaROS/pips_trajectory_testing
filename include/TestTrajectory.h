@@ -55,7 +55,7 @@ class TestTrajectory
   
   public:
   TestTrajectory();
-  void init(ros::NodeHandle& nh);
+  void init(ros::NodeHandle nh);
 
 
 

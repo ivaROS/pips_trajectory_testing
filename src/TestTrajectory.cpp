@@ -13,7 +13,7 @@
    
   }
 
-  void TestTrajectory::init(ros::NodeHandle& nh)
+  void TestTrajectory::init(ros::NodeHandle nh)
   {
     nh_ = nh;
     it_ = new image_transport::ImageTransport(nh_);
@@ -22,15 +22,15 @@
 
   
 
-    std::string depth_image_topic = "camera/depth/image_raw"; //nh_.resolveName("depth_image");
-    std::string depth_info_topic = "camera/depth/camera_info"; //nh_.resolveName("depth_info");
+    std::string depth_image_topic = "depth_image";
+    std::string depth_info_topic = "depth_info";
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &TestTrajectory::depthImageCb, this);
 
     trigger_sub_ = nh_.subscribe("enable", 10, &TestTrajectory::trigger, this);
 
 
-    ROS_INFO_STREAM("Initializing node. Depth image topic: " << depth_image_topic << "; depth info topic: " << depth_info_topic);
+    //ROS_INFO_STREAM("Initializing node. Depth image topic: " << depth_image_topic << "; depth info topic: " << depth_info_topic);
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
