@@ -63,6 +63,16 @@ add_executable(tester
    src/tester.cpp
 )
 
+## Declare a cpp library
+add_library(trajgencore
+   src/TestTrajectory.cpp
+)
+
+## Declare a cpp library
+add_library(trajgennodelet
+   src/nodelet.cpp
+)
+
 
 
 
@@ -78,6 +88,16 @@ target_link_libraries(traj_gen_test
 target_link_libraries(tester
    ${catkin_LIBRARIES} 
    traj_gen_test
+)
+
+target_link_libraries(trajgencore
+   ${catkin_LIBRARIES} 
+   traj_gen_test
+)
+
+target_link_libraries(trajgennodelet
+   ${catkin_LIBRARIES} 
+   trajgencore
 )
 
 
