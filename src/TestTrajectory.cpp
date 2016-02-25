@@ -22,8 +22,8 @@
 
   
 
-    std::string depth_image_topic = "depth_image";
-    std::string depth_info_topic = "depth_info";
+    std::string depth_image_topic = "depth/image_raw";
+    std::string depth_info_topic = "depth/camera_info";
     
     //depthsubit_ = it_.subscribeCamera(depth_image_topic, 10, &TestTrajectory::depthImageCb, this);
 
