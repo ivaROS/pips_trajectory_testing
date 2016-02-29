@@ -13,8 +13,8 @@ PipsTrajectoryNodelet::~PipsTrajectoryNodelet()
 
 void PipsTrajectoryNodelet::onInit()
 {
-    ros::NodeHandle nh = getMTNodeHandle();
-    ros::NodeHandle pnh = getMTPrivateNodeHandle();
+    ros::NodeHandle nh = getNodeHandle();
+    ros::NodeHandle pnh = getPrivateNodeHandle();
     tester->init(nh);
 }
 

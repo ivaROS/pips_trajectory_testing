@@ -68,6 +68,11 @@ add_library(trajgencore
    src/TestTrajectory.cpp
 )
 
+## Declare a cpp executable
+add_executable(PipsTrajectoryStandAlone
+   src/standalone.cpp
+)
+
 ## Declare a cpp library
 add_library(PipsTrajectoryNodelet
    src/nodelet.cpp
@@ -96,6 +101,11 @@ target_link_libraries(trajgencore
 )
 
 target_link_libraries(PipsTrajectoryNodelet
+   ${catkin_LIBRARIES} 
+   trajgencore
+)
+
+target_link_libraries(PipsTrajectoryStandAlone
    ${catkin_LIBRARIES} 
    trajgencore
 )
