@@ -16,7 +16,7 @@
 -->
 <param name="/$(arg camera)/driver/depth_mode" value="$(arg depth_res)" />
 
-<node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(camera)/driver depth_mode $(arg depth_res)"/> 
+<node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(arg camera)/driver depth_mode $(arg depth_res)"/> 
 
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
