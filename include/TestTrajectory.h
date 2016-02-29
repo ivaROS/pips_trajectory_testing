@@ -1,3 +1,6 @@
+#ifndef TEST_TRAJECTORY_H
+#define TEST_TRAJECTORY_H
+
 #include <ros/ros.h>
 #include <iostream>     // std::cout
 #include <algorithm>    // std::min
@@ -60,3 +63,5 @@ class TestTrajectory
 
 
 };
+
+#endif //TEST_TRAJECTORY_H

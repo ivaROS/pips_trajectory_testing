@@ -1,7 +1,7 @@
+#ifndef GEN_AND_TEST_H
+#define GEN_AND_TEST_H
+
 #include <ros/ros.h>
-
-
-
 
 //#include <sensor_msgs/image_encodings.h>
 
@@ -39,4 +39,4 @@ public:
 
 
 
-
+#endif //GEN_AND_TEST_H

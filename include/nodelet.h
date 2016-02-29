@@ -1,3 +1,7 @@
+#ifndef TRAJ_GEN_NODELET_H
+#define TRAJ_GEN_NODELET_H
+
+
 #include <nodelet/nodelet.h>
 #include "TestTrajectory.h"
 
@@ -14,4 +18,4 @@
     };
 
 
-
+#endif //TRAJ_GEN_NODELET_H
