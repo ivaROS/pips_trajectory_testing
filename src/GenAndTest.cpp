@@ -3,7 +3,7 @@
 
 #include "GenAndTest.h"
 
-#define DEBUG false
+#define DEBUG true
 
 
 //[ rhs_class
@@ -76,7 +76,9 @@ public:
     {
         cc_->init(image_msg);
     }
-    
+
+   ROS_INFO_STREAM("Made it past cc init");
+ 
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
 
 
@@ -111,6 +113,7 @@ public:
         
     }
     
+    ROS_INFO_STREAM("Made it past generation");
     
     std::vector<ni_trajectory> colliding_trajectories;
     std::vector<ni_trajectory> noncolliding_trajectories;

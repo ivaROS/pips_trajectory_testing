@@ -1,4 +1,4 @@
-<library path="lib/libPipsTrajectoryNodelet_d">
+<library path="lib/libPipsTrajectoryNodelet_rd">
   <class name="PipsTrajectoryNodelet" type="PipsTrajectoryNodelet" base_class_type="nodelet::Nodelet">
   <description>
   This is my first attempt to make pips_trajectory_tester into a nodelet.

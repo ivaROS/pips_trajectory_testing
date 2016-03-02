@@ -1,14 +1,21 @@
 <launch>
 
-<arg name="rgb_image" default="/camera/rgb/image_raw"/>
-<arg name="depth_image" default="/camera/depth/image_raw"/>
-<arg name="depth_info" default="/camera/depth/camera_info"/>
+<arg name="camera" default="camera"/>
+
+<arg name="rgb_image" default="$(arg camera)/rgb/image_raw"/>
+<arg name="depth_image" default="$(arg camera)/depth/image_raw"/>
+<arg name="depth_info" default="$(arg camera)/depth/camera_info"/>
 
 <arg name="parfor" default="true"/>
+<arg name="depth_res" default="8"/>
+
 
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
+<param name="/$(arg camera)/driver/depth_mode" value="$(arg depth_res)" />
 
-<node name="trajectory_tester" pkg="pips_trajectory_testing" type="tester" output="screen">
+<node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(arg camera)/driver depth_mode $(arg depth_res)"/> 
+
+<node name="trajectory_tester" pkg="pips_trajectory_testing" type="PipsTrajectoryStandAlone" output="screen">
     <remap from="rgb_image" to="$(arg rgb_image)" />
     <remap from="depth_image" to="$(arg depth_image)" />
     <remap from="depth_info" to="$(arg depth_info)" />
