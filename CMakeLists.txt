@@ -74,7 +74,7 @@ add_executable(PipsTrajectoryStandAlone
 )
 
 ## Declare a cpp library
-add_library(PipsTrajectoryNodelet
+add_library(PipsTrajectoryNodelet MODULE
    src/nodelet.cpp
 )
 
@@ -110,6 +110,6 @@ target_link_libraries(PipsTrajectoryStandAlone
    trajgencore
 )
 
-
+#target_compile_options(trajgencore PUBLIC -fPIC)
 
 
