@@ -20,7 +20,7 @@
     tfBuffer_ = new tf2_ros::Buffer; //optional parameter: ros::Duration(cache time) (default=10)
     tf_listener_ = new tf2_ros::TransformListener(*tfBuffer_);
 
-  
+    nh_.param<std::string>("/mobile_base/base_frame", base_frame_id, "base_footprint");
 
     std::string depth_image_topic = "depth/image_raw";
     std::string depth_info_topic = "depth/camera_info";
@@ -67,7 +67,8 @@
     if(DEBUG)std::cout << "depth callback" << std::endl;
 
     std::string stationary_frame("odom");
-    std::string base_frame_id("base_link");
+
+
     ros::Duration timeout(1.0 / 30);
 
 

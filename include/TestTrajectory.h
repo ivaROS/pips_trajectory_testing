@@ -36,6 +36,8 @@ class TestTrajectory
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
   
   ros::Subscriber trigger_sub_;
+  
+  std::string base_frame_id;
 
   tf2_ros::Buffer* tfBuffer_;
   tf2_ros::TransformListener* tf_listener_;
