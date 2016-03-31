@@ -129,16 +129,11 @@ public:
         try
         {
           //Get the transform that takes point in base frame and transforms it to odom frame
-          geometry_msgs::TransformStamped base_transform = tfBuffer_.lookupTransform("odom", "base_link", info_msg->header.stamp, timeout);
-          
-          ROS_DEBUG_STREAM("base_transform: " << base_transform << std::endl);
-          
-          //const geometry_msgs::TransformStampedPtr base_transformPtr = geometry_msgs::TransformStampedPtr(new geometry_msgs::TransformStamped(base_transform));
-          
+         
           
           auto t1 = std::chrono::high_resolution_clock::now();
 
-          traj_tester_->run(image_msg, info_msg, base_transform);
+          traj_tester_->run(image_msg, info_msg, "base_footprint");
           
           auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> fp_ms = t2 - t1;

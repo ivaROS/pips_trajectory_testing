@@ -21,20 +21,24 @@ class GenAndTest
   geometry_msgs::TransformStamped depth_base_transform_;
 
   CollisionChecker* cc_;
-  TrajectoryGeneratorBridge traj_gen_bridge_;
   
   ros::Publisher colliding_path_pub_, noncolliding_path_pub_, pose_array_pub_;
   int num_frames =0;
-
+  bool parallelism_enabled_ = true;
 public:
+  GenAndTest();
   GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
 
-  void run(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg, geometry_msgs::TransformStamped& base_odom_transform);
-               
-  bool evaluateTrajectory(ni_trajectory* traj);
-  bool parallelism_enabled_ = true;
+  void init(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
 
+  std::vector<ni_trajectory> run(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg, std::string frame_id);
+  std::vector<ni_trajectory> run(std::vector<traj_func*> trajectory_functions, std::string frame_id);
+
+  bool evaluateTrajectory(ni_trajectory* traj);
+
+  bool evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
+  TrajectoryGeneratorBridge traj_gen_bridge_;
+  
 };
 
 
