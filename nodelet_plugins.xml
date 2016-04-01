@@ -1,7 +1,16 @@
-<library path="lib/libPipsTrajectoryNodelet">
+<library path="lib/libpips_traj_tester_nodelet">
   <class name="PipsTrajectoryNodelet" type="PipsTrajectoryNodelet" base_class_type="nodelet::Nodelet">
-  <description>
-  This is my first attempt to make pips_trajectory_tester into a nodelet.
-  </description>
+    <description>
+      This is my first attempt to make pips_trajectory_tester into a nodelet.
+    </description>
   </class>
 </library>
+
+<library path="lib/libpips_controller_nodelet">
+  <class name="pips_trajectory_testing/PipsTrajectoryController" type="kobuki::PipsTrajectoryController" base_class_type="nodelet::Nodelet">
+    <description>
+      Controller to avoid obstacles using PIPS
+    </description>
+  </class>
+</library>
+

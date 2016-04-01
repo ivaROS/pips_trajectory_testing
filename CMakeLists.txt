@@ -65,22 +65,22 @@ add_executable(tester
 )
 
 ## Declare a cpp library
-add_library(trajgencore
+add_library(traj_gen_core
    src/TestTrajectory.cpp
 )
 
 ## Declare a cpp executable
-add_executable(PipsTrajectoryStandAlone
+add_executable(pips_traj_tester
    src/standalone.cpp
 )
 
 ## Declare a cpp library
-add_library(PipsTrajectoryNodelet
+add_library(pips_traj_tester_nodelet MODULE
    src/nodelet.cpp
 )
 
 ## Declare a cpp library
-add_library(PipsTrajectoryControllerNodelet
+add_library(pips_controller_nodelet
    src/PipsTrajectoryController.cpp
 )
 
@@ -102,22 +102,23 @@ target_link_libraries(tester
    traj_gen_test
 )
 
-target_link_libraries(trajgencore
+target_link_libraries(traj_gen_core
    ${catkin_LIBRARIES} 
    traj_gen_test
 )
 
-target_link_libraries(PipsTrajectoryNodelet
+target_link_libraries(pips_traj_tester_nodelet
    ${catkin_LIBRARIES} 
-   trajgencore
+   traj_gen_core
 )
 
-target_link_libraries(PipsTrajectoryStandAlone
+target_link_libraries(pips_traj_tester
    ${catkin_LIBRARIES} 
-   trajgencore
+   traj_gen_core
 )
 
-target_link_libraries(PipsTrajectoryControllerNodelet
+
+target_link_libraries(pips_controller_nodelet
    ${catkin_LIBRARIES} 
    traj_gen_test
 )

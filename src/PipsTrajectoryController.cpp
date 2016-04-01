@@ -41,8 +41,8 @@
 ** Ifdefs
 *****************************************************************************/
 
-#ifndef TRAJECTORY_CONTROLLER_HPP_
-#define TRAJECTORY_CONTROLLER_HPP_
+#ifndef PIPS_TRAJECTORY_CONTROLLER_H_
+#define PIPS_TRAJECTORY_CONTROLLER_H_
 
 /*****************************************************************************
 ** Includes
@@ -300,4 +300,4 @@ private:
 
 } // namespace kobuki
 // %EndTag(FULLTEXT)%
-#endif /* TRAJECTORY_CONTROLLER_HPP_ */
+#endif /* PIPS_TRAJECTORY_CONTROLLER_H_ */

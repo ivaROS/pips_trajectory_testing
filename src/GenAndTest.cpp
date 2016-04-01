@@ -3,7 +3,7 @@
 
 #include "GenAndTest.h"
 
-#define DEBUG false
+#define DEBUG true
 
 
 //Generates a straight line trajectory with a given angle and speed
@@ -126,6 +126,7 @@ public:
         
     }
     
+    ROS_INFO_STREAM("Made it past generation");
     
     std::vector<ni_trajectory> colliding_trajectories;
     std::vector<ni_trajectory> noncolliding_trajectories;
