@@ -48,22 +48,7 @@
 ** Includes
 *****************************************************************************/
 // %Tag(FULLTEXT)%
-#include <ros/ros.h>
-#include <std_msgs/Empty.h>
-#include <yocs_controllers/default_controller.hpp>
-#include <Eigen/Dense>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/Quaternion.h>
-
-#include <nav_msgs/Odometry.h>
-#include <trajectory_generator_ros_interface.h>
-#include <tf/transform_datatypes.h>
-
-#include <tf2_ros/transform_listener.h>
-#include <tf2_trajectory.h>
-#include <boost/thread/mutex.hpp>
-#include <turtlebot_trajectory_controller/trajectory_controller.hpp>
+#include <trajectory_controller.h>
 
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -78,6 +63,27 @@
 #include "GenAndTest.h"
 #include <kobuki_msgs/ButtonEvent.h>
 
+
+
+
+//Generates a straight line trajectory with a given angle and speed
+class angled_straight_traj_func : public traj_func{
+
+    double dep_angle_;
+    double v_;
+
+public:
+    angled_straight_traj_func( double dep_angle, double v ) : dep_angle_(dep_angle), v_(v) { }
+    
+    void dState ( const state_type &x , state_type &dxdt , const double  t  )
+    {
+        dxdt[XD_IND] = v_*cos( dep_angle_);
+        dxdt[YD_IND] = v_*sin( dep_angle_);
+    }
+    
+    
+};
+
 namespace kobuki
 {
 
@@ -89,7 +95,9 @@ namespace kobuki
 class PipsTrajectoryController : public kobuki::TrajectoryController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : Controller(), nh_(nh), name_(name){};
+  PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) {
+      
+  };
   ~PipsTrajectoryController(){};
 
   /**
@@ -125,8 +133,12 @@ public:
     return true;
   };
 
+protected:
+  void setupParams();
+  void setupPublishersSubscribers();
+  
 private:
-  bool wander_,ready;
+  bool wander_,ready_;
   
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
@@ -145,8 +157,10 @@ private:
     
   
   void buttonCB(const kobuki_msgs::ButtonEventPtr msg);
-  
-
+  void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
+               const sensor_msgs::CameraInfoConstPtr& info_msg);
+  bool checkCurrentTrajectory();
+  std::vector<traj_func*> getTrajectoryFunctions(std::vector<traj_func*>& trajectory_functions);
 };
 
 
@@ -157,16 +171,16 @@ private:
     TrajectoryController::setupParams();
     
     traj_tester_ = new GenAndTest();
-    params = traj_tester->traj_gen_bridge_.getDefaultParams();
+    params_ = traj_tester_->traj_gen_bridge_.getDefaultParams();
     
-    nh_.param<double>("tf", params.tf, "5");
+    nh_.param<double>("tf", params_.tf, 5);
    
-    traj_tester->traj_gen_bridge_.setDefaultParams(params);
+    traj_tester_->traj_gen_bridge_.setDefaultParams(params_);
 
   }
   
   
-  void setupPublishersSubscribers()
+  void PipsTrajectoryController::setupPublishersSubscribers()
   {
       
     std::string depth_image_topic = "depth/image_raw";
@@ -175,7 +189,7 @@ private:
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
-    synced_images->registerCallback(bind(&PipsAvoidance::depthImageCb, this, _1, _2));
+    synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
   }
   
 
@@ -195,8 +209,6 @@ private:
                const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
 
-    if(DEBUG)std::cout << "depth callback" << std::endl;
-
     ros::Duration timeout(0);
 
 
@@ -211,7 +223,7 @@ private:
           
           ready_ = true;
 
-          if(DEBUG)ROS_INFO("Created trajectory testing instance");
+          ROS_DEBUG("Created trajectory testing instance");
 
         }
         catch (tf2::TransformException &ex) {
@@ -219,14 +231,19 @@ private:
           return;
         }
     }
-    else
+    
+    if(ready_)
     {
-      if(wandering_)
+      if(wander_)
       {
+        //Update collision checker with new image/camera info
+        cc_->setImage(image_msg, info_msg);
+        
+        
         //check if current path is still clear
         if(executing_)
         {
-          if(PipsTrajectoryController::checkCurrentTrajectory(desired_trajectory_, curr_index_))
+          if(PipsTrajectoryController::checkCurrentTrajectory())
           {
             executing_ = false;
           }
@@ -237,7 +254,7 @@ private:
         {    
           std::vector<traj_func*> trajectory_functions;
           PipsTrajectoryController::getTrajectoryFunctions(trajectory_functions);
-          traj_tester_->run(trajectory_functions, image_msg, info_msg, base_frame_id_);
+          traj_tester_->run(trajectory_functions, base_frame_id_);
         }
     
 
@@ -253,11 +270,11 @@ private:
   {
     trajectory_generator::trajectory_points trimmed_trajectory;
     trimmed_trajectory.header = desired_trajectory_.header;
-    trimmed_trajectory.points = std::vector<T>(desired_trajectory_.begin() + curr_index, desired_trajectory_.end());
+    trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
       
     trajectory_generator::trajectory_points localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_);
     
-    traj_tester_->evaluateTrajectory(localTrajectory);
+    return traj_tester_->evaluateTrajectory(localTrajectory);
   }
   
   std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions(std::vector<traj_func*>& trajectory_functions)
