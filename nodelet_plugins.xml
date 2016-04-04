@@ -7,7 +7,7 @@
 </library>
 
 <library path="lib/libpips_controller_nodelet">
-  <class name="pips_trajectory_testing/PipsTrajectoryController" type="kobuki::PipsTrajectoryController" base_class_type="nodelet::Nodelet">
+  <class name="PipsTrajectoryController" type="PipsTrajectoryController" base_class_type="nodelet::Nodelet">
     <description>
       Controller to avoid obstacles using PIPS
     </description>
