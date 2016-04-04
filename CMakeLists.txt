@@ -80,7 +80,7 @@ add_library(pips_traj_tester_nodelet MODULE
 )
 
 ## Declare a cpp library
-add_library(pips_controller_nodelet
+add_library(pips_controller_nodelet MODULE
    src/PipsTrajectoryController.cpp
 )
 
