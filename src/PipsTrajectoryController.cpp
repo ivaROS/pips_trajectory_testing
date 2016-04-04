@@ -120,7 +120,7 @@ namespace kobuki
   
   void PipsTrajectoryController::setupPublishersSubscribers()
   {
-      
+    TrajectoryController::setupPublishersSubscribers();
     std::string depth_image_topic = "depth/image_raw";
     std::string depth_info_topic = "depth/camera_info";
 
@@ -128,6 +128,8 @@ namespace kobuki
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
+    
+    button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
   }
   
 
@@ -136,6 +138,7 @@ namespace kobuki
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
       wander_ = true;
+      ROS_INFO_STREAM("Activating Wander");
     }
     else
     {
@@ -194,9 +197,11 @@ namespace kobuki
           PipsTrajectoryController::getTrajectoryFunctions(trajectory_functions);
           std::vector<ni_trajectory> valid_traj = traj_tester_->run(trajectory_functions, base_frame_id_);
           
+          ROS_INFO_STREAM("Number trajectories: " << valid_traj.size());
           if(valid_traj.size() >0)
           {
             //executeTrajectory
+
           }
         }
     
