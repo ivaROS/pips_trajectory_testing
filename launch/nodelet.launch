@@ -20,7 +20,7 @@
 
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
-<node  name="PipsTrajectoryNodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_traj_tester_nodelet $(arg camera)/camera_nodelet_manager" output="screen">
+<node  name="PipsTrajectoryNodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_trajectory_nodelet $(arg camera)/camera_nodelet_manager" output="screen">
     <remap from="rgb/image_raw" to="$(arg rgb_image)" />
     <remap from="depth/image_raw" to="$(arg depth_image)" />
     <remap from="depth/camera_info" to="$(arg depth_info)" />
