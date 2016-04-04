@@ -80,11 +80,14 @@ add_library(pips_traj_tester_nodelet MODULE
 )
 
 ## Declare a cpp library
-add_library(pips_controller_nodelet MODULE
+add_library(pips_trajectory_controller
    src/PipsTrajectoryController.cpp
 )
 
-
+## Declare a cpp library
+add_library(pips_trajectory_controller_nodelet MODULE
+   src/pips_controller_nodelet.cpp
+)
 
 
 
@@ -118,11 +121,15 @@ target_link_libraries(pips_traj_tester
 )
 
 
-target_link_libraries(pips_controller_nodelet
+target_link_libraries(pips_trajectory_controller
    ${catkin_LIBRARIES} 
    traj_gen_test
 )
 
+target_link_libraries(pips_trajectory_controller_nodelet
+   ${catkin_LIBRARIES} 
+   pips_trajectory_controller
+)
 
 
 

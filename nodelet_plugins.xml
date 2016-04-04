@@ -6,8 +6,8 @@
   </class>
 </library>
 
-<library path="lib/libpips_controller_nodelet">
-  <class name="PipsTrajectoryController" type="PipsTrajectoryController" base_class_type="nodelet::Nodelet">
+<library path="lib/libpips_trajectory_controller_nodelet">
+  <class name="PipsTrajectoryControllerNodelet" type="PipsTrajectoryControllerNodelet" base_class_type="nodelet::Nodelet">
     <description>
       Controller to avoid obstacles using PIPS
     </description>
