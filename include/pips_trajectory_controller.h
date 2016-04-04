@@ -56,7 +56,7 @@ private:
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
   
-  ros::Subscriber button_subscriber_;
+  ros::Subscriber button_sub_;
   
   std::vector<cv::Point3d> co_offsets_;
   CollisionChecker* cc_;
