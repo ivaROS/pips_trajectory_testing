@@ -1,5 +1,5 @@
 <library path="lib/libpips_traj_tester_nodelet">
-  <class name="PipsTrajectoryNodelet" type="PipsTrajectoryNodelet" base_class_type="nodelet::Nodelet">
+  <class name="pips_trajectory_testing/pips_trajectory_nodelet" type="PipsTrajectoryNodelet" base_class_type="nodelet::Nodelet">
     <description>
       This is my first attempt to make pips_trajectory_tester into a nodelet.
     </description>
@@ -7,7 +7,7 @@
 </library>
 
 <library path="lib/libpips_trajectory_controller_nodelet">
-  <class name="PipsTrajectoryControllerNodelet" type="PipsTrajectoryControllerNodelet" base_class_type="nodelet::Nodelet">
+  <class name="pips_trajectory_testing/pips_trajectory_controller_nodelet" type="PipsTrajectoryControllerNodelet" base_class_type="nodelet::Nodelet">
     <description>
       Controller to avoid obstacles using PIPS
     </description>
