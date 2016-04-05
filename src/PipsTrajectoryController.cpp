@@ -85,16 +85,15 @@ namespace kobuki
   {
     kobuki::TrajectoryController::init();
     
+    double radius = .178;
+    double height = .48;
+    double floor_tolerance = .05;
+    double safety_expansion = .05;
 
-
-    double radius = .25;
-    double height = .7;
-    double clearance = .05;
-
-    cv::Point3d topr(radius,-height,radius);
-    cv::Point3d topl(-radius,-height,radius);
-    cv::Point3d bottomr(radius,-clearance,radius);
-    cv::Point3d bottoml(-radius,-clearance,radius);
+    cv::Point3d topr(radius+safety_expansion,-height,radius+safety_expansion);
+    cv::Point3d topl(-radius-safety_expansion,-height,radius+safety_expansion);
+    cv::Point3d bottomr(radius+safety_expansion,-floor_tolerance,radius+safety_expansion);
+    cv::Point3d bottoml(-radius-safety_expansion,-floor_tolerance,radius+safety_expansion);
 
 
     cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
