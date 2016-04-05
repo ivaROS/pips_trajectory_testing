@@ -32,7 +32,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES pips_trajectory_testing
   CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller
 #  DEPENDS system_lib
@@ -89,6 +89,11 @@ add_library(pips_trajectory_controller_nodelet MODULE
    src/pips_controller_nodelet.cpp
 )
 
+## Declare standalone pips trajectory controller
+add_executable(pips_trajectory_controller_main
+   src/main.cpp
+)
+
 
 
 ## Add cmake target dependencies of the executable/library
@@ -127,6 +132,11 @@ target_link_libraries(pips_trajectory_controller
 )
 
 target_link_libraries(pips_trajectory_controller_nodelet
+   ${catkin_LIBRARIES} 
+   pips_trajectory_controller
+)
+
+target_link_libraries(pips_trajectory_controller_main
    ${catkin_LIBRARIES} 
    pips_trajectory_controller
 )
