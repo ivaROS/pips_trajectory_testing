@@ -189,8 +189,8 @@ namespace kobuki
       {
       
         ROS_DEBUG_STREAM("[" << name_ << "] Updating collision checker image");
-        //Update collision checker with new image/camera info
-        cc_->setImage(image_msg, info_msg);
+        //Update tester with new image/camera info
+        traj_tester_->setImage(image_msg, info_msg);
         
         
         //check if current path is still clear

@@ -59,7 +59,6 @@ private:
   ros::Subscriber button_sub_;
   
   std::vector<cv::Point3d> co_offsets_;
-  CollisionChecker* cc_;
   GenAndTest* traj_tester_;
   traj_params params_;
   

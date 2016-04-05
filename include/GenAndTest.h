@@ -30,7 +30,7 @@ public:
   GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
 
   void init(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
-
+  void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   std::vector<ni_trajectory> run(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg, std::string frame_id);
   std::vector<ni_trajectory> run(std::vector<traj_func*> trajectory_functions, std::string frame_id);
 

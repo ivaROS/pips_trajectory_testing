@@ -80,6 +80,12 @@ public:
   }
 
 
+  void GenAndTest::setImage(const sensor_msgs::ImageConstPtr& image_msg,
+               const sensor_msgs::CameraInfoConstPtr& info_msg)
+  {
+    cc_->setImage(image_msg, info_msg);
+  
+  }
 
 //Get the transform that takes point in base frame and transforms it to odom frame
   std::vector<ni_trajectory> GenAndTest::run(const sensor_msgs::ImageConstPtr& image_msg,
