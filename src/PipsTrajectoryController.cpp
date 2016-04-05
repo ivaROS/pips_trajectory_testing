@@ -121,8 +121,8 @@ namespace kobuki
   void PipsTrajectoryController::setupPublishersSubscribers()
   {
     TrajectoryController::setupPublishersSubscribers();
-    std::string depth_image_topic = "depth/image_raw";
-    std::string depth_info_topic = "depth/camera_info";
+    std::string depth_image_topic = "depth_image_raw";
+    std::string depth_info_topic = "depth_camera_info";
 
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);

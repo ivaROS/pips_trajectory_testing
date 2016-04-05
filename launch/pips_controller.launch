@@ -1,8 +1,8 @@
 <launch>
 
-<arg name="rgb_image" default="rgb/image_raw"/>
-<arg name="depth_image" default="depth/image_raw"/>
-<arg name="depth_info" default="depth/camera_info"/>
+<arg name="rgb_image" default="/camera/rgb/image_raw"/>
+<arg name="depth_image" default="/camera/depth/image_raw"/>
+<arg name="depth_info" default="/camera/depth/camera_info"/>
 
 <arg name="camera" default="camera"/>
 
@@ -14,16 +14,17 @@
   5: QVGA   320x240
   8: QQVGA  160x120
 -->
+<!--
 <param name="/$(arg camera)/driver/depth_mode" value="$(arg depth_res)" />
 
 <node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(arg camera)/driver depth_mode $(arg depth_res)"/> 
-
+-->
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
 <node  name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_trajectory_controller_nodelet $(arg camera)/camera_nodelet_manager" output="screen">
-    <remap from="rgb/image_raw" to="$(arg rgb_image)" />
-    <remap from="depth/image_raw" to="$(arg depth_image)" />
-    <remap from="depth/camera_info" to="$(arg depth_info)" />
+    <remap from="/pips_controller_nodelet/rgb/image_raw" to="$(arg rgb_image)" />
+    <remap from="/pips_controller_nodelet/depth_image_raw" to="$(arg depth_image)" />
+    <remap from="/pips_controller_nodelet/depth_camera_info" to="$(arg depth_info)" />
 </node>
 
 
