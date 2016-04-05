@@ -9,6 +9,8 @@
 <arg name="depth_res" default="8"/>
 <arg name="parfor" default="true"/>
 
+<arg name="nodelet" default="true"/>
+
 <!-- options:
   2: VGA    640x480
   5: QVGA   320x240
@@ -21,10 +23,17 @@
 -->
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
-<node  name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_trajectory_controller_nodelet $(arg camera)/camera_nodelet_manager" output="screen">
+
+
+<node name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_trajectory_controller_nodelet $(arg camera)/camera_nodelet_manager" output="screen" if="$(arg nodelet) >
     <remap from="/pips_controller_nodelet/rgb/image_raw" to="$(arg rgb_image)" />
     <remap from="/pips_controller_nodelet/depth_image_raw" to="$(arg depth_image)" />
     <remap from="/pips_controller_nodelet/depth_camera_info" to="$(arg depth_info)" />
+</node>
+
+<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_trajectory_controller_main" args="" output="screen" unless="$(arg nodelet) >
+    <remap from="depth_image_raw" to="$(arg depth_image)" />
+    <remap from="depth_camera_info" to="$(arg depth_info)" />
 </node>
 
 
