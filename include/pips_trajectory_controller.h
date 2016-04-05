@@ -57,6 +57,7 @@ private:
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
   
   ros::Subscriber button_sub_;
+  ros::Publisher commanded_trajectory_publisher_;
   
   std::vector<cv::Point3d> co_offsets_;
   GenAndTest* traj_tester_;
