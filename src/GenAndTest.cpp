@@ -1,10 +1,16 @@
+#include "GenAndTest.h"
 
 #include <chrono>
 
-#include "GenAndTest.h"
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/PoseArray.h>
+
+#include <collision_checker.h>
+#include <trajectory_generator_ros_interface.h>
+
 
 #define DEBUG true
-
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
