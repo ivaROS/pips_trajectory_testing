@@ -121,6 +121,7 @@ namespace kobuki
   void PipsTrajectoryController::setupPublishersSubscribers()
   {
     TrajectoryController::setupPublishersSubscribers();
+    ROS_DEBUG_STREAM("[" << name_ << "] Setting up publishers and subscribers");
     std::string depth_image_topic = "depth/image_raw";
     std::string depth_info_topic = "depth/camera_info";
 
@@ -154,7 +155,7 @@ namespace kobuki
 
 
     if(!ready_) {
-
+        ROS_DEBUG_STREAM("[" << name_ << "] Not ready, check for transform");
         try
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
@@ -164,7 +165,7 @@ namespace kobuki
           
           ready_ = true;
 
-          ROS_DEBUG("Created trajectory testing instance");
+          ROS_DEBUG_STREAM("[" << name_ << "] Created trajectory testing instance");
 
         }
         catch (tf2::TransformException &ex) {
@@ -175,8 +176,11 @@ namespace kobuki
     
     if(ready_)
     {
+      ROS_DEBUG_STREAM("[" << name_ << "] Ready, check for transform");
       if(wander_)
       {
+      
+        ROS_DEBUG_STREAM("[" << name_ << "] Updating collision checker image");
         //Update collision checker with new image/camera info
         cc_->setImage(image_msg, info_msg);
         
@@ -184,8 +188,10 @@ namespace kobuki
         //check if current path is still clear
         if(executing_)
         {
+          ROS_DEBUG_STREAM("[" << name_ << "] Executing: Checking if current path clear");
           if(PipsTrajectoryController::checkCurrentTrajectory())
           {
+            ROS_WARN_STREAM("[" << name_ << "] Current trajectory collides!");
             executing_ = false;
           }
         }
@@ -193,11 +199,12 @@ namespace kobuki
         //Generate trajectories and assign best
         if(!executing_)
         {    
+          ROS_DEBUG_STREAM("[" << name_ << "] Not currently executing, test new trajectories");
           std::vector<traj_func*> trajectory_functions;
           PipsTrajectoryController::getTrajectoryFunctions(trajectory_functions);
           std::vector<ni_trajectory> valid_traj = traj_tester_->run(trajectory_functions, base_frame_id_);
           
-          ROS_INFO_STREAM("Number trajectories: " << valid_traj.size());
+          ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_traj.size() << " non colliding  trajectories");
           if(valid_traj.size() >0)
           {
             //executeTrajectory
