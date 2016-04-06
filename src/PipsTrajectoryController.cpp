@@ -220,8 +220,8 @@ namespace kobuki
             ni_trajectory chosen_traj = valid_traj[traj_ind];
             //executeTrajectory
 
-            trajectory_generator::trajectory_pointsPtr msg = chosen_traj.toTrajectoryMsgPtr();
-            msg->header.stamp = info_msg->header.stamp;
+            trajectory_generator::trajectory_points msg = chosen_traj.toTrajectoryMsg();
+            msg.header.stamp = info_msg->header.stamp;
             commanded_trajectory_publisher_.publish(msg);
 
           }
@@ -239,8 +239,8 @@ namespace kobuki
   bool PipsTrajectoryController::checkCurrentTrajectory()
   {
     trajectory_generator::trajectory_points trimmed_trajectory;
-    trimmed_trajectory.header = desired_trajectory_->header;
-    trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_->points.begin() + curr_index_, desired_trajectory_->points.end());
+    trimmed_trajectory.header = desired_trajectory_.header;
+    trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
       
     trajectory_generator::trajectory_points localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_);
     
