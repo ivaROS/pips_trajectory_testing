@@ -175,8 +175,8 @@ public:
    
   }
   
-  //Get the transform that takes point in base frame and transforms it to odom frame
-  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, std::string frame_id)
+
+  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, std::string& frame_id)
   {
     num_frames=num_frames+1;
     
@@ -210,6 +210,83 @@ public:
   
       ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr);
       traj->frame_id = frame_id;
+      
+      trajectories[i] = traj;
+      
+      collided[i] = GenAndTest::evaluateTrajectory(traj);
+        
+    }
+    
+    
+    std::vector<ni_trajectory> colliding_trajectories;
+    std::vector<ni_trajectory> noncolliding_trajectories;
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      if(collided[i])
+      {
+          colliding_trajectories.push_back(*trajectories[i]);
+      }
+      else
+      {
+          noncolliding_trajectories.push_back(*trajectories[i]);
+      }
+    }
+
+    //End timer
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
+
+    if(DEBUG)
+      ROS_INFO_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories in " << fp_ms.count() << " ms");
+        
+    
+    //Publish colliding and noncolliding paths
+    if(true)
+    {
+      traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories, num_paths);
+      traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories, num_paths);
+    }
+    
+
+    return noncolliding_trajectories;
+   
+  }
+  
+
+  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
+  {
+    num_frames=num_frames+1;
+    
+            ROS_INFO_STREAM("Num frames: " << num_frames);
+    
+    if(DEBUG)
+    {
+        ROS_INFO_STREAM("Generating Trajectories");
+
+    }
+    
+    //Update collision checker with new image and CameraInfo
+
+    
+    
+    size_t num_paths = trajectory_functions.size();
+    
+    std::vector<ni_trajectory*> trajectories(num_paths);
+    bool collided[num_paths];
+    
+    //Start timer
+    auto t1 = std::chrono::high_resolution_clock::now();
+ 
+    //Perform trajectory generation and collision detection in parallel if enabled
+    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
+    #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+    for(size_t i = 0; i < num_paths; i++)
+    {
+
+      traj_func* trajpntr = trajectory_functions[i];
+  
+      ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr, curr_odom);
       
       trajectories[i] = traj;
       
