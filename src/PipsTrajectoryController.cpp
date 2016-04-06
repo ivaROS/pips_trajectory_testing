@@ -222,7 +222,7 @@ namespace kobuki
 
             trajectory_generator::trajectory_points msg = chosen_traj.toTrajectoryMsg();
             msg.header.stamp = info_msg->header.stamp;
-            commanded_trajectory_publisher_.publish(msg);
+            PipsTrajectoryController::TrajectoryCB(msg);
 
           }
         }
