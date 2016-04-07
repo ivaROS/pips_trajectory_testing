@@ -23,8 +23,8 @@ public:
     
     void dState ( const state_type &x , state_type &dxdt , const double  t  )
     {
-        dxdt[XD_IND] = v_*cos( dep_angle_);
-        dxdt[YD_IND] = v_*sin( dep_angle_);
+        dxdt[near_identity::XD_IND] = v_*cos( dep_angle_);
+        dxdt[near_identity::YD_IND] = v_*sin( dep_angle_);
     }
     
     

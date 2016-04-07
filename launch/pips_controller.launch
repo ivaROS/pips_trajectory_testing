@@ -1,8 +1,7 @@
 <launch>
+<arg name="driver_decimation" default="false"/>
 
-<arg name="rgb_image" default="/camera/rgb/image_raw"/>
-<arg name="depth_image" default="/camera/depth/image_raw"/>
-<arg name="depth_info" default="/camera/depth/camera_info"/>
+
 
 <arg name="camera" default="camera"/>
 
@@ -16,11 +15,22 @@
   5: QVGA   320x240
   8: QQVGA  160x120
 -->
-<!--
-<param name="/$(arg camera)/driver/depth_mode" value="$(arg depth_res)" />
 
-<node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(arg camera)/driver depth_mode $(arg depth_res)"/> 
--->
+<!--If driver decimation enabled, set depth camera resolution to lowest-->
+<group if="$(arg driver_decimation)">
+  <arg name="rgb_image" default="/camera/rgb/image_raw"/>
+  <arg name="depth_image" default="/camera/depth/image_raw"/>
+  <arg name="depth_info" default="/camera/depth/camera_info"/>
+  <param name="/$(arg camera)/driver/depth_mode" value="$(arg depth_res)" />
+  <node name="dynparam_set_depth_resolution" pkg="dynamic_reconfigure" type="dynparam" args="set /$(arg camera)/driver depth_mode $(arg depth_res)"/> 
+</group>
+
+<group unless="$(arg driver_decimation)">
+  <arg name="rgb_image" default="/camera/rgb/image_raw"/>
+  <arg name="depth_image" default="/camera/decimated/depth_image"/>
+  <arg name="depth_info" default="/camera/decimated/depth_info"/>
+</group>
+
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
 
