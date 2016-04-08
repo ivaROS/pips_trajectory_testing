@@ -211,13 +211,13 @@ namespace kobuki
           ROS_DEBUG_STREAM("[" << name_ << "] Not currently executing, test new trajectories");
           std::vector<traj_func*> trajectory_functions;
           PipsTrajectoryController::getTrajectoryFunctions(trajectory_functions);
-          std::vector<ni_trajectory> valid_traj = traj_tester_->run(trajectory_functions, base_frame_id_);
+          std::vector<PipsTrajectory*> valid_trajs = traj_tester_->run(trajectory_functions, base_frame_id_);
           
           ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_traj.size() << " non colliding  trajectories");
           if(valid_traj.size() >0)
           {
-            int traj_ind = valid_traj.size()/2;
-            ni_trajectory chosen_traj = valid_traj[traj_ind];
+            int traj_ind = valid_trajs.size()/2;
+            ni_trajectory chosen_traj = valid_trajs[traj_ind];
             //executeTrajectory
 
             trajectory_generator::trajectory_points msg = chosen_traj.toTrajectoryMsg();

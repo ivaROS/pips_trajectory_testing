@@ -1,13 +1,15 @@
 #include "GenAndTest.h"
 
+#include <collision_checker.h>
+#include <trajectory_generator_ros_interface.h>
+
 #include <chrono>
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PoseArray.h>
-
-#include <collision_checker.h>
-#include <trajectory_generator_ros_interface.h>
+#include <geometry_msgs/PointStamped.h>
+#include <std_msgs/Header.h>
 
 
 #define DEBUG true
@@ -32,43 +34,33 @@ public:
 
 
 
-  GenAndTest::GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
-  {
-    cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
-    
-    traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
-    
-    //Create the various visualization publishers
-    colliding_path_pub_ = nh_.advertise<nav_msgs::Path>("colliding_paths", 5);
-    noncolliding_path_pub_ = nh_.advertise<nav_msgs::Path>("noncolliding_paths", 5);
-    pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
-    
-    
-    std::string key;
-
-    if(ros::param::search("enable_parallel_loop", key))
-    {
-      ros::param::get(key, parallelism_enabled_); 
-    }
-      
-  }
-  
   GenAndTest::GenAndTest()
   {
     traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
   }
   
-  void GenAndTest::init(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  GenAndTest::GenAndTest(ros::NodeHandle& nh)
+  {
+     nh_ = ros::NodeHandle(nh, "GenAndTest");
+  }
+  
+  
+  GenAndTest::GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  { 
+    GenAndTest::GenAndTest();
+    GenAndTest::init(co_offsets, depth_base_transform);
+  }
+  
+  
+  void GenAndTest::init(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   {
     cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
     
-
-    
     //Create the various visualization publishers
-    colliding_path_pub_ = nh_.advertise<nav_msgs::Path>("colliding_paths", 5);
-    noncolliding_path_pub_ = nh_.advertise<nav_msgs::Path>("noncolliding_paths", 5);
+    path_pub_ = nh_.advertise<nav_msgs::Path>("noncolliding_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
+    base_frame_id_ = 
     
     std::string key;
 
@@ -79,183 +71,33 @@ public:
       
   }
 
-
-  void GenAndTest::setImage(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg)
+  
+  void GenAndTest::setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
     cc_->setImage(image_msg, info_msg);
-  
+    header_.stamp = image_msg->header.stamp;
   }
 
-//Get the transform that takes point in base frame and transforms it to odom frame
-  std::vector<ni_trajectory> GenAndTest::run(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg, std::string frame_id)
-
-  {
-    num_frames=num_frames+1;
-    
-            ROS_INFO_STREAM("Num frames: " << num_frames);
-    
-    if(DEBUG)
-    {
-        ROS_INFO_STREAM("Generating Trajectories");
-
-    }
-    
-    //Update collision checker with new image and CameraInfo
-    cc_->setImage(image_msg, info_msg);
-    
-    //Set trajectory departure angles and speed
-    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
-    double v = .25;
-    
-    size_t num_paths = dep_angles.size();
-    
-    std::vector<ni_trajectory*> trajectories(num_paths);
-    bool collided[num_paths];
-    
-    //Start timer
-    auto t1 = std::chrono::high_resolution_clock::now();
- 
-    //Perform trajectory generation and collision detection in parallel if enabled
-    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
-    #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
-    for(size_t i = 0; i < num_paths; i++)
-    {
-      double dep_angle = dep_angles[i];
-      angled_straight_traj_func trajf(dep_angle, v);
-  
-      traj_func* trajpntr = &trajf;
-      
-      ROS_DEBUG_STREAM("Angle: " << dep_angle << '\n');
-  
-      ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr);
-      traj->frame_id = frame_id;
-      
-      trajectories[i] = traj;
-      
-      collided[i] = GenAndTest::evaluateTrajectory(traj);
-        
-    }
-    
-    ROS_INFO_STREAM("Made it past generation");
-    
-    std::vector<ni_trajectory> colliding_trajectories;
-    std::vector<ni_trajectory> noncolliding_trajectories;
-    for(size_t i = 0; i < num_paths; i++)
-    {
-      if(collided[i])
-      {
-          colliding_trajectories.push_back(*trajectories[i]);
-      }
-      else
-      {
-          noncolliding_trajectories.push_back(*trajectories[i]);
-      }
-    }
-
-    //End timer
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
-
-
-    if(DEBUG)
-      ROS_INFO_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories in " << fp_ms.count() << " ms");
-        
-    
-    //Publish colliding and noncolliding paths
-    if(true)
-    {
-      traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories, num_paths);
-      traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories, num_paths);
-    }
-    
-
-    return noncolliding_trajectories;
-   
-  }
-  
-
-  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, std::string& frame_id)
-  {
-    num_frames=num_frames+1;
-    
-            ROS_INFO_STREAM("Num frames: " << num_frames);
-    
-    if(DEBUG)
-    {
-        ROS_INFO_STREAM("Generating Trajectories");
-
-    }
-    
-    //Update collision checker with new image and CameraInfo
-
-    
-    
-    size_t num_paths = trajectory_functions.size();
-    
-    std::vector<ni_trajectory*> trajectories(num_paths);
-    bool collided[num_paths];
-    
-    //Start timer
-    auto t1 = std::chrono::high_resolution_clock::now();
- 
-    //Perform trajectory generation and collision detection in parallel if enabled
-    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
-    #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
-    for(size_t i = 0; i < num_paths; i++)
-    {
-
-      traj_func* trajpntr = trajectory_functions[i];
-  
-      ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr);
-      traj->frame_id = frame_id;
-      
-      trajectories[i] = traj;
-      
-      collided[i] = GenAndTest::evaluateTrajectory(traj);
-        
-    }
-    
-    
-    std::vector<ni_trajectory> colliding_trajectories;
-    std::vector<ni_trajectory> noncolliding_trajectories;
-    for(size_t i = 0; i < num_paths; i++)
-    {
-      if(collided[i])
-      {
-          colliding_trajectories.push_back(*trajectories[i]);
-      }
-      else
-      {
-          noncolliding_trajectories.push_back(*trajectories[i]);
-      }
-    }
-
-    //End timer
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
-
-
-    if(DEBUG)
-      ROS_INFO_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories in " << fp_ms.count() << " ms");
-        
-    
-    //Publish colliding and noncolliding paths
-    if(true)
-    {
-      traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories, num_paths);
-      traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories, num_paths);
-    }
-    
-
-    return noncolliding_trajectories;
-   
-  }
-  
 
   std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
   {
+    state_type x0 = 
+    TrajectoryGeneratorBridge::initState(const nav_msgs::OdometryPtr& curr_odom, state_type& x0)
+  }
+  
+  /*
+  template <typename T>
+  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, const T::ConstPtr& src)
+  {
+    
+  }
+  */
+  
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
+  
+  //This is the newest version, meant to be the most flexible
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
+  {
     num_frames=num_frames+1;
     
             ROS_INFO_STREAM("Num frames: " << num_frames);
@@ -266,14 +108,11 @@ public:
 
     }
     
-    //Update collision checker with new image and CameraInfo
-
-    
     
     size_t num_paths = trajectory_functions.size();
     
-    std::vector<ni_trajectory*> trajectories(num_paths);
-    bool collided[num_paths];
+    //Possibly make this a pointer to a vector?
+    std::vector<PipsTrajectory*> trajectories(num_paths);
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -283,64 +122,44 @@ public:
     #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
+      
+      trajectories[i] = new PipsTrajectory();
+      trajectories[i]->trajpntr = trajectory_functions[i];
+      
+      traj_gen_bridge_.generate_trajectory(trajectories[i]);
 
-      traj_func* trajpntr = trajectory_functions[i];
-  
-      ni_trajectory* traj = traj_gen_bridge_.generate_trajectory(trajpntr, curr_odom);
-      
-      trajectories[i] = traj;
-      
-      collided[i] = GenAndTest::evaluateTrajectory(traj);
+      GenAndTest::evaluateTrajectory(trajectories[i]);
+
         
     }
     
     
-    std::vector<ni_trajectory> colliding_trajectories;
-    std::vector<ni_trajectory> noncolliding_trajectories;
-    for(size_t i = 0; i < num_paths; i++)
-    {
-      if(collided[i])
-      {
-          colliding_trajectories.push_back(*trajectories[i]);
-      }
-      else
-      {
-          noncolliding_trajectories.push_back(*trajectories[i]);
-      }
-    }
 
     //End timer
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
 
-
     if(DEBUG)
-      ROS_INFO_STREAM("Generated " << colliding_trajectories.size() << " colliding and " << noncolliding_trajectories.size() << " noncolliding trajectories in " << fp_ms.count() << " ms");
-        
-    
-    //Publish colliding and noncolliding paths
-    if(true)
-    {
-      traj_gen_bridge_.publishPaths(colliding_path_pub_, colliding_trajectories, num_paths);
-      traj_gen_bridge_.publishPaths(noncolliding_path_pub_, noncolliding_trajectories, num_paths);
-    }
-    
-
-    return noncolliding_trajectories;
-   
+      ROS_INFO_STREAM("Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
+      
+    return trajectories;
+  }
+  
+  
+  void GenAndTest::evaluateTrajectory(PipsTrajectory* traj)
+  {
+    int collision_ind = GenAndTest::evaluateTrajectory((ni_trajectory*)traj);
+    traj->set_collision_ind(collision_ind);
   }
   
   //Test whether trajectory collides
-  bool GenAndTest::evaluateTrajectory(ni_trajectory* traj)
+  int GenAndTest::evaluateTrajectory(ni_trajectory* traj)
   {
-      geometry_msgs::PoseArray collision_points;
-      collision_points.header.frame_id = traj->frame_id;
 
-      bool collided = false;
-      for(size_t i = 0; !collided && i < traj->num_states(); i++)
+      for(size_t i = 0; i < traj->num_states(); i++)
       {
 
-        geometry_msgs::Vector3 pt = traj->getPoint(i);    
+        geometry_msgs::Point pt = traj->getPoint(i);    
         double coords[3];
         coords[0] = pt.x;
         coords[1] = pt.y;
@@ -348,34 +167,20 @@ public:
         
         if(cc_->testCollision(coords))
         {
-            collided = true;
-            geometry_msgs::Pose pose;
-            pose.position.x = coords[0];
-            pose.position.y = coords[1];
-            pose.position.z = coords[2];
-            collision_points.poses.push_back(pose);
+            return i;
+            
         }
-        else
-        {
-        
-        }
-        
-
+     
       }
-      
-      //Note: this will actually only ever publish 1 point at a time...
-      //Should accumulate points and publish at the end
-      pose_array_pub_.publish(collision_points);
-      
-      return collided;
+
+      return -1;
 
   }
 
-  bool GenAndTest::evaluateTrajectory(trajectory_generator::trajectory_points& trajectory)
+  int GenAndTest::evaluateTrajectory(trajectory_generator::trajectory_points& trajectory)
   {
       
-      bool collided = false;
-      for(size_t i = 0; !collided && i < trajectory.points.size(); i++)
+      for(size_t i = 0; i < trajectory.points.size(); i++)
       {
 
         trajectory_generator::trajectory_point pt = trajectory.points[i];    
@@ -386,20 +191,48 @@ public:
         
         if(cc_->testCollision(coords))
         {
-            collided = true;
+            return i;
         }
-        else
-        {
-        
-        }
-        
 
       }
 
-      return collided;
+      return -1;
 
   }
 
 
 
+  bool PipsTrajectory::collides()
+  {
+    return collision_ind_ >=0;
+  }
 
+  double PipsTrajectory::time_of_collision()
+  {
+    //ROS_WARN_STREAM(  //warn/close if no collision
+    ros::Duration(times[collision_ind_]);
+    return -1;
+  }
+  
+  void PipsTrajectory::set_collision_ind(int ind)
+  {
+    collision_ind_ = ind;
+  }
+  
+  geometry_msgs::PointStamped PipsTrajectory::get_collision_point()
+  {
+      //ROS_WARN_STREAM(  //warn/close if no collision
+    return ni_trajectory::getPointStamped(collision_ind_);
+  }
+
+  size_t PipsTrajectory::num_states()
+  {
+    if(PipsTrajectory::collides())
+    {
+      return collision_ind_;
+    }
+    else
+    {
+      return ni_trajectory::num_states();
+    }
+  }
