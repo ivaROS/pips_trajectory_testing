@@ -24,7 +24,7 @@ class PipsTrajectory : public ni_trajectory
 public:
   
   bool collides();
-  double time_of_collision();
+  ros::Time time_of_collision();
   void set_collision_ind(int ind);
   geometry_msgs::PointStamped get_collision_point();
   size_t num_states();
@@ -58,6 +58,7 @@ public:
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
+  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header);
   
   int evaluateTrajectory(ni_trajectory* traj);
   void evaluateTrajectory(PipsTrajectory* traj);

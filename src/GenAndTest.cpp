@@ -54,6 +54,7 @@ public:
   {    
       cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
       base_frame_id_ = depth_base_transform.header.frame_id;
+      header_.frame_id = base_frame_id_;
   }
   
   void GenAndTest::init(ros::NodeHandle& nh)
@@ -95,14 +96,20 @@ public:
   std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
   {
     state_type x0 = traj_gen_bridge_.initState(curr_odom);
-    return GenAndTest::run(trajectory_functions, x0);
+    std_msgs::Header header;
+    header.stamp = curr_odom->header.stamp;
+    header.frame_id = curr_odom->child_frame_id;
+    return GenAndTest::run(trajectory_functions, x0, header);
   }
   
   
-
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
+  {
+    return GenAndTest::run(trajectory_functions, x0, header_);
+  }
   
   //This is the newest version, meant to be the most flexible
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header)
   {
     num_frames=num_frames+1;
     
@@ -128,15 +135,16 @@ public:
     #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
+      PipsTrajectory* traj = new PipsTrajectory();
+      traj->header = header;
       
-      trajectories[i] = new PipsTrajectory();
-      trajectories[i]->trajpntr = trajectory_functions[i];
+      traj->trajpntr = trajectory_functions[i];
       
-      traj_gen_bridge_.generate_trajectory(trajectories[i]);
+      traj_gen_bridge_.generate_trajectory(traj);
 
-      GenAndTest::evaluateTrajectory(trajectories[i]);
+      GenAndTest::evaluateTrajectory(traj);
 
-        
+      trajectories[i] = traj;
     }
     
     
@@ -234,11 +242,10 @@ public:
     return collision_ind_ >=0;
   }
 
-  double PipsTrajectory::time_of_collision()
+  ros::Time PipsTrajectory::time_of_collision()
   {
     //ROS_WARN_STREAM(  //warn/close if no collision
-    ros::Duration(times[collision_ind_]);
-    return -1;
+    return header.stamp + ros::Duration(times[collision_ind_]);
   }
   
   void PipsTrajectory::set_collision_ind(int ind)
