@@ -36,31 +36,37 @@ public:
 
   GenAndTest::GenAndTest()
   {
-    traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
+    GenAndTest::constructor();
   }
-  
-  GenAndTest::GenAndTest(ros::NodeHandle& nh)
-  {
-     nh_ = ros::NodeHandle(nh, "GenAndTest");
-  }
-  
   
   GenAndTest::GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   { 
-    GenAndTest::GenAndTest();
-    GenAndTest::init(co_offsets, depth_base_transform);
+    GenAndTest::constructor();
+    GenAndTest::setRobotInfo(co_offsets, depth_base_transform);
   }
   
-  
-  void GenAndTest::init(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  void GenAndTest::constructor()
   {
-    cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
-    
+      traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
+  }
+  
+  void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  {    
+      cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
+      base_frame_id_ = depth_base_transform.header.frame_id;
+  }
+  
+  void GenAndTest::init(ros::NodeHandle& nh)
+  {
+  
+    nh_ = ros::NodeHandle(nh, "GenAndTest");
+    GenAndTest::constructor();
+
     //Create the various visualization publishers
-    path_pub_ = nh_.advertise<nav_msgs::Path>("noncolliding_paths", 5);
+    path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
-    base_frame_id_ = 
+
     
     std::string key;
 
@@ -79,21 +85,21 @@ public:
   }
 
 
-  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
-  {
-    state_type x0 = 
-    TrajectoryGeneratorBridge::initState(const nav_msgs::OdometryPtr& curr_odom, state_type& x0)
-  }
-  
-  /*
-  template <typename T>
-  std::vector<ni_trajectory> GenAndTest::run(std::vector<traj_func*> trajectory_functions, const T::ConstPtr& src)
-  {
-    
-  }
-  */
-  
+
   std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
+  {
+    state_type x0 = traj_gen_bridge_.initState();
+    return GenAndTest::run(trajectory_functions, x0);
+  }
+  
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
+  {
+    state_type x0 = traj_gen_bridge_.initState(curr_odom);
+    return GenAndTest::run(trajectory_functions, x0);
+  }
+  
+  
+
   
   //This is the newest version, meant to be the most flexible
   std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
@@ -198,6 +204,27 @@ public:
 
       return -1;
 
+  }
+
+
+  std::vector<traj_func*> GenAndTest::getDefaultTrajectoryFunctions()
+  {
+
+    //Set trajectory departure angles and speed
+    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
+    double v = .25;
+
+    size_t num_paths = dep_angles.size();
+    
+    std::vector<traj_func*> trajectory_functions(num_paths);
+    
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      double dep_angle = dep_angles[i];
+      traj_func* trajptr = new angled_straight_traj_func(dep_angle, v);
+      trajectory_functions.push_back(trajptr);
+    }
+    return trajectory_functions;
   }
 
 

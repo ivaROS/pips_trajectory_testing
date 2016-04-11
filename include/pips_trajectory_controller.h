@@ -35,9 +35,7 @@ namespace kobuki
 class PipsTrajectoryController : public kobuki::TrajectoryController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) {
-      
-  };
+  PipsTrajectoryController(ros::NodeHandle& nh, std::string& name);
   ~PipsTrajectoryController(){};
 
   /**
@@ -73,7 +71,7 @@ private:
   void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg);
   bool checkCurrentTrajectory();
-  std::vector<traj_func*> getTrajectoryFunctions(std::vector<traj_func*>& trajectory_functions);
+  std::vector<traj_func*> getTrajectoryFunctions();
 };
 
 } //ns kobuki

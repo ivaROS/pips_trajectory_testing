@@ -77,6 +77,11 @@ namespace kobuki
 {
 
 
+  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) 
+  {
+    traj_tester_ = new GenAndTest();
+  };
+  
   /**
    * Set-up necessary publishers/subscribers
    * @return true, if successful
@@ -100,8 +105,7 @@ namespace kobuki
     std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
     co_offsets_ = co_offsets;
     
-
-  
+    traj_tester_->init(nh_);
     
     wander_ = false;
     ready_ = false;
@@ -114,7 +118,7 @@ namespace kobuki
   {
     TrajectoryController::setupParams();
     
-    traj_tester_ = new GenAndTest();
+
     params_ = traj_tester_->traj_gen_bridge_.getDefaultParams();
     
     nh_.param<double>("tf", params_.tf, 5);
@@ -170,7 +174,7 @@ namespace kobuki
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
           
-          traj_tester_->init(co_offsets_, depth_base_transform);
+          traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
           
           ready_ = true;
 
@@ -209,18 +213,17 @@ namespace kobuki
         if(!executing_)
         {    
           ROS_DEBUG_STREAM("[" << name_ << "] Not currently executing, test new trajectories");
-          std::vector<traj_func*> trajectory_functions;
-          PipsTrajectoryController::getTrajectoryFunctions(trajectory_functions);
-          std::vector<PipsTrajectory*> valid_trajs = traj_tester_->run(trajectory_functions, base_frame_id_);
+          std::vector<traj_func*> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
+          std::vector<PipsTrajectory*> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
-          ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_traj.size() << " non colliding  trajectories");
-          if(valid_traj.size() >0)
+          ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_trajs.size() << " non colliding  trajectories");
+          if(valid_trajs.size() >0)
           {
             int traj_ind = valid_trajs.size()/2;
-            ni_trajectory chosen_traj = valid_trajs[traj_ind];
+            ni_trajectory* chosen_traj = valid_trajs[traj_ind];
             //executeTrajectory
 
-            trajectory_generator::trajectory_points msg = chosen_traj.toTrajectoryMsg();
+            trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
             msg.header.stamp = info_msg->header.stamp;
             PipsTrajectoryController::TrajectoryCB(msg);
 
@@ -247,14 +250,16 @@ namespace kobuki
     return traj_tester_->evaluateTrajectory(localTrajectory);
   }
   
-  std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions(std::vector<traj_func*>& trajectory_functions)
+  std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions()
   {
-  
+
     //Set trajectory departure angles and speed
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
     double v = .25;
 
     size_t num_paths = dep_angles.size();
+    
+    std::vector<traj_func*> trajectory_functions(num_paths);
     
     for(size_t i = 0; i < num_paths; i++)
     {

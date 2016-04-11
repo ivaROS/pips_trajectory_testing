@@ -59,10 +59,6 @@ add_library(traj_gen_test
    src/GenAndTest.cpp
 )
 
-## Declare a cpp executable
-add_executable(tester
-   src/tester.cpp
-)
 
 ## Declare a cpp library
 add_library(traj_gen_core
@@ -103,11 +99,6 @@ add_executable(pips_trajectory_controller_main
 ## Specify libraries to link a library or executable target against
 target_link_libraries(traj_gen_test
    ${catkin_LIBRARIES}
-)
-
-target_link_libraries(tester
-   ${catkin_LIBRARIES} 
-   traj_gen_test
 )
 
 target_link_libraries(traj_gen_core

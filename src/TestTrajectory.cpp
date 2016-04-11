@@ -10,7 +10,7 @@
       firstDepthFrame_(true),
       generate(true)
   {
-   
+    traj_tester_ = new GenAndTest();
   }
 
   void TestTrajectory::init(ros::NodeHandle nh)
@@ -20,6 +20,8 @@
     tfBuffer_ = new tf2_ros::Buffer; //optional parameter: ros::Duration(cache time) (default=10)
     tf_listener_ = new tf2_ros::TransformListener(*tfBuffer_);
 
+    traj_tester_->init(nh);
+    
     nh_.param<std::string>("/mobile_base/base_frame", base_frame_id, "base_footprint");
 
     std::string depth_image_topic = "depth/image_raw";
@@ -79,7 +81,7 @@
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
           
-          traj_tester_ = new GenAndTest(co_offsets_, depth_base_transform);
+          traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
           
           firstDepthFrame_ = false;
 
@@ -95,25 +97,18 @@
     {
       if(generate)
       {
-          //generate = false;
-          try
-          {
-            
-            
+            traj_tester_->setImage(image_msg, info_msg);
+          
             auto t1 = std::chrono::high_resolution_clock::now();
 
-            traj_tester_->run(image_msg, info_msg, "base_footprint");
+            std::vector<traj_func*> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
+            
+            traj_tester_->run(trajectory_functions);
             
             auto t2 = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+            std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
             ROS_INFO_STREAM("Trajectory gen/test took " << fp_ms.count() << " ms" << std::endl);
             
-
-          }
-          catch (tf2::TransformException &ex) {
-            ROS_WARN("[draw_frames] TF exception:\n%s",ex.what());
-            return;
-          }
 
    
       }
@@ -121,6 +116,8 @@
     
    
     }
+    
+    
   }
   
 

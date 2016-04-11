@@ -39,7 +39,7 @@ class GenAndTest
 
   CollisionChecker* cc_;
   
-  ros::Publisher colliding_path_pub_, noncolliding_path_pub_, pose_array_pub_;
+  ros::Publisher path_pub_, pose_array_pub_;
   int num_frames =0;
   std::string base_frame_id_ = "";
   std_msgs::Header header_;
@@ -48,19 +48,24 @@ class GenAndTest
   
 public:
   GenAndTest();
-  GenAndTest(ros::NodeHandle& nh);
   GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
+  void constructor();
   
-  void init(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
+  void init(ros::NodeHandle& nh);
+  void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions);
+  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
   
   int evaluateTrajectory(ni_trajectory* traj);
+  void evaluateTrajectory(PipsTrajectory* traj);
 
   int evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
   TrajectoryGeneratorBridge traj_gen_bridge_;
+  
+  static std::vector<traj_func*> getDefaultTrajectoryFunctions();
   
 };
 
