@@ -139,6 +139,7 @@ public:
       traj->header = header;
       
       traj->trajpntr = trajectory_functions[i];
+      traj->x0_ = x0;
       
       traj_gen_bridge_.generate_trajectory(traj);
 
@@ -230,7 +231,7 @@ public:
     {
       double dep_angle = dep_angles[i];
       traj_func* trajptr = new angled_straight_traj_func(dep_angle, v);
-      trajectory_functions.push_back(trajptr);
+      trajectory_functions[i] = trajptr;
     }
     return trajectory_functions;
   }

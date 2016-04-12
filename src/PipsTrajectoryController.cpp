@@ -131,8 +131,8 @@ namespace kobuki
   void PipsTrajectoryController::setupPublishersSubscribers()
   {
     TrajectoryController::setupPublishersSubscribers();
-    std::string depth_image_topic = "depth_image_raw";
-    std::string depth_info_topic = "depth_camera_info";
+    std::string depth_image_topic = "/camera/depth/image_raw";
+    std::string depth_info_topic = "/camera/depth/camera_info";
 
     ROS_DEBUG_STREAM("[" << name_ << "] Setting up publishers and subscribers");
 
@@ -189,7 +189,7 @@ namespace kobuki
     
     if(ready_)
     {
-      ROS_DEBUG_STREAM("[" << name_ << "] Ready, check for transform");
+      ROS_DEBUG_STREAM("[" << name_ << "] Ready (check for transform)");
       if(wander_)
       {
       
@@ -224,7 +224,6 @@ namespace kobuki
             //executeTrajectory
 
             trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
-            msg.header.stamp = info_msg->header.stamp;
             PipsTrajectoryController::TrajectoryCB(msg);
 
           }
@@ -265,7 +264,7 @@ namespace kobuki
     {
       double dep_angle = dep_angles[i];
       traj_func* trajptr = new angled_straight_traj_func(dep_angle, v);
-      trajectory_functions.push_back(trajptr);
+      trajectory_functions[i] = trajptr;
     }
     return trajectory_functions;
   }
