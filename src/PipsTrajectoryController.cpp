@@ -119,11 +119,9 @@ namespace kobuki
     TrajectoryController::setupParams();
     
 
-    params_ = traj_tester_->traj_gen_bridge_.getDefaultParams();
+    params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
     
-    nh_.param<double>("tf", params_.tf, 5);
-   
-    traj_tester_->traj_gen_bridge_.setDefaultParams(params_);
+    nh_.param<double>("tf", params_->tf, 5);
 
   }
   
@@ -143,6 +141,7 @@ namespace kobuki
     
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
     
+    //Currently not using this; would it be effective with multithreaded spinner?
     commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1);
   }
   
@@ -227,13 +226,12 @@ namespace kobuki
         {    
           ROS_DEBUG_STREAM("[" << name_ << "] Not currently executing, test new trajectories");
           std::vector<traj_func*> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
-          std::vector<PipsTrajectory*> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+          std::vector<ni_trajectory*> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_trajs.size() << " non colliding  trajectories");
           if(valid_trajs.size() >0)
           {
-            int traj_ind = valid_trajs.size()/2;
-            ni_trajectory* chosen_traj = valid_trajs[traj_ind];
+            ni_trajectory* chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
             //executeTrajectory
 
             trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();

@@ -47,20 +47,23 @@ class GenAndTest
   
   bool parallelism_enabled_ = true;
   std::string name_ = "GenAndTest";
+  traj_params** params_;
   
 public:
   GenAndTest();
   GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void constructor();
   
+  void updateParams();
+  
   void init(ros::NodeHandle& nh);
   void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   
-  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom);
-  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions);
-  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
-  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header);
+  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom);
+  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions);
+  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
+  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header);
   
   int evaluateTrajectory(ni_trajectory* traj);
   void evaluateTrajectory(PipsTrajectory* traj);

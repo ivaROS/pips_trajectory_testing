@@ -48,6 +48,7 @@ public:
   void GenAndTest::constructor()
   {
       traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
+      *params_ = new traj_params(traj_gen_bridge_.copyDefaultParams());
   }
   
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
@@ -75,7 +76,15 @@ public:
     {
       ros::param::get(key, parallelism_enabled_); 
     }
-      
+    
+    
+    GenAndTest::updateParams();
+  }
+  
+  void GenAndTest::updateParams()
+  {
+  //Should probably make this dynamnically reconfigurable, or at least cache the results
+    nh_.param<double>("tf", (*params_)->tf, 10);
   }
 
   
@@ -87,14 +96,14 @@ public:
 
 
 
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
+  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
   {
     state_type x0 = traj_gen_bridge_.initState();
     return GenAndTest::run(trajectory_functions, x0);
   }
   
   //OdometryPtr is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
+  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
   {
     state_type x0 = traj_gen_bridge_.initState(curr_odom);
     std_msgs::Header header;
@@ -104,13 +113,13 @@ public:
   }
   
   
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
+  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
   {
     return GenAndTest::run(trajectory_functions, x0, header_);
   }
   
   //This is the newest version, meant to be the most flexible
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header)
   {
     num_frames=num_frames+1;
     
@@ -125,7 +134,7 @@ public:
     size_t num_paths = trajectory_functions.size();
     
     //Possibly use boost::shared_ptr to ensure these are properly released?
-    std::vector<PipsTrajectory*> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
+    std::vector<ni_trajectory*> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -137,6 +146,7 @@ public:
     {
       PipsTrajectory* traj = new PipsTrajectory();
       traj->header = header;
+      traj->params = *params_;
       
       traj->trajpntr = trajectory_functions[i];
       traj->x0_ = x0;

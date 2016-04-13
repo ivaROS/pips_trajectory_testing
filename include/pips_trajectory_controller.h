@@ -59,7 +59,7 @@ private:
   
   std::vector<cv::Point3d> co_offsets_;
   GenAndTest* traj_tester_;
-  traj_params params_;
+  traj_params* params_;
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
