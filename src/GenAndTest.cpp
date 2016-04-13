@@ -93,7 +93,8 @@ public:
     return GenAndTest::run(trajectory_functions, x0);
   }
   
-  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom)
+  //OdometryPtr is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
+  std::vector<PipsTrajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
   {
     state_type x0 = traj_gen_bridge_.initState(curr_odom);
     std_msgs::Header header;
@@ -113,19 +114,18 @@ public:
   {
     num_frames=num_frames+1;
     
-            ROS_INFO_STREAM("Num frames: " << num_frames);
+    ROS_DEBUG_STREAM("[" << name_ << "] Num frames: " << num_frames);
     
-    if(DEBUG)
-    {
-        ROS_INFO_STREAM("Generating Trajectories");
+    
+    ROS_DEBUG_STREAM("[" << name_ << "] Generating Trajectories");
 
-    }
+    
     
     
     size_t num_paths = trajectory_functions.size();
     
-    //Possibly make this a pointer to a vector?
-    std::vector<PipsTrajectory*> trajectories(num_paths);
+    //Possibly use boost::shared_ptr to ensure these are properly released?
+    std::vector<PipsTrajectory*> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -154,9 +154,21 @@ public:
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
 
-    if(DEBUG)
-      ROS_INFO_STREAM("Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
-      
+    
+    ROS_DEBUG_STREAM("[" << name_ << "] Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
+    
+
+    for(size_t i = 0; i < trajectories.size(); i++)
+    {
+        nav_msgs::PathPtr path;
+
+        path = trajectories[i]->toPathMsg();
+        
+        path_pub_.publish(path);
+    }
+
+
+    
     return trajectories;
   }
   

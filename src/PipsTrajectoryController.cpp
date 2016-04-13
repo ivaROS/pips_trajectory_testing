@@ -152,11 +152,11 @@ namespace kobuki
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
       wander_ = true;
-      ROS_INFO_STREAM("Activating Wander");
+      ROS_INFO_STREAM("[" << name_ <<"] Activating Wander");
     }
     else
     {
-      ROS_INFO_STREAM("Button event");
+      ROS_INFO_STREAM("[" << name_ <<"] Button event");
     }
   };
   
@@ -165,6 +165,7 @@ namespace kobuki
   {
 
     ros::Duration timeout(0);
+    
 
 
     if(!ready_) {
@@ -190,6 +191,18 @@ namespace kobuki
     if(ready_)
     {
       ROS_DEBUG_STREAM("[" << name_ << "] Ready (check for transform)");
+      
+      if(curr_odom_ == NULL)
+      {
+        ROS_ERROR_STREAM("[" << name_ << "] No odometry received!");
+        return;
+      }
+      else
+      {
+        ros::Duration delta_t = curr_odom_->header.stamp - info_msg->header.stamp;
+        ROS_DEBUG_STREAM("[" << name_ << "] Odometry is " << delta_t << " newer than current image");
+      }
+      
       if(wander_)
       {
       

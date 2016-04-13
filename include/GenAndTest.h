@@ -12,6 +12,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
+#include <boost/shared_ptr.hpp>
 
 
 
@@ -19,7 +20,7 @@
 
 class PipsTrajectory : public ni_trajectory
 {
-  int collision_ind_;
+  int collision_ind_ = -1;
   
 public:
   
@@ -45,6 +46,7 @@ class GenAndTest
   std_msgs::Header header_;
   
   bool parallelism_enabled_ = true;
+  std::string name_ = "GenAndTest";
   
 public:
   GenAndTest();
@@ -55,7 +57,7 @@ public:
   void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   
-  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr& curr_odom);
+  std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
   std::vector<PipsTrajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header);
