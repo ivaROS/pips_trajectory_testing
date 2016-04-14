@@ -47,7 +47,7 @@ class GenAndTest
   
   bool parallelism_enabled_ = true;
   std::string name_ = "GenAndTest";
-  traj_params** params_;
+  traj_params* params_;
   
 public:
   GenAndTest();

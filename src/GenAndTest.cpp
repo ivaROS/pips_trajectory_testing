@@ -48,8 +48,8 @@ public:
   void GenAndTest::constructor()
   {
       traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
-      traj_params* tmp_params = new traj_params(traj_gen_bridge_.copyDefaultParams());
-      params_ = &tmp_params;
+      //Will need to use shared_ptrs to prevent memory leaking here!
+      params_ = new traj_params(traj_gen_bridge_.copyDefaultParams());
   }
   
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
@@ -85,7 +85,7 @@ public:
   void GenAndTest::updateParams()
   {
   //Should probably make this dynamnically reconfigurable, or at least cache the results
-    nh_.param<double>("tf", (*params_)->tf, 10);
+    nh_.param<double>("tf", params_->tf, 10);
   }
 
   
@@ -147,7 +147,7 @@ public:
     {
       PipsTrajectory* traj = new PipsTrajectory();
       traj->header = header;
-      traj->params = *params_;
+      traj->params = params_;
       
       traj->trajpntr = trajectory_functions[i];
       traj->x0_ = x0;
