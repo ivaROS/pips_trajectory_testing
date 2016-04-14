@@ -6,15 +6,12 @@
 
 #include <ros/ros.h>
 
-//#include <sensor_msgs/image_encodings.h>
-
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
-#include <boost/shared_ptr.hpp>
 
-
+#include <memory>
 
 
 
@@ -32,13 +29,21 @@ public:
 };
 
 
+
+typedef std::shared_ptr<TrajectoryGeneratorBridge> TrajectoryGeneratorBridge_ptr;
+typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
+
 class GenAndTest
 {
   ros::NodeHandle nh_;
   std::vector<cv::Point3d> co_offsets_;
   geometry_msgs::TransformStamped depth_base_transform_;
 
-  CollisionChecker* cc_;
+
+
+  
+  
+  CollisionChecker_ptr cc_;
   
   ros::Publisher path_pub_, pose_array_pub_;
   int num_frames =0;
@@ -47,9 +52,10 @@ class GenAndTest
   
   bool parallelism_enabled_ = true;
   std::string name_ = "GenAndTest";
-  traj_params* params_;
+  traj_params_ptr params_;
   
 public:
+
   GenAndTest();
   GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void constructor();
@@ -69,7 +75,10 @@ public:
   void evaluateTrajectory(PipsTrajectory* traj);
 
   int evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
-  TrajectoryGeneratorBridge traj_gen_bridge_;
+  
+
+
+  TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
   static std::vector<traj_func*> getDefaultTrajectoryFunctions();
   

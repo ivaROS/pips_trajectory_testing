@@ -54,6 +54,7 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <kobuki_msgs/ButtonEvent.h>
+#include <memory>
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
@@ -79,7 +80,7 @@ namespace kobuki
 
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) 
   {
-    traj_tester_ = new GenAndTest();
+    traj_tester_ = std::make_shared<GenAndTest>();
   };
   
   /**
@@ -110,6 +111,11 @@ namespace kobuki
     wander_ = false;
     ready_ = false;
     
+    
+    //these next 2 lines are just for initial testing!
+    wander_ = true;
+    this->disable();
+    
     return true;
   }
 
@@ -119,9 +125,9 @@ namespace kobuki
     TrajectoryController::setupParams();
     
 
-    params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
+    //params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
     
-    nh_.param<double>("tf", params_->tf, 5);
+    //nh_.param<double>("tf", params_->tf, 5);
 
   }
   

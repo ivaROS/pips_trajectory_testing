@@ -11,6 +11,7 @@
 *****************************************************************************/
 // %Tag(FULLTEXT)%
 #include <trajectory_controller.h>
+#include "GenAndTest.h"
 
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
@@ -18,9 +19,9 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <memory>
 
 
-#include "GenAndTest.h"
 #include <kobuki_msgs/ButtonEvent.h>
 
 
@@ -43,6 +44,8 @@ public:
    * @return true, if successful
    */
   bool init();
+  
+  typedef std::shared_ptr<GenAndTest> GenAndTest_ptr;
 
 protected:
   void setupParams();
@@ -58,7 +61,7 @@ private:
   ros::Publisher commanded_trajectory_publisher_;
   
   std::vector<cv::Point3d> co_offsets_;
-  GenAndTest* traj_tester_;
+  GenAndTest_ptr traj_tester_;
   traj_params* params_;
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,

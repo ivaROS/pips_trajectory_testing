@@ -10,9 +10,8 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
+#include <memory>
 
-
-#define DEBUG true
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
@@ -47,14 +46,14 @@ public:
   
   void GenAndTest::constructor()
   {
-      traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
+      traj_gen_bridge_ = std::make_shared<TrajectoryGeneratorBridge>();
       //Will need to use shared_ptrs to prevent memory leaking here!
-      params_ = new traj_params(traj_gen_bridge_.copyDefaultParams());
+      params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
   }
   
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   {    
-      cc_ = new CollisionChecker(depth_base_transform, co_offsets, false);
+      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, false);
       base_frame_id_ = depth_base_transform.header.frame_id;
       header_.frame_id = base_frame_id_;
   }
@@ -99,14 +98,14 @@ public:
 
   std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
   {
-    state_type x0 = traj_gen_bridge_.initState();
+    state_type x0 = traj_gen_bridge_->initState();
     return GenAndTest::run(trajectory_functions, x0);
   }
   
   //OdometryPtr is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
   std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
   {
-    state_type x0 = traj_gen_bridge_.initState(curr_odom);
+    state_type x0 = traj_gen_bridge_->initState(curr_odom);
     std_msgs::Header header;
     header.stamp = curr_odom->header.stamp;
     header.frame_id = curr_odom->child_frame_id;
@@ -119,7 +118,7 @@ public:
     return GenAndTest::run(trajectory_functions, x0, header_);
   }
   
-  //This is the newest version, meant to be the most flexible
+  //This is the lowest level version that is actually run; the rest are for convenience
   std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header)
   {
     num_frames=num_frames+1;
@@ -152,7 +151,7 @@ public:
       traj->trajpntr = trajectory_functions[i];
       traj->x0_ = x0;
       
-      traj_gen_bridge_.generate_trajectory(traj);
+      traj_gen_bridge_->generate_trajectory(traj);
 
       GenAndTest::evaluateTrajectory(traj);
 
