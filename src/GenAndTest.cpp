@@ -123,10 +123,10 @@ public:
   {
     num_frames=num_frames+1;
     
-    ROS_DEBUG_STREAM("[" << name_ << "] Num frames: " << num_frames);
+    ROS_DEBUG_STREAM_NAMED(name_, "Num frames: " << num_frames);
     
     
-    ROS_DEBUG_STREAM("[" << name_ << "] Generating Trajectories");
+    ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
 
     
     
@@ -165,7 +165,7 @@ public:
     std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
 
     
-    ROS_DEBUG_STREAM("[" << name_ << "] Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
+    ROS_DEBUG_STREAM_NAMED(name_, "Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
     
 
     for(size_t i = 0; i < trajectories.size(); i++)

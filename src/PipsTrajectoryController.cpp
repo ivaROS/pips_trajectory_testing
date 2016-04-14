@@ -138,7 +138,7 @@ namespace kobuki
     std::string depth_image_topic = "/camera/depth/image_raw";
     std::string depth_info_topic = "/camera/depth/camera_info";
 
-    ROS_DEBUG_STREAM("[" << name_ << "] Setting up publishers and subscribers");
+    ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
@@ -157,11 +157,11 @@ namespace kobuki
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
       wander_ = true;
-      ROS_INFO_STREAM("[" << name_ <<"] Activating Wander");
+      ROS_INFO_STREAM_NAMED(name_,  "Activating Wander");
     }
     else
     {
-      ROS_INFO_STREAM("[" << name_ <<"] Button event");
+      ROS_INFO_STREAM_NAMED(name_,  "Button event");
     }
   };
   
@@ -174,7 +174,7 @@ namespace kobuki
 
 
     if(!ready_) {
-        ROS_DEBUG_STREAM("[" << name_ << "] Not ready, check for transform");
+        ROS_DEBUG_STREAM_ONCE_NAMED(name_, "Not ready, check for transform...");
         try
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
@@ -184,34 +184,34 @@ namespace kobuki
           
           ready_ = true;
 
-          ROS_DEBUG_STREAM("[" << name_ << "] Created trajectory testing instance");
+          ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Initializing trajectory testing with robot info");
 
         }
         catch (tf2::TransformException &ex) {
-          ROS_WARN("%s",ex.what());
+          ROS_WARN_STREAM_THROTTLE_NAMED(5, name_, "Problem finding transform:\n" <<ex.what());
           return;
         }
     }
     
     if(ready_)
     {
-      ROS_DEBUG_STREAM("[" << name_ << "] Ready (check for transform)");
+      ROS_DEBUG_STREAM_NAMED(name_, "Ready");
       
       if(curr_odom_ == NULL)
       {
-        ROS_ERROR_STREAM("[" << name_ << "] No odometry received!");
+        ROS_WARN_STREAM_THROTTLE_NAMED(5 , name_,  "No odometry received!");
         return;
       }
       else
       {
         ros::Duration delta_t = curr_odom_->header.stamp - info_msg->header.stamp;
-        ROS_DEBUG_STREAM("[" << name_ << "] Odometry is " << delta_t << " newer than current image");
+        ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current image");
       }
       
       if(wander_)
       {
       
-        ROS_DEBUG_STREAM("[" << name_ << "] Updating collision checker image");
+        ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
         //Update tester with new image/camera info
         traj_tester_->setImage(image_msg, info_msg);
         
@@ -219,10 +219,10 @@ namespace kobuki
         //check if current path is still clear
         if(executing_)
         {
-          ROS_DEBUG_STREAM("[" << name_ << "] Executing: Checking if current path clear");
+          ROS_DEBUG_STREAM_NAMED(name_, "Executing: Checking if current path clear");
           if(PipsTrajectoryController::checkCurrentTrajectory())
           {
-            ROS_WARN_STREAM("[" << name_ << "] Current trajectory collides!");
+            ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
             executing_ = false;
           }
         }
@@ -230,11 +230,11 @@ namespace kobuki
         //Generate trajectories and assign best
         if(!executing_)
         {    
-          ROS_DEBUG_STREAM("[" << name_ << "] Not currently executing, test new trajectories");
+          ROS_DEBUG_STREAM_NAMED(name_, "Not currently executing, test new trajectories");
           std::vector<traj_func*> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
           std::vector<ni_trajectory*> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
-          ROS_DEBUG_STREAM("[" << name_ << "] Found " << valid_trajs.size() << " non colliding  trajectories");
+          ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           if(valid_trajs.size() >0)
           {
             ni_trajectory* chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
