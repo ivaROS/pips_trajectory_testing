@@ -48,7 +48,8 @@ public:
   void GenAndTest::constructor()
   {
       traj_gen_bridge_ = *(new TrajectoryGeneratorBridge);
-      *params_ = new traj_params(traj_gen_bridge_.copyDefaultParams());
+      traj_params* tmp_params = new traj_params(traj_gen_bridge_.copyDefaultParams());
+      params_ = &tmp_params;
   }
   
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
