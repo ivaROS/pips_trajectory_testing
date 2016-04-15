@@ -124,10 +124,12 @@ namespace kobuki
   {
     TrajectoryController::setupParams();
     
-    double min_ttc;
+    double min_ttc, min_tte;
     nh_.param<double>("min_ttc", min_ttc, 3); //Min time to collision before triggering a stop/replan
     min_ttc_ = ros::Duration(min_ttc);
     
+    nh_.param<double>("min_tte", min_tte, 5); //Min time to collision before triggering a stop/replan
+    min_tte_ = ros::Duration(min_tte);
     //params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
     
     //nh_.param<double>("tf", params_->tf, 5);
@@ -225,9 +227,9 @@ namespace kobuki
           ROS_DEBUG_STREAM_NAMED(name_, "Executing: Checking if current path clear");
           if(PipsTrajectoryController::checkCurrentTrajectory(info_msg->header))
           {
-            ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
             executing_ = false;
           }
+
         }
         
         //Generate trajectories and assign best
@@ -243,8 +245,15 @@ namespace kobuki
             ni_trajectory* chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
             //executeTrajectory
 
-            trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
-            PipsTrajectoryController::TrajectoryCB(msg);
+            if(chosen_traj->times.back() > min_ttc_.toSec())
+            {
+              trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
+              PipsTrajectoryController::TrajectoryCB(msg);
+            }
+            else
+            {
+              ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time (" << min_ttc_ << ")" );
+            }
 
           }
         }
@@ -263,7 +272,7 @@ namespace kobuki
     trajectory_generator::trajectory_points trimmed_trajectory;
 
     
-    //Lock trajectory mutex while updating trajectory
+    //Lock trajectory mutex while copying
     {
       boost::mutex::scoped_lock lock(trajectory_mutex_);
       
@@ -287,16 +296,22 @@ namespace kobuki
     
     int collision_ind = traj_tester_->evaluateTrajectory(localTrajectory);
     
-    if(collision_ind <0)
+    if((collision_ind >=0) && (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time) < min_ttc_)
     {
-      return false;
+      ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
+      return true;
+    }
+    else if((localTrajectory.points.back().time - localTrajectory.points.front().time) < min_tte_)
+    {
+      ROS_WARN_NAMED(name_, "No imminent collision, but close to end of trajectory"); //should be debug, but for now making more obvious
+      return true;
     }
     else
     {
-      return localTrajectory.points[collision_ind].time < min_ttc_;
+      return false;
     }
-    
   }
+  
   
   std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions()
   {
