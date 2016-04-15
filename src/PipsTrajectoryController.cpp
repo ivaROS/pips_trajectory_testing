@@ -124,7 +124,10 @@ namespace kobuki
   {
     TrajectoryController::setupParams();
     
-
+    double min_ttc;
+    nh_.param<double>("min_ttc", min_ttc, 3); //Min time to collision before triggering a stop/replan
+    min_ttc_ = ros::Duration(min_ttc);
+    
     //params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
     
     //nh_.param<double>("tf", params_->tf, 5);
@@ -220,7 +223,7 @@ namespace kobuki
         if(executing_)
         {
           ROS_DEBUG_STREAM_NAMED(name_, "Executing: Checking if current path clear");
-          if(PipsTrajectoryController::checkCurrentTrajectory())
+          if(PipsTrajectoryController::checkCurrentTrajectory(info_msg->header))
           {
             ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
             executing_ = false;
@@ -255,15 +258,44 @@ namespace kobuki
     }
   }
 
-  bool PipsTrajectoryController::checkCurrentTrajectory()
+  bool PipsTrajectoryController::checkCurrentTrajectory(const std_msgs::Header& header)
   {
     trajectory_generator::trajectory_points trimmed_trajectory;
-    trimmed_trajectory.header = desired_trajectory_.header;
-    trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
-      
-    trajectory_generator::trajectory_points localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_);
+
     
-    return traj_tester_->evaluateTrajectory(localTrajectory);
+    //Lock trajectory mutex while updating trajectory
+    {
+      boost::mutex::scoped_lock lock(trajectory_mutex_);
+      
+      trimmed_trajectory.header = desired_trajectory_.header;
+      trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
+    }
+    
+    trajectory_generator::trajectory_points localTrajectory;
+    try
+    {
+      localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, header.stamp, odom_frame_id_);
+    
+      ROS_DEBUG_STREAM_NAMED(name_, "Successfully transformed current trajectory from frame [" << trimmed_trajectory.header.frame_id << "] to frame [" << localTrajectory.header.frame_id << "] at time " << localTrajectory.header.stamp);
+    }
+    catch (tf2::TransformException &ex) {
+        ROS_WARN_NAMED(name_, "Unable to transform trajectory: %s",ex.what());
+        return true;  //If we can't verify that the current trajectory is safe, better act as though it isn't
+    }
+    
+
+    
+    int collision_ind = traj_tester_->evaluateTrajectory(localTrajectory);
+    
+    if(collision_ind <0)
+    {
+      return false;
+    }
+    else
+    {
+      return localTrajectory.points[collision_ind].time < min_ttc_;
+    }
+    
   }
   
   std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions()

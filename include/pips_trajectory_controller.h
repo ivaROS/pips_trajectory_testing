@@ -63,6 +63,7 @@ private:
   std::vector<cv::Point3d> co_offsets_;
   GenAndTest_ptr traj_tester_;
   traj_params* params_;
+  ros::Duration min_ttc_;
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
@@ -73,7 +74,7 @@ private:
   void buttonCB(const kobuki_msgs::ButtonEventPtr msg);
   void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg);
-  bool checkCurrentTrajectory();
+  bool checkCurrentTrajectory(const std_msgs::Header& header);
   std::vector<traj_func*> getTrajectoryFunctions();
 };
 
