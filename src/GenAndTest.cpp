@@ -88,7 +88,7 @@ public:
   }
 
   
-  void GenAndTest::setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg)
+  void GenAndTest::setImage(const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     cc_->setImage(image_msg, info_msg);
     header_.stamp = image_msg->header.stamp;
@@ -103,7 +103,7 @@ public:
   }
   
   //OdometryPtr is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
-  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
+  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry::ConstPtr curr_odom)
   {
     state_type x0 = traj_gen_bridge_->initState(curr_odom);
     std_msgs::Header header;

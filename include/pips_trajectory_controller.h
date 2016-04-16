@@ -51,7 +51,7 @@ public:
 protected:
   void setupParams();
   void setupPublishersSubscribers();
-  void OdomCB(const nav_msgs::OdometryPtr& msg);
+  void OdomCB(const nav_msgs::Odometry::ConstPtr& msg);
 
   
 private:
@@ -78,9 +78,9 @@ private:
   boost::shared_ptr<image_synchronizer> synced_images;
     
   
-  void buttonCB(const kobuki_msgs::ButtonEventPtr msg);
-  void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg);
+  void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg);
+  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr& info_msg);
   bool checkCurrentTrajectory(const std_msgs::Header& header);
   std::vector<traj_func_ptr> getTrajectoryFunctions();
 };

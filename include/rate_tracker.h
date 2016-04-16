@@ -12,7 +12,7 @@ private:
 
 std::list<ros::Time> times;
 size_t max_size = 50;
-
+size_t num_samples=0;
 
 public:
 
@@ -23,7 +23,7 @@ void addTime()
 
 void addTime(ros::Time time)
 {
-  
+  num_samples = num_samples + 1;
   times.push_back(time);
   
   if(times.size() == max_size -1)
@@ -39,6 +39,11 @@ double getRate()
   
   double rate = times.size()/dt.toSec();
   return rate;
+}
+
+size_t getNumSamples()
+{
+  return num_samples;
 }
 
 };

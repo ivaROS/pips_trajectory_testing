@@ -160,7 +160,7 @@ namespace kobuki
   }
   
 
-  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEventPtr msg)
+  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
   {
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
@@ -173,14 +173,16 @@ namespace kobuki
     }
   };
   
-  void PipsTrajectoryController::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg)
+  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
 
     ros::Duration timeout(0);
     
     image_rate.addTime(info_msg->header.stamp);
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate());
+    ros::Duration delay = ros::Time::now() - info_msg->header.stamp;
+    
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << delay.toSec() << "s");
 
 
     if(!ready_) {
@@ -272,11 +274,14 @@ namespace kobuki
     }
   }
   
-  void PipsTrajectoryController::OdomCB(const nav_msgs::OdometryPtr& msg)
+  void PipsTrajectoryController::OdomCB(const nav_msgs::Odometry::ConstPtr& msg)
   {
     TrajectoryController::OdomCB(msg);
     odom_rate.addTime(msg->header.stamp);
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate());
+    
+    ros::Duration delay = ros::Time::now() - msg->header.stamp;
+ 
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate() << " (" << odom_rate.getNumSamples() << " samples). Current delay: " << delay.toSec() << "s");
   }
 
 

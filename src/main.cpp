@@ -55,7 +55,9 @@ int main(int argc, char **argv)
     controller.init();
 
 
-    ros::spin();
+    ros::AsyncSpinner spinner(4); // Use 4 threads
+    spinner.start();
+    ros::waitForShutdown();
 
     //ros::shutdown();
 
