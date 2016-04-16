@@ -12,6 +12,7 @@
 // %Tag(FULLTEXT)%
 #include <trajectory_controller.h>
 #include "GenAndTest.h"
+#include "rate_tracker.h"
 
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
@@ -50,6 +51,8 @@ public:
 protected:
   void setupParams();
   void setupPublishersSubscribers();
+  void OdomCB(const nav_msgs::OdometryPtr& msg);
+
   
 private:
   bool wander_,ready_;
@@ -62,9 +65,12 @@ private:
   
   std::vector<cv::Point3d> co_offsets_;
   GenAndTest_ptr traj_tester_;
-  traj_params* params_;
   ros::Duration min_ttc_;
   ros::Duration min_tte_;
+  
+  rate_tracker odom_rate;
+  rate_tracker image_rate;
+  
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
@@ -76,7 +82,7 @@ private:
   void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
                const sensor_msgs::CameraInfoConstPtr& info_msg);
   bool checkCurrentTrajectory(const std_msgs::Header& header);
-  std::vector<traj_func*> getTrajectoryFunctions();
+  std::vector<traj_func_ptr> getTrajectoryFunctions();
 };
 
 } //ns kobuki

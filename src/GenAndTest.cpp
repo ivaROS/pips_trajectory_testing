@@ -96,14 +96,14 @@ public:
 
 
 
-  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions)
+  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions)
   {
     state_type x0 = traj_gen_bridge_->initState();
     return GenAndTest::run(trajectory_functions, x0);
   }
   
   //OdometryPtr is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
-  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
+  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom)
   {
     state_type x0 = traj_gen_bridge_->initState(curr_odom);
     std_msgs::Header header;
@@ -113,13 +113,13 @@ public:
   }
   
   
-  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0)
+  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0)
   {
     return GenAndTest::run(trajectory_functions, x0, header_);
   }
   
   //This is the lowest level version that is actually run; the rest are for convenience
-  std::vector<ni_trajectory*> GenAndTest::run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+  std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header)
   {
     num_frames=num_frames+1;
     
@@ -133,8 +133,7 @@ public:
     
     size_t num_paths = trajectory_functions.size();
     
-    //Possibly use boost::shared_ptr to ensure these are properly released?
-    std::vector<ni_trajectory*> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
+    std::vector<ni_trajectory_ptr> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -144,7 +143,7 @@ public:
     #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
     for(size_t i = 0; i < num_paths; i++)
     {
-      PipsTrajectory* traj = new PipsTrajectory();
+      pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
       traj->header = header;
       traj->params = params_;
       
@@ -183,14 +182,15 @@ public:
   }
   
   
-  void GenAndTest::evaluateTrajectory(PipsTrajectory* traj)
+  void GenAndTest::evaluateTrajectory(pips_trajectory_ptr& traj)
   {
-    int collision_ind = GenAndTest::evaluateTrajectory((ni_trajectory*)traj);
+    ni_trajectory_ptr ni_traj= std::static_pointer_cast<ni_trajectory>(traj);
+    int collision_ind = GenAndTest::evaluateTrajectory(ni_traj);
     traj->set_collision_ind(collision_ind);
   }
   
   //Test whether trajectory collides
-  int GenAndTest::evaluateTrajectory(ni_trajectory* traj)
+  int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
   {
 
       for(size_t i = 0; i < traj->num_states(); i++)
@@ -238,7 +238,7 @@ public:
   }
 
 
-  std::vector<traj_func*> GenAndTest::getDefaultTrajectoryFunctions()
+  std::vector<traj_func_ptr> GenAndTest::getDefaultTrajectoryFunctions()
   {
 
     //Set trajectory departure angles and speed
@@ -247,13 +247,12 @@ public:
 
     size_t num_paths = dep_angles.size();
     
-    std::vector<traj_func*> trajectory_functions(num_paths);
+    std::vector<traj_func_ptr> trajectory_functions(num_paths);
     
     for(size_t i = 0; i < num_paths; i++)
     {
       double dep_angle = dep_angles[i];
-      traj_func* trajptr = new angled_straight_traj_func(dep_angle, v);
-      trajectory_functions[i] = trajptr;
+      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angle, v);
     }
     return trajectory_functions;
   }

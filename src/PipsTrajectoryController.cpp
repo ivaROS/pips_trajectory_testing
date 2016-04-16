@@ -56,6 +56,7 @@
 #include <kobuki_msgs/ButtonEvent.h>
 #include <memory>
 
+
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
 
@@ -176,6 +177,8 @@ namespace kobuki
 
     ros::Duration timeout(0);
     
+    image_rate.addTime(info_msg->header.stamp);
+    ROS_DEBUG_STREAM_NAMED(name_,"Image rate: " << image_rate.getRate());
 
 
     if(!ready_) {
@@ -236,13 +239,13 @@ namespace kobuki
         if(!executing_)
         {    
           ROS_DEBUG_STREAM_NAMED(name_, "Not currently executing, test new trajectories");
-          std::vector<traj_func*> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
-          std::vector<ni_trajectory*> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+          std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
+          std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           if(valid_trajs.size() >0)
           {
-            ni_trajectory* chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
+            ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
             //executeTrajectory
 
             if(chosen_traj->times.back() > min_ttc_.toSec())
@@ -266,6 +269,14 @@ namespace kobuki
    
     }
   }
+  
+  void PipsTrajectoryController::OdomCB(const nav_msgs::OdometryPtr& msg)
+  {
+    TrajectoryController::OdomCB(msg);
+    odom_rate.addTime(msg->header.stamp);
+    ROS_DEBUG_STREAM_NAMED(name_,"Odom rate: " << odom_rate.getRate());
+  }
+
 
   bool PipsTrajectoryController::checkCurrentTrajectory(const std_msgs::Header& header)
   {
@@ -313,7 +324,7 @@ namespace kobuki
   }
   
   
-  std::vector<traj_func*> PipsTrajectoryController::getTrajectoryFunctions()
+  std::vector<traj_func_ptr> PipsTrajectoryController::getTrajectoryFunctions()
   {
 
     //Set trajectory departure angles and speed
@@ -322,13 +333,12 @@ namespace kobuki
 
     size_t num_paths = dep_angles.size();
     
-    std::vector<traj_func*> trajectory_functions(num_paths);
+    std::vector<traj_func_ptr> trajectory_functions(num_paths);
     
     for(size_t i = 0; i < num_paths; i++)
     {
-      double dep_angle = dep_angles[i];
-      traj_func* trajptr = new angled_straight_traj_func(dep_angle, v);
-      trajectory_functions[i] = trajptr;
+      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angles[i], v);
+
     }
     return trajectory_functions;
   }

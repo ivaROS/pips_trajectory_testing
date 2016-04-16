@@ -28,6 +28,7 @@ public:
   size_t num_states();
 };
 
+typedef std::shared_ptr<PipsTrajectory> pips_trajectory_ptr;
 
 
 typedef std::shared_ptr<TrajectoryGeneratorBridge> TrajectoryGeneratorBridge_ptr;
@@ -66,13 +67,13 @@ public:
   void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   
-  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom);
-  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions);
-  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0);
-  std::vector<ni_trajectory*> run(std::vector<traj_func*>& trajectory_functions, state_type& x0, std_msgs::Header& header);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::OdometryPtr curr_odom);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header);
   
-  int evaluateTrajectory(ni_trajectory* traj);
-  void evaluateTrajectory(PipsTrajectory* traj);
+  int evaluateTrajectory(ni_trajectory_ptr& traj);
+  void evaluateTrajectory(pips_trajectory_ptr& traj);
 
   int evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
   
@@ -80,7 +81,7 @@ public:
 
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
-  static std::vector<traj_func*> getDefaultTrajectoryFunctions();
+  static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
   
 };
 

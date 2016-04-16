@@ -101,7 +101,7 @@
           
             auto t1 = std::chrono::high_resolution_clock::now();
 
-            std::vector<traj_func*> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
+            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
             
             traj_tester_->run(trajectory_functions);
             
