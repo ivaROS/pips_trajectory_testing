@@ -42,7 +42,7 @@
     <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
 </node>
 
-<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_trajectory_controller_main" args="" unless="$(arg nodelet)" >
+<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_trajectory_controller_main" output="screen" args="" unless="$(arg nodelet)" >
     <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
     <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
 </node>

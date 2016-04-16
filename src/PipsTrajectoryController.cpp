@@ -169,7 +169,7 @@ namespace kobuki
     }
     else
     {
-      ROS_INFO_STREAM_NAMED(name_,  "Button event");
+      ROS_DEBUG_STREAM_NAMED(name_,  "Non-handled Button event");
     }
   };
   
@@ -180,7 +180,7 @@ namespace kobuki
     ros::Duration timeout(0);
     
     image_rate.addTime(info_msg->header.stamp);
-    ROS_DEBUG_STREAM_NAMED(name_,"Image rate: " << image_rate.getRate());
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate());
 
 
     if(!ready_) {
@@ -276,7 +276,7 @@ namespace kobuki
   {
     TrajectoryController::OdomCB(msg);
     odom_rate.addTime(msg->header.stamp);
-    ROS_DEBUG_STREAM_NAMED(name_,"Odom rate: " << odom_rate.getRate());
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate());
   }
 
 
