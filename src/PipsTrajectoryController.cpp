@@ -46,6 +46,8 @@
 #include "GenAndTest.h"
 #include <trajectory_controller.h>
 
+#include "rate_tracker.h"
+
 #include <opencv/cv.h>
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>

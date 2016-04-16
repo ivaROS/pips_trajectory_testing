@@ -10,15 +10,15 @@
       firstDepthFrame_(true),
       generate(true)
   {
-    traj_tester_ = new GenAndTest();
+    traj_tester_ = new GenAndTest();  //not deleted on shutdown
   }
 
   void TestTrajectory::init(ros::NodeHandle nh)
   {
     nh_ = nh;
-    it_ = new image_transport::ImageTransport(nh_);
+    it_ = new image_transport::ImageTransport(nh_); //not deleted on shutdown
     tfBuffer_ = new tf2_ros::Buffer; //optional parameter: ros::Duration(cache time) (default=10)
-    tf_listener_ = new tf2_ros::TransformListener(*tfBuffer_);
+    tf_listener_ = new tf2_ros::TransformListener(*tfBuffer_);  //not deleted on shutdown
 
     traj_tester_->init(nh);
     
