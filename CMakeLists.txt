@@ -90,6 +90,10 @@ add_executable(pips_trajectory_controller_main
    src/main.cpp
 )
 
+add_executable(delayed_nodelet 
+   src/delayed_nodelet.cpp
+)
+
 
 
 ## Add cmake target dependencies of the executable/library
@@ -132,5 +136,8 @@ target_link_libraries(pips_trajectory_controller_main
    pips_trajectory_controller
 )
 
+target_link_libraries(delayed_nodelet
+   ${catkin_LIBRARIES}
+)
 
 
