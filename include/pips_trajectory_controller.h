@@ -22,6 +22,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <memory>
 
+#include <ros/callback_queue.h>
 
 #include <kobuki_msgs/ButtonEvent.h>
 
@@ -55,6 +56,8 @@ protected:
 
   
 private:
+
+  
   bool wander_,ready_;
   
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;

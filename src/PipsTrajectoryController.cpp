@@ -173,16 +173,17 @@ namespace kobuki
     }
   };
   
+  //Note: Is it really necessary to get both image and camera info? More importantly, does it slow things much to do a synchronized callback like this?
+  //If it does, then should have separate callbacks- this one would just get the image, and the other would check if camerainfo changes, and if so update it. That does sound messy though. On the other hand, if the only thing that changes is the size, then the image msg has that anyway so it would be easy.
   void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
 
     ros::Duration timeout(0);
     
-    image_rate.addTime(info_msg->header.stamp);
-    ros::Duration delay = ros::Time::now() - info_msg->header.stamp;
+    image_rate.addTime(info_msg->header);
     
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << delay.toSec() << "s");
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
 
     if(!ready_) {
@@ -277,11 +278,9 @@ namespace kobuki
   void PipsTrajectoryController::OdomCB(const nav_msgs::Odometry::ConstPtr& msg)
   {
     TrajectoryController::OdomCB(msg);
-    odom_rate.addTime(msg->header.stamp);
-    
-    ros::Duration delay = ros::Time::now() - msg->header.stamp;
- 
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate() << " (" << odom_rate.getNumSamples() << " samples). Current delay: " << delay.toSec() << "s");
+    odom_rate.addTime(msg->header);
+     
+    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate() << " (" << odom_rate.getNumSamples() << " samples). Current delay: " << odom_rate.getLastDelay() << "s; Average delay: " << odom_rate.getAverageDelay() << "s.");
   }
 
 
