@@ -5,32 +5,25 @@
 
 struct delayed_nodelet {
 public:
-  delayed_nodelet()  {
-    // advertise, subscribe or whatever using the my_queue_ CallbackQueue
-
-    
+  delayed_nodelet(std::string& topic, std::string& command) : topic(topic), command(command){
 
   }
   
   void init(ros::NodeHandle& nh)
   {
-    nh_ = nh;
-    trigger_subscriber_ = nh_.subscribe("/camera/depth/image_raw", 1, &delayed_nodelet::trigger_callback_, this);
-    command1 = "roslaunch odroid throttle_images.launch";
+    boost::shared_ptr<sensor_msgs::Image const> sharedPtr;
+    sensor_msgs::Image img;
+
+    sharedPtr  = ros::topic::waitForMessage<sensor_msgs::Image>(topic, nh);
+    //if (sharedPtr == NULL)
+    //    ROS_ERROR();
+    nodelet_thread_ = boost::thread(&delayed_nodelet::start_nodelet, this, command);
+
   }
   
   ~delayed_nodelet()
   {
-    nh_.shutdown();
-    nodelet_thread1_.join();
-  }
-
-
-
-  void trigger_callback_(sensor_msgs::Image msg)
-  {
-    nodelet_thread1_ = boost::thread(&delayed_nodelet::start_nodelet, this, command1);
-    trigger_subscriber_.shutdown();
+    nodelet_thread_.join();
   }
 
   void start_nodelet(std::string command)
@@ -39,10 +32,9 @@ public:
   }
 
 private:
-  ros::NodeHandle nh_;
-  ros::Subscriber trigger_subscriber_;
-  boost::thread nodelet_thread1_;
-  std::string command1;
+  boost::thread nodelet_thread_;
+  std::string topic, command;
+
 };
 
 int main(int argc, char **argv)
@@ -52,7 +44,12 @@ int main(int argc, char **argv)
     ros::start();
     ros::NodeHandle nh;
 
-    delayed_nodelet delayer;
+    std::string topic = "/camera/depth/image_raw";
+    std::string command = "roslaunch odroid throttle_images.launch";
+
+
+    delayed_nodelet delayer(topic, command);
     delayer.init(nh);
     ros::spin();
+    ros::shutdown();
 }
