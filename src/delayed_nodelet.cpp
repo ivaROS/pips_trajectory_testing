@@ -15,6 +15,7 @@ public:
     sensor_msgs::Image img;
 
     sharedPtr  = ros::topic::waitForMessage<sensor_msgs::Image>(topic, nh);
+    ROS_INFO("Message received, executing command");
     //if (sharedPtr == NULL)
     //    ROS_ERROR();
     nodelet_thread_ = boost::thread(&delayed_nodelet::start_nodelet, this, command);
