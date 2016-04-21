@@ -84,15 +84,6 @@ namespace kobuki
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) 
   {
     traj_tester_ = std::make_shared<GenAndTest>();
-  };
-  
-  /**
-   * Set-up necessary publishers/subscribers
-   * @return true, if successful
-   */
-  bool PipsTrajectoryController::init()
-  {
-    kobuki::TrajectoryController::init();
     
     double radius = .178;
     double height = .48;
@@ -108,6 +99,17 @@ namespace kobuki
     cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
     std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
     co_offsets_ = co_offsets;
+  };
+  
+  /**
+   * Set-up necessary publishers/subscribers
+   * @return true, if successful
+   */
+  bool PipsTrajectoryController::init()
+  {
+    kobuki::TrajectoryController::init();
+    
+
     
     traj_tester_->init(nh_);
     
