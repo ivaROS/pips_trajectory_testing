@@ -58,7 +58,7 @@ class GenAndTest
 public:
 
   GenAndTest();
-  GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
+  GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void constructor();
   
   void updateParams();

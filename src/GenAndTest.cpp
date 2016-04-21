@@ -51,7 +51,7 @@ public:
       params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
   }
   
-  void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  void GenAndTest::setRobotInfo(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   {    
       cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, false);
       base_frame_id_ = depth_base_transform.header.frame_id;
