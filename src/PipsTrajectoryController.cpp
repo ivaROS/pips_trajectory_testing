@@ -81,7 +81,10 @@ namespace kobuki
 {
 
 
-  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : kobuki::TrajectoryController(nh, name) 
+  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : 
+      kobuki::TrajectoryController(nh, name), 
+      wander_(false), 
+      ready_(false)
   {
     traj_tester_ = std::make_shared<GenAndTest>();
     
@@ -112,12 +115,10 @@ namespace kobuki
 
     
     traj_tester_->init(nh_);
-    
-    wander_ = false;
-    ready_ = false;
+
     
     
-    //these next 2 lines are just for initial testing!
+    //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
     wander_ = true;
     this->disable();
     
@@ -162,7 +163,7 @@ namespace kobuki
   }
   
 
-  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
+  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr msg)
   {
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
@@ -177,8 +178,8 @@ namespace kobuki
   
   //Note: Is it really necessary to get both image and camera info? More importantly, does it slow things much to do a synchronized callback like this?
   //If it does, then should have separate callbacks- this one would just get the image, and the other would check if camerainfo changes, and if so update it. That does sound messy though. On the other hand, if the only thing that changes is the size, then the image msg has that anyway so it would be easy.
-  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr info_msg)
   {
 
     ros::Duration timeout(0);
@@ -194,12 +195,9 @@ namespace kobuki
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
-          ROS_WARN_STREAM_NAMED(name_, "co_offsets size: " << co_offsets_.size());
           traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
-          
+         
           ready_ = true;
-          
-
 
           ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Initializing trajectory testing with robot info");
 
@@ -279,7 +277,7 @@ namespace kobuki
     }
   }
   
-  void PipsTrajectoryController::OdomCB(const nav_msgs::Odometry::ConstPtr& msg)
+  void PipsTrajectoryController::OdomCB(const nav_msgs::Odometry::ConstPtr msg)
   {
     TrajectoryController::OdomCB(msg);
     odom_rate.addTime(msg->header);

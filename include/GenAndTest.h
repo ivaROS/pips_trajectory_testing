@@ -58,13 +58,13 @@ class GenAndTest
 public:
 
   GenAndTest();
-  GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
+  GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void constructor();
   
   void updateParams();
   
   void init(ros::NodeHandle& nh);
-  void setRobotInfo(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
+  void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
   
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry::ConstPtr curr_odom);

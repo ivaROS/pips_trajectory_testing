@@ -52,7 +52,7 @@ public:
 protected:
   void setupParams();
   void setupPublishersSubscribers();
-  void OdomCB(const nav_msgs::Odometry::ConstPtr& msg);
+  void OdomCB(const nav_msgs::Odometry::ConstPtr msg);
 
   
 private:
@@ -80,10 +80,12 @@ private:
   typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
   boost::shared_ptr<image_synchronizer> synced_images;
     
+  //To ensure message not deleted, callbacks must not take by reference
+  void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr msg);
+  void depthImageCb(const sensor_msgs::Image::ConstPtr image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr info_msg);
   
-  void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg);
-  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+  //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);
   std::vector<traj_func_ptr> getTrajectoryFunctions();
 };
