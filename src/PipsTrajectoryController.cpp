@@ -192,12 +192,12 @@ namespace kobuki
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
-          
+          ROS_WARN_STREAM_NAMED(name_, "co_offsets size: " << co_offsets_.size());
           traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
           
           ready_ = true;
           
-          ROS_WARN_STREAM_NAMED(name_, "co_offsets size: " << co_offsets_.size());
+
 
           ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Initializing trajectory testing with robot info");
 
