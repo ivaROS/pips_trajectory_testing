@@ -38,7 +38,7 @@ public:
     GenAndTest::constructor();
   }
   
-  GenAndTest::GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  GenAndTest::GenAndTest(std::vector<cv::Point3d> co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   { 
     GenAndTest::constructor();
     GenAndTest::setRobotInfo(co_offsets, depth_base_transform);
