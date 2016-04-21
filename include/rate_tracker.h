@@ -39,7 +39,7 @@ void addTime(ros::Time time)
   times.push_back(time);
 }
 
-void addDuration(ros::Time& msgTime, ros::Time& actualTime)
+void addDuration(ros::Time msgTime, ros::Time actualTime)
 {
   if(delays.size() == max_size)
     delays.pop_front();
@@ -48,7 +48,7 @@ void addDuration(ros::Time& msgTime, ros::Time& actualTime)
   delays.push_back(delay);
 }
 
-void addTime(std_msgs::Header& header)
+void addTime(std_msgs::Header header)
 {
   addTime(header.stamp);
   addDuration(header.stamp, now());

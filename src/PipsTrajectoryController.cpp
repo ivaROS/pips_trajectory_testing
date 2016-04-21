@@ -196,6 +196,8 @@ namespace kobuki
           traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
           
           ready_ = true;
+          
+          ROS_WARN_STREAM_NAMED(name_, "co_offsets size: " << co_offsets_.size());
 
           ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Initializing trajectory testing with robot info");
 
