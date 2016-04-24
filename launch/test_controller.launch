@@ -17,6 +17,14 @@
 
 <param name="/use_sim_time" value="true"/>
 
-<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) --pause -r 1 " />
+<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) --pause -r 1 " >
+  <remap from="/camera/depth/image_raw"   to="/rosbag/image" if="$(arg nodelet)"/>
+  <remap from="/camera/depth/camera_info" to="/rosbag/info" if="$(arg nodelet)"/>
+  <remap from="/odom"                     to="/rosbag/odom" if="$(arg nodelet)"/>
+</node>
+
+
+<node name="rosbag_publisher_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/rosbag_publisher_nodelet camera/camera_nodelet_manager" if="$(arg nodelet)" /> 
+
 
 </launch>

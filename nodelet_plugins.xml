@@ -14,3 +14,11 @@
   </class>
 </library>
 
+<library path="lib/librosbag_publisher_nodelet">
+  <class name="pips_trajectory_testing/rosbag_publisher_nodelet" type="pips::RosbagPublisherNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      Republishes certain topics from a nodelet, allowing use of rosbags while testing nodelet behavior
+    </description>
+  </class>
+</library>
+

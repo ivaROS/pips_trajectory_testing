@@ -98,7 +98,7 @@ namespace kobuki
     cv::Point3d bottomr(radius+safety_expansion,-floor_tolerance,radius+safety_expansion);
     cv::Point3d bottoml(-radius-safety_expansion,-floor_tolerance,radius+safety_expansion);
 
-
+    //Note: at this time, the order doesn't matter. 
     cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
     std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
     co_offsets_ = co_offsets;

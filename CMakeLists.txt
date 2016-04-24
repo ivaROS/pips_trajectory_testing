@@ -94,6 +94,9 @@ add_executable(delayed_nodelet
    src/delayed_nodelet.cpp
 )
 
+add_library(rosbag_publisher_nodelet MODULE
+   src/rosbag_nodelet_publisher.cpp
+)
 
 
 ## Add cmake target dependencies of the executable/library
@@ -140,4 +143,7 @@ target_link_libraries(delayed_nodelet
    ${catkin_LIBRARIES}
 )
 
+target_link_libraries(rosbag_publisher_nodelet
+   ${catkin_LIBRARIES}
+)
 
