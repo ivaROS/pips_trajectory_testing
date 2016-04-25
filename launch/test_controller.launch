@@ -5,7 +5,7 @@
 <arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/toward_chair_2016-01-04-15-24-43.bag"/>
 <arg name="start_time" default="0"/>
 
-<node ns="camera" name="camera_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" if="$(arg nodelet)" output="screen"/>
+<node ns="camera" name="camera_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" if="$(arg nodelet)" output="screen" launch-prefix="xterm -e gdb --args"/>
 
 <include file="$(find pips_trajectory_testing)/launch/pips_controller.launch">
   <arg name="driver_decimation" value="true"/>
