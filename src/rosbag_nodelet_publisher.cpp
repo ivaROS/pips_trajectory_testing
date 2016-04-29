@@ -19,13 +19,20 @@ public:
 
   }
   
-  void CameraCB(const sensor_msgs::Image::ConstPtr image_msg, const sensor_msgs::CameraInfo::ConstPtr info_msg)
+  void CameraCB(sensor_msgs::Image image_msg, sensor_msgs::CameraInfo info_msg)
   {
-    image_pub_.publish(image_msg);
-    info_pub_.publish(info_msg);
+    sensor_msgs::Image::Ptr img_ptr = sensor_msgs::Image::Ptr(new sensor_msgs::Image(image_msg));
+    sensor_msgs::CameraInfo::Ptr info_ptr = sensor_msgs::CameraInfo::Ptr(new sensor_msgs::CameraInfo(info_msg));    
+    
+    img_ptr->header.stamp = ros::Time::now();
+    info_ptr->header.stamp = img_ptr->header.stamp;
+    
+    image_pub_.publish(img_ptr);
+    info_pub_.publish(info_ptr);
+    
   }
   
-  void OdomCB(const nav_msgs::Odometry::ConstPtr msg)
+  void OdomCB(nav_msgs::Odometry msg)
   {
     odom_pub_.publish(msg);
   }
