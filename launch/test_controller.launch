@@ -1,6 +1,7 @@
 <launch>
 
-<arg name="nodelet" default="false"/>
+<arg name="nodelet" default="true"/>
+<arg name="spinner" default="false"/>
 
 <arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/toward_chair_2016-01-04-15-24-43.bag"/>
 <arg name="start_time" default="0"/>
@@ -16,6 +17,7 @@
 <include file="$(find pips_trajectory_testing)/launch/pips_controller.launch">
   <arg name="driver_decimation" value="true"/>
   <arg name="nodelet" value="$(arg nodelet)"/>
+  <arg name="spinner" value="$(arg spinner)"/>
   
   <!--  <arg name="depth_image" value="/camera/depth/image_raw"/>
   <arg name="depth_info" value="/camera/depth/camera_info"/> -->

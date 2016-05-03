@@ -50,8 +50,9 @@ int main(int argc, char **argv)
     ros::init(argc, argv, name);
     ros::start();
     ros::NodeHandle nh;
+    ros::NodeHandle pnh("~");
     
-    kobuki::PipsTrajectoryController controller(nh, name);
+    kobuki::PipsTrajectoryController controller(nh, pnh, name);
     controller.init();
 
 

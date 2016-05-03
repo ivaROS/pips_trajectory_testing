@@ -38,7 +38,7 @@ namespace kobuki
 class PipsTrajectoryController : public kobuki::TrajectoryController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, std::string& name);
+  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
   ~PipsTrajectoryController(){};
 
   /**

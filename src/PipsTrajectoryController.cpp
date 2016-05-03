@@ -81,8 +81,8 @@ namespace kobuki
 {
 
 
-  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, std::string& name) : 
-      kobuki::TrajectoryController(nh, name), 
+  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) : 
+      kobuki::TrajectoryController(nh, pnh, name), 
       wander_(false), 
       ready_(false)
   {
@@ -131,10 +131,10 @@ namespace kobuki
     TrajectoryController::setupParams();
     
     double min_ttc, min_tte;
-    nh_.param<double>("min_ttc", min_ttc, 3); //Min time to collision before triggering a stop/replan
+    pnh_.param<double>("min_ttc", min_ttc, 3); //Min time to collision before triggering a stop/replan
     min_ttc_ = ros::Duration(min_ttc);
     
-    nh_.param<double>("min_tte", min_tte, 5); //Min time to collision before triggering a stop/replan
+    pnh_.param<double>("min_tte", min_tte, 5); //Min time to collision before triggering a stop/replan
     min_tte_ = ros::Duration(min_tte);
     //params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
     
