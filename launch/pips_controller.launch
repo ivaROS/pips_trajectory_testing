@@ -41,6 +41,8 @@
 <node name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_trajectory_controller_nodelet $(arg camera)/camera_nodelet_manager" if="$(arg nodelet)" >
     <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
     <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
+    <remap from="$(arg camera)/GenAndTest/tested_paths" to="/GenAndTest/tested_paths"/>
+    <remap from="$(arg camera)/GenAndTest/collision_points" to="/GenAndTest/collision_points"/>
     <param name="odom_spinner" value="$(arg spinner)"/>
 </node>
 

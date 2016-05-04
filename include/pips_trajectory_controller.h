@@ -71,7 +71,6 @@ private:
   ros::Duration min_ttc_;
   ros::Duration min_tte_;
   
-  rate_tracker odom_rate;
   rate_tracker image_rate;
   
   
