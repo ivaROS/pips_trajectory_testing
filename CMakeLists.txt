@@ -33,9 +33,9 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES pips_trajectory_testing
+##  LIBRARIES pips_trajectory_testing
   CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller
-#  DEPENDS system_lib
+##  DEPENDS system_lib
 )
 
 ###########
@@ -51,7 +51,7 @@ include_directories(
 )
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -std=c++11 ${OpenMP_CXX_FLAGS}")
 
 ## Declare a cpp library

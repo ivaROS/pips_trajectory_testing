@@ -47,7 +47,6 @@ public:
   void GenAndTest::constructor()
   {
       traj_gen_bridge_ = std::make_shared<TrajectoryGeneratorBridge>();
-      //Will need to use shared_ptrs to prevent memory leaking here!
       params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
   }
   

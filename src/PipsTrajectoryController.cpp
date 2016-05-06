@@ -46,8 +46,6 @@
 #include "GenAndTest.h"
 #include <trajectory_controller.h>
 
-#include "rate_tracker.h"
-
 #include <opencv/cv.h>
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
@@ -163,7 +161,7 @@ namespace kobuki
   }
   
 
-  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr msg)
+  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
   {
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
@@ -178,8 +176,8 @@ namespace kobuki
   
   //Note: Is it really necessary to get both image and camera info? More importantly, does it slow things much to do a synchronized callback like this?
   //If it does, then should have separate callbacks- this one would just get the image, and the other would check if camerainfo changes, and if so update it. That does sound messy though. On the other hand, if the only thing that changes is the size, then the image msg has that anyway so it would be easy.
-  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr info_msg)
+  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
 
     ros::Duration timeout(0);
@@ -212,7 +210,7 @@ namespace kobuki
     {
       ROS_DEBUG_STREAM_NAMED(name_, "Ready");
       
-      if(curr_odom_ == NULL)
+      if(!curr_odom_)
       {
         ROS_WARN_STREAM_THROTTLE_NAMED(5 , name_,  "No odometry received!");
         return;
@@ -275,14 +273,6 @@ namespace kobuki
     
    
     }
-  }
-  
-  void PipsTrajectoryController::OdomCB(const nav_msgs::Odometry::ConstPtr msg)
-  {
-    TrajectoryController::OdomCB(msg);
-    odom_rate.addTime(msg->header);
-     
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Odom rate: " << odom_rate.getRate() << " (" << odom_rate.getNumSamples() << " samples). Current delay: " << odom_rate.getLastDelay() << "s; Average delay: " << odom_rate.getAverageDelay() << "s.");
   }
 
 
