@@ -86,8 +86,8 @@ add_library(pips_trajectory_controller_nodelet MODULE
 )
 
 ## Declare standalone pips trajectory controller
-add_executable(pips_trajectory_controller_main
-   src/main.cpp
+add_executable(pips_trajectory_controller_node
+   src/pips_controller_node.cpp
 )
 
 add_executable(delayed_nodelet 
@@ -134,7 +134,7 @@ target_link_libraries(pips_trajectory_controller_nodelet
    pips_trajectory_controller
 )
 
-target_link_libraries(pips_trajectory_controller_main
+target_link_libraries(pips_trajectory_controller_node
    ${catkin_LIBRARIES} 
    pips_trajectory_controller
 )
