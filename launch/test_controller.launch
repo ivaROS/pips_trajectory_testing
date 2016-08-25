@@ -1,38 +1,44 @@
 <launch>
 
-<arg name="nodelet" default="true"/>
-<arg name="spinner" default="false"/>
+  <!-- This launch file allows us to run the controller on bag files as though it was running live. The controller can't actually influence the robot's path, but everything else can be tested -->
 
-<arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/toward_chair_2016-01-04-15-24-43.bag"/>
-<arg name="start_time" default="0"/>
-<arg name="debug" default="false"/>
+  <arg name="nodelet" default="true"/>
+  <arg name="spinner" default="false"/>
 
-<arg name="debug_prefix" value="" unless="$(arg debug)"/>
-<arg name="debug_prefix" value="xterm -e gdb --args" if="$(arg debug)"/>
+  <arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/toward_chair_2016-01-04-15-24-43.bag"/>
+  <arg name="start_time" default="0"/>
+  <arg name="debug" default="false"/>
 
-
-
-<node ns="camera" name="camera_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" if="$(arg nodelet)" output="screen" launch-prefix="$(arg debug_prefix)"/>
-
-<include file="$(find pips_trajectory_testing)/launch/pips_controller.launch">
-  <arg name="driver_decimation" value="true"/>
-  <arg name="nodelet" value="$(arg nodelet)"/>
-  <arg name="spinner" value="$(arg spinner)"/>
-  
-  <!--  <arg name="depth_image" value="/camera/depth/image_raw"/>
-  <arg name="depth_info" value="/camera/depth/camera_info"/> -->
-</include>
-
-<param name="/use_sim_time" value="true"/>
-
-<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) --pause -r 1 " >
-  <remap from="/camera/depth/image_raw"   to="/rosbag/image" if="$(arg nodelet)"/>
-  <remap from="/camera/depth/camera_info" to="/rosbag/info" if="$(arg nodelet)"/>
-  <remap from="/odom"                     to="/rosbag/odom" if="$(arg nodelet)"/>
-</node>
+  <arg name="debug_prefix" value="" unless="$(arg debug)"/>
+  <arg name="debug_prefix" value="xterm -e gdb --args" if="$(arg debug)"/>
 
 
-<node name="rosbag_publisher_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/rosbag_publisher_nodelet camera/camera_nodelet_manager" if="$(arg nodelet)" /> 
+  <!-- For visualization, need to run 'tb rosbag_play_turtlebot.launch'
+  <node ns="camera" name="camera_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" if="$(arg nodelet)" output="screen" launch-prefix="$(arg debug_prefix)"/>
+  -->
+
+  <include file="$(find pips_trajectory_testing)/launch/pips_controller.launch">
+    <arg name="driver_decimation" value="false"/>
+    <arg name="nodelet" value="$(arg nodelet)"/>
+    <arg name="spinner" value="$(arg spinner)"/>
+    
+    <!--  <arg name="depth_image" value="/camera/depth/image_raw"/>
+    <arg name="depth_info" value="/camera/depth/camera_info"/> -->
+  </include>
+
+  <param name="/use_sim_time" value="true"/>
+
+
+
+  <node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) --pause -r 1 " >
+    <remap from="/camera/depth/image_raw"   to="/rosbag/image" if="$(arg nodelet)"/>
+    <remap from="/camera/depth/camera_info" to="/rosbag/info" if="$(arg nodelet)"/>
+    <remap from="/odom"                     to="/rosbag/odom" if="$(arg nodelet)"/>
+  </node>
+
+
+  <node name="rosbag_publisher_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/rosbag_publisher_nodelet camera/camera_nodelet_manager" if="$(arg nodelet)" /> 
+
 
 
 </launch>
