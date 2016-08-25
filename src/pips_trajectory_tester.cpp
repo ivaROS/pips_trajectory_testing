@@ -53,7 +53,7 @@ public:
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   {    
       cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, false);
-      base_frame_id_ = depth_base_transform.header.frame_id;
+      base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
       header_.frame_id = base_frame_id_;
   }
   
