@@ -1,9 +1,9 @@
-#ifndef TRAJ_GEN_NODELET_H
-#define TRAJ_GEN_NODELET_H
+#ifndef PIPS_DEMO_NODELET_H
+#define PIPS_DEMO_NODELET_H
 
-
+#include "pips_demo.h"
 #include <nodelet/nodelet.h>
-#include "TestTrajectory.h"
+
 
 
     class PipsTrajectoryNodelet : public nodelet::Nodelet
@@ -18,4 +18,4 @@
     };
 
 
-#endif //TRAJ_GEN_NODELET_H
+#endif //PIPS_DEMO_NODELET_H

@@ -42,8 +42,8 @@
 ** Includes
 *****************************************************************************/
 // %Tag(FULLTEXT)%
-#include "pips_trajectory_controller.h"
-#include "GenAndTest.h"
+#include "pips_controller.h"
+#include "pips_trajectory_tester.h"
 #include <trajectory_controller.h>
 
 #include <opencv/cv.h>

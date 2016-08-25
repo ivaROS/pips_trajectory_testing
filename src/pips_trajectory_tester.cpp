@@ -1,4 +1,4 @@
-#include "GenAndTest.h"
+#include "pips_trajectory_tester.h"
 
 #include <collision_checker.h>
 #include <trajectory_generator_ros_interface.h>

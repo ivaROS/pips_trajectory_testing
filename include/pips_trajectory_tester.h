@@ -1,5 +1,5 @@
-#ifndef GEN_AND_TEST_H
-#define GEN_AND_TEST_H
+#ifndef PIPS_TRAJECTORY_TESTER_H
+#define PIPS_TRAJECTORY_TESTER_H
 
 #include <collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
@@ -86,4 +86,4 @@ public:
 };
 
 
-#endif //GEN_AND_TEST_H
+#endif //PIPS_TRAJECTORY_TESTER_H

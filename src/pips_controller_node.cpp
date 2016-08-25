@@ -40,13 +40,13 @@
 *****************************************************************************/
 // %Tag(FULLTEXT)%
 
-#include "pips_trajectory_controller.h"
+#include "pips_controller.h"
 #include <ros/ros.h>
 
 
 int main(int argc, char **argv)
 {
-    std::string name= "pips_trajectory_controller";
+    std::string name= "pips_controller";
     ros::init(argc, argv, name);
     ros::start();
     ros::NodeHandle nh;

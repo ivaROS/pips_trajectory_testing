@@ -1,4 +1,4 @@
-#include "nodelet.h"
+#include "pips_demo_nodelet.h"
 #include <pluginlib/class_list_macros.h>
 
 

@@ -55,38 +55,38 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -std=c++11 ${OpenMP_CXX_FLAGS}")
 
 ## Declare a cpp library
-add_library(traj_gen_test
-   src/GenAndTest.cpp
+add_library(pips_trajectory_tester
+   src/pips_trajectory_tester.cpp
 )
 
 
 ## Declare a cpp library
-add_library(traj_gen_core
-   src/TestTrajectory.cpp
+add_library(pips_demo
+   src/pips_demo.cpp
 )
 
 ## Declare a cpp executable
-add_executable(pips_traj_tester
-   src/standalone.cpp
+add_executable(pips_demo_node
+   src/pips_demo_node.cpp
 )
 
 ## Declare a cpp library
-add_library(pips_traj_tester_nodelet MODULE
-   src/nodelet.cpp
+add_library(pips_demo_nodelet MODULE
+   src/pips_demo_nodelet.cpp
 )
 
 ## Declare a cpp library
-add_library(pips_trajectory_controller
-   src/PipsTrajectoryController.cpp
+add_library(pips_controller
+   src/pips_controller.cpp
 )
 
 ## Declare a cpp library
-add_library(pips_trajectory_controller_nodelet MODULE
+add_library(pips_controller_nodelet MODULE
    src/pips_controller_nodelet.cpp
 )
 
 ## Declare standalone pips trajectory controller
-add_executable(pips_trajectory_controller_node
+add_executable(pips_controller_node
    src/pips_controller_node.cpp
 )
 
@@ -104,39 +104,39 @@ add_library(rosbag_publisher_nodelet MODULE
 # add_dependencies(pips_trajectory_testing_node pips_trajectory_testing_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(traj_gen_test
+target_link_libraries(pips_trajectory_tester
    ${catkin_LIBRARIES}
 )
 
-target_link_libraries(traj_gen_core
+target_link_libraries(pips_demo
    ${catkin_LIBRARIES} 
-   traj_gen_test
+   pips_trajectory_tester
 )
 
-target_link_libraries(pips_traj_tester_nodelet
+target_link_libraries(pips_demo_nodelet
    ${catkin_LIBRARIES} 
-   traj_gen_core
+   pips_demo
 )
 
-target_link_libraries(pips_traj_tester
+target_link_libraries(pips_demo_node
    ${catkin_LIBRARIES} 
-   traj_gen_core
+   pips_demo
 )
 
 
-target_link_libraries(pips_trajectory_controller
+target_link_libraries(pips_controller
    ${catkin_LIBRARIES} 
-   traj_gen_test
+   pips_trajectory_tester
 )
 
-target_link_libraries(pips_trajectory_controller_nodelet
+target_link_libraries(pips_controller_nodelet
    ${catkin_LIBRARIES} 
-   pips_trajectory_controller
+   pips_controller
 )
 
-target_link_libraries(pips_trajectory_controller_node
+target_link_libraries(pips_controller_node
    ${catkin_LIBRARIES} 
-   pips_trajectory_controller
+   pips_controller
 )
 
 target_link_libraries(delayed_nodelet

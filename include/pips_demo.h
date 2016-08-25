@@ -1,9 +1,14 @@
 #ifndef TEST_TRAJECTORY_H
 #define TEST_TRAJECTORY_H
 
-#include <ros/ros.h>
+#include "pips_trajectory_tester.h"
+
+
 #include <iostream>     // std::cout
 #include <algorithm>    // std::min
+#include <chrono>
+
+#include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <opencv/cv.h>
 #include <cv_bridge/cv_bridge.h>
@@ -19,8 +24,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <chrono>
-#include "GenAndTest.h"
+
+
 
 #define DEBUG false
 

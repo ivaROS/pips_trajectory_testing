@@ -8,10 +8,10 @@
 <machine name="odroid" address="odroid.zapto.xyz" env-loader="~/env_loader.sh" default="true"/>
 <machine name="wolverine" address="wolverine.zapto.xyz" env-loader="~/env_loader.sh" default="true"/>
 
-
+<arg name="camera" default="camera"/>
 <arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
 <arg name="start_time" default="13"/>
-<arg name="type" default="tester"/>
+<arg name="type" default="pips_traj_tester"/>
 
 <arg name="rgb_image" default="camera/rgb/image_color"/>
 <arg name="depth_image" default="camera/depth/image_raw"/>
@@ -27,6 +27,9 @@
     <remap from="rgb_image" to="$(arg rgb_image)" />
     <remap from="depth_image" to="$(arg depth_image)" />
     <remap from="depth_info" to="$(arg depth_info)" />
+    
+    <remap from="$(arg camera)/GenAndTest/tested_paths" to="/GenAndTest/tested_paths"/>
+    <remap from="$(arg camera)/GenAndTest/collision_points" to="/GenAndTest/collision_points"/>
   </node>
 
 <!--

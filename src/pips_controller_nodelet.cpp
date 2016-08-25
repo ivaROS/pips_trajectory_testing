@@ -39,9 +39,11 @@
 ** Includes
 *****************************************************************************/
 // %Tag(FULLTEXT)%
+#include "pips_controller.h"
+
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
-#include "pips_trajectory_controller.h"
+
 
 
 namespace kobuki

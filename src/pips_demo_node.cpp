@@ -1,8 +1,8 @@
-#include "TestTrajectory.h"
+#include "pips_demo.h"
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_trajectory");
+  ros::init(argc, argv, "pips_demo");
   TestTrajectory tester;
   ros::NodeHandle nh("/camera");
   tester.init(nh);

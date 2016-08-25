@@ -11,7 +11,7 @@
 *****************************************************************************/
 // %Tag(FULLTEXT)%
 #include <trajectory_controller.h>
-#include "GenAndTest.h"
+#include "pips_trajectory_tester.h"
 
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
