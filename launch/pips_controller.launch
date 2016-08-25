@@ -11,13 +11,13 @@
 
 <arg name="camera" default="camera"/>
 
-<arg name="depth_res" default="8"/>
 <arg name="parfor" default="true"/>
 
 <arg name="nodelet" default="true"/>
 <arg name="spinner" default="false"/>
 
-<!-- options:
+<arg name="depth_res" default="8"/>
+<!-- depth_res options:
   2: VGA    640x480
   5: QVGA   320x240
   8: QQVGA  160x120
@@ -46,7 +46,7 @@
     <param name="odom_spinner" value="$(arg spinner)"/>
 </node>
 
-<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_trajectory_controller_main" output="screen" args="" unless="$(arg nodelet)" >
+<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_trajectory_controller_node" output="screen" args="" unless="$(arg nodelet)" >
     <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
     <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
     <param name="odom_spinner" value="$(arg spinner)"/>
