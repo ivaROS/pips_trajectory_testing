@@ -29,7 +29,7 @@ public:
 
   void start_nodelet(std::string command)
   {
-    int ret = system(command.c_str());
+    /*int ret = */ system(command.c_str());
   }
 
 private:
