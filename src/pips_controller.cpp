@@ -88,8 +88,8 @@ namespace kobuki
     
     double radius = .178;
     double height = .48;
-    double floor_tolerance = .05;
-    double safety_expansion = .05;
+    double floor_tolerance = .03;
+    double safety_expansion = .02;
 
     cv::Point3d topr(radius+safety_expansion,-height,radius+safety_expansion);
     cv::Point3d topl(-radius-safety_expansion,-height,radius+safety_expansion);
