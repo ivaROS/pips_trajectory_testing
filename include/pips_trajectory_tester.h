@@ -55,6 +55,8 @@ class GenAndTest
   std::string name_ = "GenAndTest";
   traj_params_ptr params_;
   
+  double min_dist = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
+  
 public:
 
   GenAndTest();

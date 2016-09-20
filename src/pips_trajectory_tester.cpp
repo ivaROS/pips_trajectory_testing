@@ -52,7 +52,7 @@ public:
   
   void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
   {    
-      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, false);
+      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, true);
       base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
       header_.frame_id = base_frame_id_;
   }
@@ -137,25 +137,37 @@ public:
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
  
-    //Perform trajectory generation and collision detection in parallel if enabled
-    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
-    #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
-    for(size_t i = 0; i < num_paths; i++)
+    double coords[3];
+    coords[0] = min_dist;
+    coords[1] = 0;
+    coords[2] = 0;
+ 
+    if(~cc_->testCollision(coords))
     {
-      pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
-      traj->header = header;
-      traj->params = params_;
-      
-      traj->trajpntr = trajectory_functions[i];
-      traj->x0_ = x0;
-      
-      traj_gen_bridge_->generate_trajectory(traj);
+ 
+        //Perform trajectory generation and collision detection in parallel if enabled
+        //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
+        #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+        for(size_t i = 0; i < num_paths; i++)
+        {
+          pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
+          traj->header = header;
+          traj->params = params_;
+          
+          traj->trajpntr = trajectory_functions[i];
+          traj->x0_ = x0;
+          
+          traj_gen_bridge_->generate_trajectory(traj);
 
-      GenAndTest::evaluateTrajectory(traj);
+          evaluateTrajectory(traj);
 
-      trajectories[i] = traj;
+          trajectories[i] = traj;
+        }
     }
-    
+    else
+    {
+        trajectories.resize(0);
+    }
     
 
     //End timer
@@ -196,15 +208,20 @@ public:
       {
 
         geometry_msgs::Point pt = traj->getPoint(i);    
-        double coords[3];
-        coords[0] = pt.x;
-        coords[1] = pt.y;
-        coords[2] = pt.z;
-        
-        if(cc_->testCollision(coords))
+
+        if(pt.x > min_dist)
         {
-            return i;
-            
+        
+          double coords[3];
+          coords[0] = pt.x;
+          coords[1] = pt.y;
+          coords[2] = pt.z;
+          
+          if(cc_->testCollision(coords))
+          {
+              return i;
+              
+          }
         }
      
       }

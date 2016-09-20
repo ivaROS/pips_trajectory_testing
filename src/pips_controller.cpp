@@ -54,6 +54,7 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <kobuki_msgs/ButtonEvent.h>
+//#include <dynamic_reconfigure/server.h>
 #include <memory>
 
 
@@ -77,7 +78,6 @@ public:
 
 namespace kobuki
 {
-
 
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) : 
       kobuki::TrajectoryController(nh, pnh, name), 
@@ -109,12 +109,14 @@ namespace kobuki
   bool PipsTrajectoryController::init()
   {
     kobuki::TrajectoryController::init();
-    
-
-    
     traj_tester_->init(nh_);
+/*
+      dynamic_reconfigure::Server<dynamic_tutorials::TutorialsConfig> server;
+  dynamic_reconfigure::Server<dynamic_tutorials::TutorialsConfig>::CallbackType f;
 
-    
+  f = boost::bind(&callback, _1, _2);
+  server.setCallback(f);
+  */
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
     wander_ = true;
