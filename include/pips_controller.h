@@ -28,6 +28,7 @@
 #include <ros/callback_queue.h>
 
 #include <kobuki_msgs/ButtonEvent.h>
+#include <kobuki_msgs/BumperEvent.h>
 
 
 namespace kobuki
@@ -66,7 +67,7 @@ private:
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
   
-  ros::Subscriber button_sub_;
+  ros::Subscriber button_sub_, bumper_sub_;
   ros::Publisher commanded_trajectory_publisher_;
   
   std::vector<cv::Point3d> co_offsets_;
@@ -88,6 +89,7 @@ private:
   boost::shared_ptr<image_synchronizer> synced_images;
     
   void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg);
+  void bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg);
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg);
                

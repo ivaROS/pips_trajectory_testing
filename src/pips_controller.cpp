@@ -55,6 +55,7 @@
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <kobuki_msgs/ButtonEvent.h>
+#include <kobuki_msgs/BumperEvent.h>
 #include <dynamic_reconfigure/server.h>
 #include <memory>
 
@@ -112,21 +113,21 @@ namespace kobuki
     kobuki::TrajectoryController::init();
     traj_tester_->init(nh_);
 
-    dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig>::CallbackType param_callback_type_;
-    param_callback_type_ = boost::bind(&PipsTrajectoryController::configCB, this, _1, _2);
-    param_server_.setCallback(param_callback_type_);
+    //ros::NodeHandle& param_nh = getPrivateNodeHandle(); 
+
+    param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
   
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
-    wander_ = true;
-    this->disable();
+    //wander_ = true;
+    //this->disable();
     
     return true;
   }
 
   void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
-    ROS_INFO("Reconfigure Request: %f %f", 
-              config.min_ttc, config.min_tte);
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte);
+              
   }
 
   void PipsTrajectoryController::setupParams()
@@ -160,12 +161,13 @@ namespace kobuki
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
+    bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &PipsTrajectoryController::bumperCB, this);
     
     //Currently not using this; would it be effective with multithreaded spinner?
     commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1);
   }
   
-
+  //Pressing button 0 activates wander mode
   void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
   {
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
@@ -176,6 +178,20 @@ namespace kobuki
     else
     {
       ROS_DEBUG_STREAM_NAMED(name_,  "Non-handled Button event");
+    }
+  };
+  
+  //Hitting the bumper deactivates wander mode
+  void PipsTrajectoryController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
+  {
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED )
+    {
+      wander_ = false;
+      ROS_INFO_STREAM_NAMED(name_,  "Deactivating Wander");
+    }
+    else
+    {
+      ROS_DEBUG_STREAM_NAMED(name_,  "Non-handled Bumper event");
     }
   };
   
