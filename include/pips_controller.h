@@ -80,7 +80,8 @@ private:
   dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig> param_server_;
   dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig>::CallbackType param_callback_type_;
 
-  
+  int num_paths_;
+  double v_des_;
   
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,

@@ -113,8 +113,10 @@ namespace kobuki
     kobuki::TrajectoryController::init();
     traj_tester_->init(nh_);
 
-    //ros::NodeHandle& param_nh = getPrivateNodeHandle(); 
-
+    //If switch to a pointer:
+    //param_server_.reset( new ReconfigureServer(pnh_));
+    //param_server_->setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
+    
     param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
   
     
@@ -126,10 +128,18 @@ namespace kobuki
   }
 
   void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
-    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte);
-              
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte <<", Wander=" << config.wander << ", tf=" << config.tf << ", num_paths=" << config.num_paths << ", v_des=" << config.v_des);
+    min_ttc_ = ros::Duration(config.min_ttc);
+    min_tte_ = ros::Duration(config.min_tte);
+    
+    //traj_tester_->params_->tf = config.tf;
+
+    wander_ = config.wander;
+    num_paths_ = config.num_paths;
+    v_des_ = config.v_des;
   }
 
+  //This will be redundant once dynamic config fully working.
   void PipsTrajectoryController::setupParams()
   {
     TrajectoryController::setupParams();
@@ -348,9 +358,9 @@ namespace kobuki
 
     //Set trajectory departure angles and speed
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
-    double v = .25;
+    double v = v_des_;  //.25;
 
-    size_t num_paths = dep_angles.size();
+    size_t num_paths = dep_angles.size(); // = num_paths_; 
     
     std::vector<traj_func_ptr> trajectory_functions(num_paths);
     
