@@ -45,7 +45,7 @@
 #include "pips_controller.h"
 #include "pips_trajectory_tester.h"
 #include <trajectory_controller.h>
-#include <pips_trajectory_testing/pips_controller_Config.h>
+#include <pips_trajectory_testing/PipsControllerConfig.h>
 
 #include <opencv/cv.h>
 #include <sensor_msgs/Image.h>
@@ -112,11 +112,9 @@ namespace kobuki
     kobuki::TrajectoryController::init();
     traj_tester_->init(nh_);
 
-    dynamic_reconfigure::Server<pips_trajectory_testing::pips_controllerConfig> param_server_;
-    dynamic_reconfigure::Server<pips_trajectory_testing::pips_controllerConfig>::CallbackType param_callback_type_;
-
-    param_callback_type_ = boost::bind(&param_callback, _1, _2);
-    server.setCallback(param_callback_type_);
+    dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig>::CallbackType param_callback_type_;
+    param_callback_type_ = boost::bind(&PipsTrajectoryController::configCB, this, _1, _2);
+    param_server_.setCallback(param_callback_type_);
   
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
@@ -126,7 +124,7 @@ namespace kobuki
     return true;
   }
 
-  void param_callback(pips_trajectory_testing::pips_controllerConfig &config, uint32_t level) {
+  void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
     ROS_INFO("Reconfigure Request: %f %f", 
               config.min_ttc, config.min_tte);
   }

@@ -12,7 +12,7 @@
 // %Tag(FULLTEXT)%
 #include <trajectory_controller.h>
 #include "pips_trajectory_tester.h"
-#include <pips_trajectory_testing/pips_controller_Config.h>
+#include <pips_trajectory_testing/PipsControllerConfig.h>
 
 
 #include <sensor_msgs/Image.h>
@@ -56,7 +56,7 @@ protected:
   void setupParams();
   void setupPublishersSubscribers();
 
-  void param_callback(pips_trajectory_testing::pips_controller_Config &config, uint32_t level);
+  void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);
   
 private:
 
@@ -76,8 +76,8 @@ private:
   
   rate_tracker image_rate;
   
-  dynamic_reconfigure::Server<pips_trajectory_testing::pips_controller> param_server_;
-  dynamic_reconfigure::Server<pips_trajectory_testing::pips_controller>::CallbackType param_callback_type_;
+  dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig> param_server_;
+  dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig>::CallbackType param_callback_type_;
 
   
   

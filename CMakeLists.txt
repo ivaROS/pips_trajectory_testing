@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenMP)
 
-generate_dynamic_reconfigure_options(cfg/pips_controller.cfg)
+generate_dynamic_reconfigure_options(cfg/PipsController.cfg)
 
 ###################################
 ## catkin specific configuration ##
