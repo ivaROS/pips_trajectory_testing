@@ -12,6 +12,8 @@
 // %Tag(FULLTEXT)%
 #include <trajectory_controller.h>
 #include "pips_trajectory_tester.h"
+#include <pips_trajectory_testing/pips_controller_Config.h>
+
 
 #include <sensor_msgs/Image.h>
 #include <image_transport/subscriber_filter.h>
@@ -19,6 +21,8 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <dynamic_reconfigure/server.h>
+
 #include <memory>
 
 #include <ros/callback_queue.h>
@@ -52,6 +56,7 @@ protected:
   void setupParams();
   void setupPublishersSubscribers();
 
+  void param_callback(pips_trajectory_testing::pips_controller_Config &config, uint32_t level);
   
 private:
 
@@ -71,6 +76,11 @@ private:
   
   rate_tracker image_rate;
   
+  dynamic_reconfigure::Server<pips_trajectory_testing::pips_controller> param_server_;
+  dynamic_reconfigure::Server<pips_trajectory_testing::pips_controller>::CallbackType param_callback_type_;
+
+  
+  
   
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
@@ -80,7 +90,8 @@ private:
   void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg);
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg);
-  
+               
+
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);
   std::vector<traj_func_ptr> getTrajectoryFunctions();

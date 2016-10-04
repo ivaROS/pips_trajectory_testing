@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_view
   tf
   tf2
+  dynamic_reconfigure
   
   trajectory_generator
   pips
@@ -21,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenMP)
 
+generate_dynamic_reconfigure_options(cfg/pips_controller.cfg)
 
 ###################################
 ## catkin specific configuration ##
@@ -34,7 +36,7 @@ find_package(OpenMP)
 catkin_package(
   INCLUDE_DIRS include
 ##  LIBRARIES pips_trajectory_testing
-  CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller
+  CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure
 ##  DEPENDS system_lib
 )
 
@@ -79,6 +81,9 @@ add_library(pips_demo_nodelet MODULE
 add_library(pips_controller
    src/pips_controller.cpp
 )
+
+add_dependencies(pips_controller ${PROJECT_NAME}_gencfg)
+
 
 ## Declare a cpp library
 add_library(pips_controller_nodelet MODULE
