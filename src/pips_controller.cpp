@@ -114,10 +114,10 @@ namespace kobuki
     traj_tester_->init(nh_);
 
     //If switch to a pointer:
-    //param_server_.reset( new ReconfigureServer(pnh_));
-    //param_server_->setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
+    reconfigure_server_.reset( new ReconfigureServer(pnh_));
+    reconfigure_server_->setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
     
-    param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
+    //param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
   
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
@@ -128,7 +128,7 @@ namespace kobuki
   }
 
   void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
-    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte <<", Wander=" << config.wander << ", tf=" << config.tf << ", num_paths=" << config.num_paths << ", v_des=" << config.v_des);
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte <<", Wander=" << (config.wander?"True":"False") << ", v_des=" << config.v_des); //<< config.num_paths 
     min_ttc_ = ros::Duration(config.min_ttc);
     min_tte_ = ros::Duration(config.min_tte);
     

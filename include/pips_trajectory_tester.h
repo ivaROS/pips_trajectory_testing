@@ -3,6 +3,7 @@
 
 #include <collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
+#include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 
 #include <ros/ros.h>
 
@@ -10,6 +11,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
+#include <dynamic_reconfigure/server.h>
 
 #include <memory>
 
@@ -36,13 +38,14 @@ typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
 
 class GenAndTest
 {
-  ros::NodeHandle nh_;
+  ros::NodeHandle nh_, pnh_;
   std::vector<cv::Point3d> co_offsets_;
   geometry_msgs::TransformStamped depth_base_transform_;
 
+  void configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level);
 
-
-  
+  typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsTrajectoryTesterConfig> ReconfigureServer;
+  boost::shared_ptr<ReconfigureServer> reconfigure_server_;
   
   CollisionChecker_ptr cc_;
   

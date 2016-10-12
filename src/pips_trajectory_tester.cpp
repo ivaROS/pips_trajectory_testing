@@ -2,6 +2,7 @@
 
 #include <collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
+#include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 
 #include <chrono>
 
@@ -10,6 +11,8 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
+#include <dynamic_reconfigure/server.h>
+
 #include <memory>
 
 
@@ -61,13 +64,15 @@ public:
   {
   
     nh_ = ros::NodeHandle(nh, "GenAndTest");
+    pnh_ = ros::NodeHandle(nh, "~GenAndTest");
     GenAndTest::constructor();
 
     //Create the various visualization publishers
     path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
-
+    reconfigure_server_.reset( new ReconfigureServer(pnh_));
+    reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
     
     std::string key;
 
@@ -86,6 +91,13 @@ public:
     nh_.param<double>("tf", params_->tf, 10);
   }
 
+  void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level) {
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False")); 
+    
+    parallelism_enabled_ = config.parallelism;
+    params_->tf = config.tf;
+    
+  }
   
   void GenAndTest::setImage(const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {

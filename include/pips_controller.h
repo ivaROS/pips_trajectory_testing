@@ -77,8 +77,8 @@ private:
   
   rate_tracker image_rate;
   
-  dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig> param_server_;
-  dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig>::CallbackType param_callback_type_;
+  typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig> ReconfigureServer;
+  boost::shared_ptr<ReconfigureServer> reconfigure_server_;
 
   int num_paths_;
   double v_des_;

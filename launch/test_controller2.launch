@@ -1,0 +1,7 @@
+<launch>
+
+<include file="$(find pips_trajectory_testing)/launch/test_controller.launch">
+<arg name="bagfile" value="/media/justin/data/bag_files/tf_fixed/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
+<arg name="start_time" value="13"/>
+</include>
+</launch>
