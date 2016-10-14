@@ -64,14 +64,14 @@ public:
   {
   
     nh_ = ros::NodeHandle(nh, "GenAndTest");
-    pnh_ = ros::NodeHandle(nh, "~GenAndTest");
+    //pnh_ = ros::NodeHandle(nh_, "~");
     GenAndTest::constructor();
 
     //Create the various visualization publishers
     path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
-    reconfigure_server_.reset( new ReconfigureServer(pnh_));
+    reconfigure_server_.reset( new ReconfigureServer(nh_));
     reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
     
     std::string key;

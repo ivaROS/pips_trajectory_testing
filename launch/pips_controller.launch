@@ -1,13 +1,31 @@
 <launch>
+
 <arg name="driver_decimation" default="false"/>
 
-<arg name="rgb_image" default="/camera/rgb/image_raw" if="$(arg driver_decimation)"/>
-<arg name="depth_image" default="/camera/depth/image_raw" if="$(arg driver_decimation)"/>
-<arg name="depth_info" default="/camera/depth/camera_info" if="$(arg driver_decimation)"/>
-  
-<arg name="rgb_image" default="/camera/rgb/image_raw" unless="$(arg driver_decimation)"/>
-<arg name="depth_image" default="/camera/decimated/depth_image" unless="$(arg driver_decimation)"/>
-<arg name="depth_info" default="/camera/decimated/depth_info" unless="$(arg driver_decimation)"/>
+<arg name="gazebo" default="false"/>
+
+
+<arg name="depth_image_raw" default="/camera/depth/image_raw"/>
+<arg name="depth_info_raw" default="/camera/depth/camera_info"/>
+
+<arg name="depth_image_dec" default="/camera/decimated/depth_image"/>
+<arg name="depth_info_dec" default="/camera/decimated/depth_info"/>
+
+<!--If driver_decimation is on, then the temporary topic is set to the raw stream. Otherwise, it is set to the decimated stream-->
+<arg name="depth_image_topic_t" value="$(arg depth_image_raw)" if="$(arg driver_decimation)"/>
+<arg name="depth_info_topic_t" value="$(arg depth_info_raw)" if="$(arg driver_decimation)"/>
+<arg name="depth_image_topic_t" value="$(arg depth_image_dec)" unless="$(arg driver_decimation)"/>
+<arg name="depth_info_topic_t" value="$(arg depth_info_dec)" unless="$(arg driver_decimation)"/>
+
+<!--If gazebo is enabled, we use the raw stream. Otherwise, we use whatever was selected above-->
+<arg name="depth_image_topic" value="$(arg depth_image_raw)" if="$(arg gazebo)"/>
+<arg name="depth_info_topic" value="$(arg depth_info_raw)" if="$(arg gazebo)"/>
+<arg name="depth_image_topic" value="$(arg depth_image_topic_t)" unless="$(arg gazebo)"/>
+<arg name="depth_info_topic" value="$(arg depth_info_topic_t)" unless="$(arg gazebo)"/>
+
+<!--The selected topics above are used, though they can still be remapped from the command line-->
+<arg name="depth_image" default="$(arg depth_image_topic)"/>
+<arg name="depth_info" default="$(arg depth_info_topic)"/>
 
 <arg name="camera" default="camera"/>
 

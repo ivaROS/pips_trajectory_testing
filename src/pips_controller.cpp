@@ -194,7 +194,7 @@ namespace kobuki
   //Hitting the bumper deactivates wander mode
   void PipsTrajectoryController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
-    if (msg->state == kobuki_msgs::BumperEvent::PRESSED )
+    if (wander_ && msg->state == kobuki_msgs::BumperEvent::PRESSED )
     {
       wander_ = false;
       ROS_INFO_STREAM_NAMED(name_,  "Deactivating Wander");
@@ -281,13 +281,13 @@ namespace kobuki
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           if(valid_trajs.size() >0)
           {
-            ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getLongestTrajectory(valid_trajs);
+            ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
             //executeTrajectory
 
             if(chosen_traj->times.back() > min_ttc_.toSec())
             {
               trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
-              PipsTrajectoryController::TrajectoryCB(msg);
+              commanded_trajectory_publisher_.publish(msg);
             }
             else
             {
