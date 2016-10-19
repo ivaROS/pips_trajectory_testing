@@ -69,6 +69,7 @@ public:
 
     //Create the various visualization publishers
     path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
+    desired_path_pub_ = nh_.advertise<nav_msgs::Path>("desired_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
     reconfigure_server_.reset( new ReconfigureServer(nh_));
@@ -96,6 +97,12 @@ public:
     
     parallelism_enabled_ = config.parallelism;
     params_->tf = config.tf;
+    params_->dt = config.dt;
+    
+    params_->cp = config.cp;
+    params_->cd = config.cd;
+    params_->cl = config.cl;
+    params_->eps = config.eps;
     
   }
   
@@ -197,6 +204,7 @@ public:
         path = trajectories[i]->toPathMsg();
         
         path_pub_.publish(path);
+        desired_path_pub_.publish(trajectories[i]->getDesiredPathMsg());
     }
 
 

@@ -113,12 +113,15 @@ namespace kobuki
     kobuki::TrajectoryController::init();
     traj_tester_->init(nh_);
 
-    //If switch to a pointer:
+    //Using pointer
     reconfigure_server_.reset( new ReconfigureServer(pnh_));
     reconfigure_server_->setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
     
+    //If not using pointer:
     //param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
   
+    PipsTrajectoryController::setupPublishersSubscribers();
+    
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
     //wander_ = true;
@@ -128,38 +131,19 @@ namespace kobuki
   }
 
   void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
-    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: Min_ttc=" << config.min_ttc << ", Min_tte="<< config.min_tte <<", Wander=" << (config.wander?"True":"False") << ", v_des=" << config.v_des); //<< config.num_paths 
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request:\n\tMin_ttc =\t" << config.min_ttc << "\n\tMin_tte =\t"<< config.min_tte <<"\n\tWander =\t" << (config.wander?"True":"False") << "\n\tv_des =\t" << config.v_des); //<< config.num_paths 
     min_ttc_ = ros::Duration(config.min_ttc);
     min_tte_ = ros::Duration(config.min_tte);
     
-    //traj_tester_->params_->tf = config.tf;
 
     wander_ = config.wander;
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
   }
-
-  //This will be redundant once dynamic config fully working.
-  void PipsTrajectoryController::setupParams()
-  {
-    TrajectoryController::setupParams();
-    
-    double min_ttc, min_tte;
-    pnh_.param<double>("min_ttc", min_ttc, 3); //Min time to collision before triggering a stop/replan
-    min_ttc_ = ros::Duration(min_ttc);
-    
-    pnh_.param<double>("min_tte", min_tte, 5); //Min time to collision before triggering a stop/replan
-    min_tte_ = ros::Duration(min_tte);
-    //params_ = new traj_params(traj_tester_->traj_gen_bridge_.copyDefaultParams());
-    
-    //nh_.param<double>("tf", params_->tf, 5);
-
-  }
   
   
   void PipsTrajectoryController::setupPublishersSubscribers()
   {
-    TrajectoryController::setupPublishersSubscribers();
     std::string depth_image_topic = "/camera/depth/image_raw";
     std::string depth_info_topic = "/camera/depth/camera_info";
 
@@ -173,7 +157,6 @@ namespace kobuki
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
     bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &PipsTrajectoryController::bumperCB, this);
     
-    //Currently not using this; would it be effective with multithreaded spinner?
     commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1);
   }
   
@@ -279,7 +262,7 @@ namespace kobuki
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
-          if(valid_trajs.size() >0)
+          if(wander_ && valid_trajs.size() >0)
           {
             ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
             //executeTrajectory
@@ -291,7 +274,7 @@ namespace kobuki
             }
             else
             {
-              ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time (" << min_ttc_ << ")" );
+              ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time to collision (min_ttc) (" << min_ttc_ << ")" );
             }
 
           }
@@ -323,7 +306,7 @@ namespace kobuki
     trajectory_generator::trajectory_points localTrajectory;
     try
     {
-      localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, header.stamp, odom_frame_id_);
+      localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, header.stamp, odom_frame_id_, ros::Duration(.1)); // This was where the transform exceptions were actually coming from!
     
       ROS_DEBUG_STREAM_NAMED(name_, "Successfully transformed current trajectory from frame [" << trimmed_trajectory.header.frame_id << "] to frame [" << localTrajectory.header.frame_id << "] at time " << localTrajectory.header.stamp);
     }

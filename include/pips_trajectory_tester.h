@@ -49,7 +49,7 @@ class GenAndTest
   
   CollisionChecker_ptr cc_;
   
-  ros::Publisher path_pub_, pose_array_pub_;
+  ros::Publisher path_pub_, desired_path_pub_, pose_array_pub_;
   int num_frames =0;
   std::string base_frame_id_ = "";
   std_msgs::Header header_;

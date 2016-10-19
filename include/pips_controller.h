@@ -54,10 +54,9 @@ public:
   typedef std::shared_ptr<GenAndTest> GenAndTest_ptr;
 
 protected:
-  void setupParams();
   void setupPublishersSubscribers();
 
-  void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);
+
   
 private:
 
@@ -93,7 +92,7 @@ private:
   void bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg);
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg);
-               
+  void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);             
 
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);
