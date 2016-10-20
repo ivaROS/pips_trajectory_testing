@@ -104,6 +104,11 @@ public:
     params_->cl = config.cl;
     params_->eps = config.eps;
     
+    params_->a_max = config.a_max;
+    params_->v_max = config.v_max;
+    params_->w_max = config.w_max;
+    params_->w_dot_max = config.w_dot_max;
+    
   }
   
   void GenAndTest::setImage(const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& info_msg)
@@ -196,6 +201,7 @@ public:
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
     
+    //traj_gen_bridge_->publishPaths(path_pub_, trajectories, 5); //hard coded for 5 trajectories
 
     for(size_t i = 0; i < trajectories.size(); i++)
     {
