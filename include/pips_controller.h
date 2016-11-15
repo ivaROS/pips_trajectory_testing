@@ -71,7 +71,7 @@ private:
   
   
   std::shared_ptr<RectangularModel> robot_model_;
-  std::vector<cv::Point3d> co_offsets_;
+
   GenAndTest_ptr traj_tester_;
   ros::Duration min_ttc_;
   ros::Duration min_tte_;

@@ -93,16 +93,6 @@ namespace kobuki
     double floor_tolerance = .03;
     double safety_expansion = .02;
 
-    cv::Point3d topr(radius+safety_expansion,-height,radius+safety_expansion);
-    cv::Point3d topl(-radius-safety_expansion,-height,radius+safety_expansion);
-    cv::Point3d bottomr(radius+safety_expansion,-floor_tolerance,radius+safety_expansion);
-    cv::Point3d bottoml(-radius-safety_expansion,-floor_tolerance,radius+safety_expansion);
-
-    //Note: at this time, the order doesn't matter. 
-    cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
-    std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
-    co_offsets_ = co_offsets;
-    
     robot_model_ = std::make_shared<RectangularModel>(radius, height, safety_expansion, floor_tolerance);
     
   };

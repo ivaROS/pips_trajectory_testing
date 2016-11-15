@@ -39,19 +39,12 @@
     synced_images->registerCallback(bind(&TestTrajectory::depthImageCb, this, _1, _2));
 
 
-    double radius = .25;
-    double height = .7;
-    double clearance = .05;
+    double radius = .178;
+    double height = .48;
+    double floor_tolerance = .03;
+    double safety_expansion = .02;
 
-    cv::Point3d topr(radius,-height,radius);
-    cv::Point3d topl(-radius,-height,radius);
-    cv::Point3d bottomr(radius,-clearance,radius);
-    cv::Point3d bottoml(-radius,-clearance,radius);
-
-
-    cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
-    std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
-    co_offsets_ = co_offsets;
+    robot_model_ = std::make_shared<RectangularModel>(radius, height, safety_expansion, floor_tolerance);
   
   }
   
@@ -81,7 +74,7 @@
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
           
-          traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
+          traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
           
           firstDepthFrame_ = false;
 

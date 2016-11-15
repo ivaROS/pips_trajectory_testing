@@ -41,10 +41,10 @@ public:
     GenAndTest::constructor();
   }
   
-  GenAndTest::GenAndTest(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  GenAndTest::GenAndTest(std::shared_ptr<HallucinatedRobotModel> robot_model, geometry_msgs::TransformStamped& depth_base_transform)
   { 
     GenAndTest::constructor();
-    GenAndTest::setRobotInfo(co_offsets, depth_base_transform);
+    GenAndTest::setRobotInfo(robot_model, depth_base_transform);
   }
   
   void GenAndTest::constructor()
@@ -53,16 +53,9 @@ public:
       params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
   }
   
-  void GenAndTest::setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform)
+  void GenAndTest::setRobotInfo(std::shared_ptr<HallucinatedRobotModel> robot_model, geometry_msgs::TransformStamped& depth_base_transform)
   {    
-      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, co_offsets, true);
-      base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
-      header_.frame_id = base_frame_id_;
-  }
-  
-  void GenAndTest::setRobotInfo(std::shared_ptr<HallucinatedRobotModel> model, geometry_msgs::TransformStamped& depth_base_transform)
-  {    
-      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, model, true);
+      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, robot_model, true);
       base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
       header_.frame_id = base_frame_id_;
   }
