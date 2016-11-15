@@ -60,6 +60,13 @@ public:
       header_.frame_id = base_frame_id_;
   }
   
+  void GenAndTest::setRobotInfo(std::shared_ptr<HallucinatedRobotModel> model, geometry_msgs::TransformStamped& depth_base_transform)
+  {    
+      cc_ = std::make_shared<CollisionChecker>(depth_base_transform, model, true);
+      base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
+      header_.frame_id = base_frame_id_;
+  }
+  
   void GenAndTest::init(ros::NodeHandle& nh)
   {
   

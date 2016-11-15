@@ -69,6 +69,8 @@ private:
   ros::Subscriber button_sub_, bumper_sub_;
   ros::Publisher commanded_trajectory_publisher_;
   
+  
+  std::shared_ptr<RectangularModel> robot_model_;
   std::vector<cv::Point3d> co_offsets_;
   GenAndTest_ptr traj_tester_;
   ros::Duration min_ttc_;

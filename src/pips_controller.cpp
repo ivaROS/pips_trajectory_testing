@@ -102,6 +102,9 @@ namespace kobuki
     cv::Point3d offsets[] = {topr,topl,bottoml,bottomr};
     std::vector<cv::Point3d> co_offsets(offsets, offsets + sizeof(offsets) / sizeof(cv::Point3d) );
     co_offsets_ = co_offsets;
+    
+    robot_model_ = std::make_shared<RectangularModel>(radius, height, safety_expansion, floor_tolerance);
+    
   };
   
   /**
@@ -207,7 +210,7 @@ namespace kobuki
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
-          traj_tester_->setRobotInfo(co_offsets_, depth_base_transform);
+          traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
          
           ready_ = true;
 
