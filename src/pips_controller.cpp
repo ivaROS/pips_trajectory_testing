@@ -93,7 +93,7 @@ namespace kobuki
     double floor_tolerance = .03;
     double safety_expansion = .02;
 
-    robot_model_ = std::make_shared<RectangularModel>(radius, height, safety_expansion, floor_tolerance);
+    robot_model_ = std::make_shared<CylindricalModel>(radius, height, safety_expansion, floor_tolerance);
     
   };
   

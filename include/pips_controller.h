@@ -70,7 +70,7 @@ private:
   ros::Publisher commanded_trajectory_publisher_;
   
   
-  std::shared_ptr<RectangularModel> robot_model_;
+  std::shared_ptr<HallucinatedRobotModel> robot_model_;
 
   GenAndTest_ptr traj_tester_;
   ros::Duration min_ttc_;
