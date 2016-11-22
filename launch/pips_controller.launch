@@ -31,7 +31,9 @@
 
 <arg name="parfor" default="true"/>
 
-<arg name="nodelet" default="true"/>
+<arg name="nodelet" default="true" unless="$(arg gazebo)"/>
+<arg name="nodelet" default="false" if="$(arg gazebo)"/>
+
 <arg name="spinner" default="false"/>
 
 <arg name="depth_res" default="8"/>

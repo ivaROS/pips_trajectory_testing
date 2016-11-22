@@ -74,7 +74,7 @@ public:
     
     reconfigure_server_.reset( new ReconfigureServer(nh_));
     reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
-    
+    /*
     std::string key;
 
     if(ros::param::search("enable_parallel_loop", key))
@@ -84,12 +84,14 @@ public:
     
     
     GenAndTest::updateParams();
+    
+    */
   }
   
   void GenAndTest::updateParams()
   {
   //Should probably make this dynamnically reconfigurable, or at least cache the results
-    nh_.param<double>("tf", params_->tf, 10);
+  //  nh_.param<double>("tf", params_->tf, 10);
   }
 
   void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level) {
@@ -151,7 +153,10 @@ public:
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
 
-    
+    if(num_frames == 1)
+    {
+        generateDepthImages(trajectory_functions, x0, header);
+    }
     
     
     size_t num_paths = trajectory_functions.size();
@@ -168,7 +173,7 @@ public:
  
     if(~cc_->testCollision(coords))
     {
- 
+        ROS_DEBUG_STREAM_NAMED(name_, "Parallelism: " << parallelism_enabled_);
         //Perform trajectory generation and collision detection in parallel if enabled
         //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
         #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
@@ -298,6 +303,99 @@ public:
     }
     return trajectory_functions;
   }
+
+
+  std::vector<cv::Mat> GenAndTest::generateDepthImages(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+  {
+    
+    ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
+
+    
+    
+    
+    size_t num_paths = trajectory_functions.size();
+    
+    std::vector<cv::Mat> trajectoryImages(num_paths);
+    
+    //Start timer
+    auto t1 = std::chrono::high_resolution_clock::now();
+ 
+
+    //Perform trajectory generation and collision detection in parallel if enabled
+    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
+    //#pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
+      traj->header = header;
+      traj->params = params_;
+      
+      traj->trajpntr = trajectory_functions[i];
+      traj->x0_ = x0;
+      
+      traj_gen_bridge_->generate_trajectory(traj);
+
+      cv::Mat image = generateTrajectoryDepthImage(traj);
+
+      trajectoryImages[i] = image;
+    }
+
+
+    //End timer
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
+
+    ROS_DEBUG_STREAM_NAMED(name_, "Generated depth images for " << num_paths << " trajectories in " << fp_ms.count() << " ms");
+
+    //traj_gen_bridge_->publishPaths(path_pub_, trajectories, 5); //hard coded for 5 trajectories
+
+
+    return trajectoryImages;
+  }
+  
+  
+  cv::Mat GenAndTest::generateTrajectoryDepthImage(pips_trajectory_ptr& traj)
+  {
+      cv::Mat result;
+      for(size_t i = 0; i < traj->num_states(); i++)
+      {
+        geometry_msgs::Point pt = traj->getPoint(i);    
+
+        double coords[3];
+        coords[0] = pt.x;
+        coords[1] = pt.y;
+        coords[2] = pt.z;
+
+        cv::Mat newIm = cc_->generateDepthImage(coords);
+        
+        if(result.empty())
+        {
+          result =  newIm;
+        }
+        else
+        {
+          result = cv::max(result, newIm);
+        }
+        
+        {
+          double min;
+          double max;
+          cv::minMaxIdx(result, &min, &max);
+          cv::Mat adjMap;
+          cv::convertScaleAbs(result, adjMap, 255 / (max-min), -min);
+          
+          cv::imshow("composite image", adjMap);
+          cv::waitKey(0);
+        }
+
+
+      }
+
+      return result;
+
+  }
+  
 
 
 
