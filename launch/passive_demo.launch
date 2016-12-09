@@ -1,0 +1,26 @@
+<launch>
+
+<arg name="camera" default="camera"/>
+
+<arg name="rgb_image" default="camera/rgb/image_color"/>
+<arg name="depth_image" default="camera/depth/image_raw"/>
+<arg name="depth_info" default="camera/depth/camera_info"/>
+
+<node name="pips_demo_node" pkg="pips_trajectory_testing" type="pips_demo_node" args="/base_link" output="screen">
+    <remap from="rgb_image" to="$(arg rgb_image)" />
+    <remap from="depth_image" to="$(arg depth_image)" />
+    <remap from="depth_info" to="$(arg depth_info)" />
+    
+    <remap from="$(arg camera)/GenAndTest/tested_paths" to="/GenAndTest/tested_paths"/>
+    <remap from="$(arg camera)/GenAndTest/collision_points" to="/GenAndTest/collision_points"/>
+  </node>
+
+<!--
+<node name="depth_input_viewer" pkg="image_view" type="image_view">
+    <remap from="image" to="$(arg depth_image)" />
+    <param name="autosize" value="False" />
+  </node>
+  -->
+
+
+</launch>
