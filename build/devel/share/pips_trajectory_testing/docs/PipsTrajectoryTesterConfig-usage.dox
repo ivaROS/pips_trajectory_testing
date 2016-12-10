@@ -1,0 +1,17 @@
+\subsubsection usage Usage
+\verbatim
+<node name="pips_controller" pkg="pips_trajectory_testing" type="pips_controller">
+  <param name="tf" type="double" value="10.0" />
+  <param name="dt" type="double" value="0.1" />
+  <param name="cp" type="double" value="1.0" />
+  <param name="cd" type="double" value="5.0" />
+  <param name="cl" type="double" value="1.0" />
+  <param name="eps" type="double" value="0.01" />
+  <param name="v_max" type="double" value="0.15" />
+  <param name="w_max" type="double" value="3.0" />
+  <param name="a_max" type="double" value="0.3" />
+  <param name="w_dot_max" type="double" value="1.0" />
+  <param name="parallelism" type="bool" value="True" />
+</node>
+\endverbatim
+

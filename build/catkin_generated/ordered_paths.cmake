@@ -1,0 +1,1 @@
+set(ORDERED_PATHS "/opt/ros/indigo/lib;/home/yipuzhao/ros_workspace/package_dir/trajectory_generator/build/devel/lib;/home/yipuzhao/ros_workspace/package_dir/pips/build/devel/lib;/home/yipuzhao/ros_workspace/package_dir/turtlebot_trajectory_controller/build/devel/lib")
