@@ -32,40 +32,40 @@
 class TestTrajectory
 {
 
-  private:
-  ros::NodeHandle nh_;
-  image_transport::ImageTransport* it_;
-  image_transport::CameraSubscriber* sub_,depthsubit_;
-  image_transport::Publisher* pub_,depthpub_,depthpub2_;
-  message_filters::Subscriber<sensor_msgs::Image> depthsub_;
-  message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
-  
-  ros::Subscriber trigger_sub_;
-  
-  std::string base_frame_id;
+private:
+    ros::NodeHandle nh_;
+    image_transport::ImageTransport* it_;
+    image_transport::CameraSubscriber* sub_,depthsubit_;
+    image_transport::Publisher* pub_,depthpub_,depthpub2_;
+    message_filters::Subscriber<sensor_msgs::Image> depthsub_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
 
-  tf2_ros::Buffer* tfBuffer_;
-  tf2_ros::TransformListener* tf_listener_;
-  bool firstDepthFrame_, generate;
+    ros::Subscriber trigger_sub_;
 
-  std::shared_ptr<RectangularModel> robot_model_;
-  CollisionChecker* cc_;
-  GenAndTest* traj_tester_;
+    std::string base_frame_id;
+
+    tf2_ros::Buffer* tfBuffer_;
+    tf2_ros::TransformListener* tf_listener_;
+    bool firstDepthFrame_, generate;
+
+    std::shared_ptr<RectangularModel> robot_model_;
+    CollisionChecker* cc_;
+    GenAndTest* traj_tester_;
 
 
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
-                                                      sensor_msgs::CameraInfo> image_sync_policy;
+    sensor_msgs::CameraInfo> image_sync_policy;
     typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
     boost::shared_ptr<image_synchronizer> synced_images;
 
 
-  void trigger(const std_msgs::Empty& msg);
-  void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg);
-  
-  public:
-  TestTrajectory();
-  void init(ros::NodeHandle nh);
+    void trigger(const std_msgs::Empty& msg);
+    void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
+                      const sensor_msgs::CameraInfoConstPtr& info_msg);
+
+public:
+    TestTrajectory();
+    void init(ros::NodeHandle nh);
 
 
 

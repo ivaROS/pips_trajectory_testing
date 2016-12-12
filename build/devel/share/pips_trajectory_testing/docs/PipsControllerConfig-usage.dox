@@ -1,0 +1,11 @@
+\subsubsection usage Usage
+\verbatim
+<node name="pips_controller" pkg="pips_trajectory_testing" type="pips_controller">
+  <param name="min_ttc" type="double" value="7.0" />
+  <param name="min_tte" type="double" value="5.0" />
+  <param name="v_des" type="double" value="0.25" />
+  <param name="wander" type="bool" value="False" />
+  <param name="num_paths" type="int" value="5" />
+</node>
+\endverbatim
+
