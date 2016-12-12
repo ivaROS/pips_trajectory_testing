@@ -153,10 +153,10 @@ public:
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
 
-    if(num_frames == 1)
-    {
-        generateDepthImages(trajectory_functions, x0, header);
-    }
+    // if(num_frames == 1)
+    // {
+    //     generateDepthImages(trajectory_functions, x0, header);
+    // }
     
     
     size_t num_paths = trajectory_functions.size();

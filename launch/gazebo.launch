@@ -7,6 +7,11 @@
   <arg name="stacks"    value="$(optenv TURTLEBOT_STACKS hexagons)"/>  <!-- circles, hexagons --> 
   <arg name="3d_sensor" value="$(optenv TURTLEBOT_3D_SENSOR kinect)"/>  <!-- kinect, asus_xtion_pro --> 
 
+    <!-- Robot description -->
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find turtlebot_description)/robots/$(arg base)_$(arg stacks)_$(arg 3d_sensor).urdf.xacro'" />
+  <param name="robot_description" command="$(arg urdf_file)" />  
+
+<!-- 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
     <arg name="debug" value="false"/>
@@ -19,13 +24,16 @@
     <arg name="stacks" value="$(arg stacks)"/>
     <arg name="3d_sensor" value="$(arg 3d_sensor)"/>
   </include>
-  
-  <node pkg="rviz" type="rviz" name="pips_rviz" args="-d $(find tb)/data/turtlebot_pips_gazebo.rviz">
+-->
+
+  <node pkg="rviz" type="rviz" name="pips_rviz" args="-d $(find pips_trajectory_testing)/turtlebot_pips_gazebo.rviz">
   </node>
   
+  <!-- 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="30.0" />
   </node>
+  -->
   
   <!-- Fake laser -->
   <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
