@@ -1,4 +1,4 @@
-file(REMOVE_RECURSE
+FILE(REMOVE_RECURSE
   "CMakeFiles/pips_trajectory_testing_gencfg"
   "devel/include/pips_trajectory_testing/PipsControllerConfig.h"
   "devel/share/pips_trajectory_testing/docs/PipsControllerConfig.dox"
@@ -13,6 +13,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang)
-  include(CMakeFiles/pips_trajectory_testing_gencfg.dir/cmake_clean_${lang}.cmake OPTIONAL)
-endforeach()
+FOREACH(lang)
+  INCLUDE(CMakeFiles/pips_trajectory_testing_gencfg.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)

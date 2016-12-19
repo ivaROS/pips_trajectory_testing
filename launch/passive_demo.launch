@@ -2,7 +2,7 @@
 
 <arg name="camera" default="camera"/>
 
-<arg name="bagfile" default="/mnt/DATA/Datasets/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
+<arg name="bagfile" default="/mnt/DATA/Datasets/PiPS/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
 <arg name="start_time" default="13"/>
 
 <arg name="rgb_image" default="camera/rgb/image_color"/>
@@ -23,6 +23,6 @@
     <param name="autosize" value="False" />
   </node>
 
-<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) -r 1 " />
+<node name="play_bag" pkg="rosbag" type="play" args="$(arg bagfile) --clock -s $(arg start_time) -r 0.05 " />
 
 </launch>

@@ -94,9 +94,9 @@ void TestTrajectory::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
 
             auto t1 = std::chrono::high_resolution_clock::now();
 
-//            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
+            //            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
             //
-             std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDenseTrajectoryFunctions();
+            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDenseTrajectoryFunctions();
             
             traj_tester_->run(trajectory_functions);
             
@@ -104,15 +104,11 @@ void TestTrajectory::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
             std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
             ROS_INFO_STREAM("Trajectory gen/test took " << fp_ms.count() << " ms" << std::endl);
             
-
+            // save the collision test results into file
+            traj_tester_->saveCollisionCheckData(trajectory_functions);
 
         }
-
-
-
     }
-    
-    
 }
 
 

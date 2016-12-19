@@ -15,6 +15,8 @@
 
 #include <memory>
 
+#define MAX_NUM_TRAJ_TEST  21 // 5
+
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
@@ -68,9 +70,9 @@ void GenAndTest::init(ros::NodeHandle& nh)
     GenAndTest::constructor();
 
     //Create the various visualization publishers
-    path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
-    desired_path_pub_ = nh_.advertise<nav_msgs::Path>("desired_paths", 5);
-    pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
+    path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", MAX_NUM_TRAJ_TEST);
+    desired_path_pub_ = nh_.advertise<nav_msgs::Path>("desired_paths", MAX_NUM_TRAJ_TEST);
+    pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", MAX_NUM_TRAJ_TEST);
     
     reconfigure_server_.reset( new ReconfigureServer(nh_));
     reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
@@ -312,13 +314,13 @@ std::vector<traj_func_ptr> GenAndTest::getDenseTrajectoryFunctions()
     //Set trajectory departure angles and speed
     // angle range:
     // [-k : k]*interval_ang
-    double interval_ang = 0.02;
-    int k = 20;
+    double interval_ang = 0.04;
+    int k = 10;
     std::vector<double> dep_angles;
     for (int i = -k; i < k; ++ i) {
         dep_angles.push_back(double(i)*interval_ang);
     }
-//    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
+    //    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
     double v = .25;
 
     size_t num_paths = dep_angles.size();
@@ -339,9 +341,6 @@ std::vector<cv::Mat> GenAndTest::generateDepthImages(std::vector<traj_func_ptr>&
 {
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
-
-    
-    
     
     size_t num_paths = trajectory_functions.size();
     
@@ -427,6 +426,56 @@ cv::Mat GenAndTest::generateTrajectoryDepthImage(pips_trajectory_ptr& traj)
 }
 
 
+//
+void GenAndTest::saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions)
+{
+    state_type x0 = traj_gen_bridge_->initState();
+
+    save_check_data_.open ("collision_check.txt", std::fstream::out | std::fstream::app);
+    //    save_check_data_ << "Writing this to a file.\n";
+    size_t num_paths = trajectory_functions.size();
+    //Perform trajectory generation and collision detection in parallel if enabled
+    //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
+    //#pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+    for(size_t i = 0; i < num_paths; i++)
+    {
+        pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
+        traj->header = header_;
+        traj->params = params_;
+
+        traj->trajpntr = trajectory_functions[i];
+        traj->x0_ = x0;
+
+        traj_gen_bridge_->generate_trajectory(traj);
+
+        double coords[3];
+        double pixels[2];
+        geometry_msgs::Point pt;
+        int collision_idx;
+        traj->get_collision_ind(collision_idx);
+        // for non-collision check points
+        for(size_t j = 0; j < collision_idx; j++)
+        {
+            pt = traj->getPoint(j);
+            coords[0] = pt.x;
+            coords[1] = pt.y;
+            coords[2] = pt.z;
+
+            cc_->generateImageCoord(coords, pixels);
+            save_check_data_ << pixels[0] << " " << pixels[1] << " " << 0 << std::endl;
+        }
+        // for collision point
+        pt = traj->getPoint(collision_idx);
+        coords[0] = pt.x;
+        coords[1] = pt.y;
+        coords[2] = pt.z;
+
+        cc_->generateImageCoord(coords, pixels);
+        save_check_data_ << pixels[0] << " " << pixels[1] << " " << 1 << std::endl;
+    }
+
+    save_check_data_.close();
+}
 
 
 bool PipsTrajectory::collides()
@@ -461,4 +510,16 @@ size_t PipsTrajectory::num_states()
     {
         return ni_trajectory::num_states();
     }
+}
+
+//
+void PipsTrajectory::get_collision_ind(int & ind)
+{
+    ind = collision_ind_;
+}
+
+geometry_msgs::PointStamped PipsTrajectory::get_check_point(const int ind)
+{
+    //ROS_WARN_STREAM(  //warn/close if no collision
+    return ni_trajectory::getPointStamped(ind);
 }

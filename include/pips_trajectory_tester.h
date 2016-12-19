@@ -13,6 +13,7 @@
 #include <std_msgs/Header.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <fstream>
 #include <memory>
 
 
@@ -28,6 +29,10 @@ public:
     void set_collision_ind(int ind);
     geometry_msgs::PointStamped get_collision_point();
     size_t num_states();
+
+    //
+    void get_collision_ind(int & ind);
+    geometry_msgs::PointStamped get_check_point(const int ind);
 };
 
 typedef std::shared_ptr<PipsTrajectory> pips_trajectory_ptr;
@@ -91,6 +96,9 @@ public:
     static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
 //
     static std::vector<traj_func_ptr> getDenseTrajectoryFunctions();
+    void saveCollisionCheckData();
+    std::fstream save_check_data_;
+    void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);
 };
 
 
