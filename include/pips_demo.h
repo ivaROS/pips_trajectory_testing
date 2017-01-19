@@ -48,7 +48,7 @@ class TestTrajectory
   tf2_ros::TransformListener* tf_listener_;
   bool firstDepthFrame_, generate;
 
-  std::shared_ptr<RectangularModel> robot_model_;
+  std::shared_ptr<HallucinatedRobotModel> robot_model_;
   CollisionChecker* cc_;
   GenAndTest* traj_tester_;
 

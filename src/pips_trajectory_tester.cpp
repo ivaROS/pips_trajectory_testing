@@ -68,8 +68,8 @@ public:
     GenAndTest::constructor();
 
     //Create the various visualization publishers
-    path_pub_ = nh_.advertise<nav_msgs::Path>("tested_paths", 5);
-    desired_path_pub_ = nh_.advertise<nav_msgs::Path>("desired_paths", 5);
+    path_pub_ = nh_.advertise<pips_msgs::PathArray>("tested_paths", 5);
+    desired_path_pub_ = nh_.advertise<pips_msgs::PathArray>("desired_paths", 5);
     pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
     
     reconfigure_server_.reset( new ReconfigureServer(nh_));
@@ -155,7 +155,8 @@ public:
 
     if(num_frames == 1)
     {
-        generateDepthImages(trajectory_functions, x0, header);
+        /* Should use a service call to trigger the generation+publication */
+        //generateDepthImages(trajectory_functions, x0, header);
     }
     
     
@@ -205,21 +206,10 @@ public:
 
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
-    
-    //traj_gen_bridge_->publishPaths(path_pub_, trajectories, 5); //hard coded for 5 trajectories
 
-    for(size_t i = 0; i < trajectories.size(); i++)
-    {
-        nav_msgs::PathPtr path;
+    TrajectoryGeneratorBridge::publishPaths(path_pub_, trajectories);
+    TrajectoryGeneratorBridge::publishDesiredPaths(desired_path_pub_, trajectories);
 
-        path = trajectories[i]->toPathMsg();
-        
-        path_pub_.publish(path);
-        desired_path_pub_.publish(trajectories[i]->getDesiredPathMsg());
-    }
-
-
-    
     return trajectories;
   }
   
@@ -305,7 +295,7 @@ public:
   }
 
 
-  std::vector<cv::Mat> GenAndTest::generateDepthImages(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+  std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
   {
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
@@ -355,8 +345,9 @@ public:
   }
   
   
-  cv::Mat GenAndTest::generateTrajectoryDepthImage(pips_trajectory_ptr& traj)
+  cv::Mat GenAndTest::generateTrajectoryDepthImage(const pips_trajectory_ptr& traj)
   {
+
       cv::Mat result;
       for(size_t i = 0; i < traj->num_states(); i++)
       {
@@ -368,6 +359,18 @@ public:
         coords[2] = pt.z;
 
         cv::Mat newIm = cc_->generateDepthImage(coords);
+        
+        {
+          double min;
+          double max;
+          cv::minMaxIdx(result, &min, &max);
+          cv::Mat adjMap;
+          cv::convertScaleAbs(newIm, adjMap, 255 / (max-min), -min);
+          
+          
+          cv::imshow("image", adjMap);
+          cv::waitKey(0);
+        }
         
         if(result.empty())
         {

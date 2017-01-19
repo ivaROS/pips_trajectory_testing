@@ -83,8 +83,8 @@ public:
 
   int evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
   
-  std::vector<cv::Mat> generateDepthImages(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header);
-  cv::Mat generateTrajectoryDepthImage(pips_trajectory_ptr& traj);
+  std::vector<cv::Mat> generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header);
+  cv::Mat generateTrajectoryDepthImage(const pips_trajectory_ptr& traj);
 
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   

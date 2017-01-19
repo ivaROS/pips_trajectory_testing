@@ -45,7 +45,7 @@
 #include "pips_controller.h"
 #include "pips_trajectory_tester.h"
 #include <trajectory_controller.h>
-#include <pips_trajectory_testing/PipsControllerConfig.h>
+#include <pips_trajectory_testing/PipsControllerConfig.h> //Dynamic Reconfigure for high level pips controller functions
 
 #include <opencv/cv.h>
 #include <sensor_msgs/Image.h>
@@ -142,9 +142,9 @@ namespace kobuki
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
-    depthsub_.subscribe(nh_, depth_image_topic, 10);
-    depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
-    synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
+    depthsub_.subscribe(nh_, depth_image_topic, 100);
+    depth_info_sub_.subscribe(nh_, depth_info_topic, 100);
+    synced_images.reset(new image_synchronizer(image_synchronizer(100), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
@@ -255,13 +255,16 @@ namespace kobuki
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
-          if(wander_ && valid_trajs.size() >0)
+          
+          bool foundPath = false;
+          if(valid_trajs.size() >0)
           {
             ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
             //executeTrajectory
 
             if(chosen_traj->times.back() > min_ttc_.toSec())
             {
+              foundPath = true;
               trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
               commanded_trajectory_publisher_.publish(msg);
             }
@@ -270,6 +273,12 @@ namespace kobuki
               ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time to collision (min_ttc) (" << min_ttc_ << ")" );
             }
 
+          }
+          
+          //If no satisfactory trajectory was found, then command a halt.
+          if(~foundPath)
+          {
+            stop();
           }
         }
     

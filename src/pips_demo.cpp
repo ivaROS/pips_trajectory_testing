@@ -44,7 +44,7 @@
     double floor_tolerance = .03;
     double safety_expansion = .02;
 
-    robot_model_ = std::make_shared<RectangularModel>(radius, height, safety_expansion, floor_tolerance);
+    robot_model_ = std::make_shared<CylindricalModel>(radius, height, safety_expansion, floor_tolerance);
   
   }
   
@@ -102,7 +102,6 @@
             std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
             ROS_INFO_STREAM("Trajectory gen/test took " << fp_ms.count() << " ms" << std::endl);
             
-
    
       }
     
