@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/yipuzhao/ros_workspace/package_dir/pips_trajectory_testing/build/devel/setup.sh

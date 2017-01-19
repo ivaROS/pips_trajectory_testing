@@ -6,15 +6,15 @@
 
 
 
-  TestTrajectory::TestTrajectory() :
-      firstDepthFrame_(true),
-      generate(true)
-  {
+TestTrajectory::TestTrajectory() :
+    firstDepthFrame_(true),
+    generate(true)
+{
     traj_tester_ = new GenAndTest();  //not deleted on shutdown
-  }
+}
 
-  void TestTrajectory::init(ros::NodeHandle nh)
-  {
+void TestTrajectory::init(ros::NodeHandle nh)
+{
     nh_ = nh;
     it_ = new image_transport::ImageTransport(nh_); //not deleted on shutdown
     tfBuffer_ = new tf2_ros::Buffer; //optional parameter: ros::Duration(cache time) (default=10)
@@ -44,20 +44,22 @@
     double floor_tolerance = .03;
     double safety_expansion = .02;
 
+
     robot_model_ = std::make_shared<CylindricalModel>(radius, height, safety_expansion, floor_tolerance);
   
-  }
+}
   
 
-  void TestTrajectory::trigger(const std_msgs::Empty& msg)
-  {
-      generate = true;
-  
-  }
 
-  void TestTrajectory::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg)
-  {
+void TestTrajectory::trigger(const std_msgs::Empty& msg)
+{
+    generate = true;
+
+}
+
+void TestTrajectory::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
+                                  const sensor_msgs::CameraInfoConstPtr& info_msg)
+{
 
     if(DEBUG)std::cout << "depth callback" << std::endl;
 
@@ -71,46 +73,46 @@
 
         try
         {
-          //Get the transform that takes a point in the base frame and transforms it to the depth optical
-          geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
-          
-          traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
-          
-          firstDepthFrame_ = false;
+            //Get the transform that takes a point in the base frame and transforms it to the depth optical
+            geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
 
-          if(DEBUG)ROS_INFO("Created trajectory testing instance");
+            traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
+
+            firstDepthFrame_ = false;
+
+            if(DEBUG)ROS_INFO("Created trajectory testing instance");
 
         }
         catch (tf2::TransformException &ex) {
-          ROS_WARN("%s",ex.what());
-          return;
+            ROS_WARN("%s",ex.what());
+            return;
         }
     }
     else
     {
-      if(generate)
-      {
+        if(generate)
+        {
             traj_tester_->setImage(image_msg, info_msg);
-          
+
             auto t1 = std::chrono::high_resolution_clock::now();
 
-            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
+            //            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDefaultTrajectoryFunctions();
+            //
+            std::vector<traj_func_ptr> trajectory_functions = GenAndTest::getDenseTrajectoryFunctions();
             
             traj_tester_->run(trajectory_functions);
             
             auto t2 = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
             ROS_INFO_STREAM("Trajectory gen/test took " << fp_ms.count() << " ms" << std::endl);
-            
-   
-      }
-    
-    
-   
+
+            // save the collision test results into file
+            traj_tester_->saveCollisionCheckData(trajectory_functions);
+
+        }
+
     }
-    
-    
-  }
-  
+}
+
 
 

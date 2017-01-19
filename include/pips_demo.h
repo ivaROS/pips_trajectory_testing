@@ -52,18 +52,17 @@ class TestTrajectory
   CollisionChecker* cc_;
   GenAndTest* traj_tester_;
 
-
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
-                                                      sensor_msgs::CameraInfo> image_sync_policy;
-    typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
-    boost::shared_ptr<image_synchronizer> synced_images;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image,
+  sensor_msgs::CameraInfo> image_sync_policy;
+  typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
+  boost::shared_ptr<image_synchronizer> synced_images;
 
 
   void trigger(const std_msgs::Empty& msg);
   void depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
-               const sensor_msgs::CameraInfoConstPtr& info_msg);
-  
-  public:
+                    const sensor_msgs::CameraInfoConstPtr& info_msg);
+
+public:
   TestTrajectory();
   void init(ros::NodeHandle nh);
 

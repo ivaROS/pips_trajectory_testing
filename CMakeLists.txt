@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pips_trajectory_testing)
 
+set(trajectory_generator_DIR ../trajectory_generator/build/devel/share/trajectory_generator/cmake)
+set(pips_DIR ../pips/build/devel/share/pips/cmake)
+set(turtlebot_trajectory_controller_DIR ../turtlebot_trajectory_controller/build/devel/share/turtlebot_trajectory_controller/cmake)
+
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages

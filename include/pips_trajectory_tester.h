@@ -13,6 +13,7 @@
 #include <std_msgs/Header.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <fstream>
 #include <memory>
 
 
@@ -20,14 +21,18 @@
 class PipsTrajectory : public ni_trajectory
 {
   int collision_ind_ = -1;
-  
+
 public:
-  
+
   bool collides();
   ros::Time time_of_collision();
   void set_collision_ind(int ind);
   geometry_msgs::PointStamped get_collision_point();
   size_t num_states();
+
+  //
+  void get_collision_ind(int & ind);
+  geometry_msgs::PointStamped get_check_point(const int ind);
 };
 
 typedef std::shared_ptr<PipsTrajectory> pips_trajectory_ptr;
@@ -46,20 +51,20 @@ class GenAndTest
 
   typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsTrajectoryTesterConfig> ReconfigureServer;
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
-  
+
   CollisionChecker_ptr cc_;
-  
+
   ros::Publisher path_pub_, desired_path_pub_, pose_array_pub_;
   int num_frames =0;
   std::string base_frame_id_ = "";
   std_msgs::Header header_;
-  
+
   bool parallelism_enabled_ = true;
   std::string name_ = "GenAndTest";
   traj_params_ptr params_;
-  
+
   double min_dist = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
-  
+
 public:
 
   GenAndTest();
@@ -89,6 +94,11 @@ public:
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
   static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
+  static std::vector<traj_func_ptr> getDenseTrajectoryFunctions();
+  
+  void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);
+  
+  std::fstream save_check_data_;
   
 };
 
