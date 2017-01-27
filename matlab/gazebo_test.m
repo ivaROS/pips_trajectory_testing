@@ -3,6 +3,7 @@ gazebo = ExampleHelperGazeboCommunicator();
 
 if ismember('/camera/rgb/image_raw', rostopic('list'))
   imsub = rossubscriber('/camera/rgb/image_raw');
+  depthsub = rossubscriber('/camera/depth/image_raw');
 end
 
 phys = readPhysics(gazebo);
@@ -28,9 +29,13 @@ spawnModel(gazebo,box,[x-1.5,0,.5]);
 pause(1);
 
 img = receive(imsub);
-  figure(ind)
-  imshow(readImage(img));
+figure(ind)
+imshow(readImage(img));
 
+ind = ind+1;
+img = receive(depthsub);
+figure(ind);
+imshow(readImage(img));
 
 pauseSim(gazebo);
 %[position, orientation, velocity] = getState(ball)
