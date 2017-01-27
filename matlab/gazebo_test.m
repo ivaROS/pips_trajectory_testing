@@ -1,3 +1,5 @@
+MAX_RANGE = 8;
+
 rosinit('localhost');
 gazebo = ExampleHelperGazeboCommunicator();
 
@@ -23,19 +25,19 @@ spherelink = addLink(ball,'sphere',1,'color',[0 0 1 1]);
 spawnModel(gazebo,ball,[x,0,1]);
 
 box = ExampleHelperGazeboModel('Box');
-boxlink = addLink(box,'box',[.2,.1,.5],'color',[1 0 0 1]);
-spawnModel(gazebo,box,[x-1.5,0,.5]);
+boxlink = addLink(box,'box',0.0,'color',[1 0 0 1]); %Note: I can't seem to control the size of the box- 0.0 can be replaced with anything without affecting results
+spawnModel(gazebo,box,[x-1.8,0,.5]);
 
 pause(1);
 
 img = receive(imsub);
 figure(ind)
-imshow(readImage(img));
+imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
 
 ind = ind+1;
 img = receive(depthsub);
 figure(ind);
-imshow(readImage(img));
+imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
 
 pauseSim(gazebo);
 %[position, orientation, velocity] = getState(ball)
