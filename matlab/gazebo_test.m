@@ -1,5 +1,12 @@
-MAX_RANGE = 8;
+close all
+clear all
 
+WORLD_NUM = 10
+OBJECT_TYPE = 'Cylinder'
+OBJECT_NUM = 5
+MAX_DEPTH_RANGE = 8
+
+%% initial gazebo communicator
 % rosinit('localhost');
 % rosinit
 gazebo = ExampleHelperGazeboCommunicator();
@@ -15,59 +22,94 @@ phys;
 
 setPhysics(gazebo,phys);
 
+%% create random world
 %resetSim(gazebo);
-ind = 0;
-
-for iter = 1:10
+for iter = 1:WORLD_NUM
   
-  ind = ind+1;
-  ball = ExampleHelperGazeboModel('Ball');
-  spherelink = addLink(ball,'sphere',1,'color',[0 0 1 1]);
+  % spawn random object
+  switch OBJECT_TYPE
+    case 'Ball'
+      for ii=1:OBJECT_NUM
+        obj_model{ii} = ExampleHelperGazeboModel('Ball');
+        %
+        radius = rand([1 1]) * 0.2;
+        addLink(obj_model{ii},'sphere',radius,'color',[0 0 1 1]);
+        %
+        p = rand([2 1]) * 2;
+        r = rand([1 1]) * pi;
+        spawnModel(gazebo,obj_model{ii},[p(1),p(2),0], [0,0,r(1)]);
+      end
+    case 'Box'
+      for ii=1:OBJECT_NUM
+        obj_model{ii} = ExampleHelperGazeboModel('Box');
+        %
+        % TODO fix the issue of size adjustment
+        % For now we simply avoid creating box object to the world
+        sz = rand([1 1]) * 0.2;
+        addLink(obj_model{ii},'box',sz,'color',[0 0 1 1]);
+        %
+        p = rand([2 1]) * 2;
+        r = rand([1 1]) * pi;
+        spawnModel(gazebo,obj_model{ii},[p(1),p(2),0], [0,0,r(1)]);
+      end
+    case 'Cylinder'
+      for ii=1:OBJECT_NUM
+        obj_model{ii} = ExampleHelperGazeboModel('Cylinder');
+        %
+        length = rand([1 1]) * 0.5;
+        radius = rand([1 1]) * 0.2;
+        addLink(obj_model{ii},'cylinder',[length radius],'color',[0 0 1 1]);
+        %
+        p = rand([2 1]) * 2;
+        r = rand([1 1]) * pi;
+        spawnModel(gazebo,obj_model{ii},[p(1),p(2),0], [0,0,r(1)]);
+      end
+    otherwise
+        %
+  end
   
-  %
-  p = rand([3 1]) * 10;
-  r = rand([3 1]) * pi;
-  spawnModel(gazebo,ball,[p(1),p(2),p(3)], [r(1),r(2),r(3)]);
-  
-%   box = ExampleHelperGazeboModel('Box');
-%   boxlink = addLink(box,'box',0.0,'color',[1 0 0 1]); %Note: I can't seem to control the size of the box- 0.0 can be replaced with anything without affecting results
-%   spawnModel(gazebo,box,[x-1.8,0,.5]);
-%   
-%   cyl = ExampleHelperGazeboModel('Cylinder');
-%   spherelink = addLink(cyl,'cylinder',1,'color',[0 0 1 1]);
-%   spawnModel(gazebo,cyl,[x,0,1]);
-  
-  pause(1);
+  pause(3)
   
   img = receive(imsub);
-  figure(ind)
-  imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
+  figure(1)
+  imshow(readImage(img),'DisplayRange',[0,MAX_DEPTH_RANGE]);
   
-  ind = ind+1;
   img = receive(depthsub);
-  figure(ind);
-  imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
+  figure(2);
+  imshow(readImage(img),'DisplayRange',[0,MAX_DEPTH_RANGE]);
   
   pauseSim(gazebo);
   %[position, orientation, velocity] = getState(ball)
   
-  models = getSpawnedModels(gazebo);
+%   models = getSpawnedModels(gazebo);
   
-  pause(2);
+  for ii=1:OBJECT_NUM
+    if ismember('Ball', getSpawnedModels(gazebo))
+      removeModel(gazebo, 'Ball');
+    end
+    if ismember(['Ball_' num2str(ii-1)], getSpawnedModels(gazebo))
+      removeModel(gazebo, ['Ball_' num2str(ii-1)]);
+    end
+    %
+    if ismember('Box', getSpawnedModels(gazebo))
+      removeModel(gazebo, 'Box');
+    end
+    if ismember(['Box_' num2str(ii-1)], getSpawnedModels(gazebo))
+      removeModel(gazebo, ['Box_' num2str(ii-1)]);
+    end
+    %
+    if ismember('Cylinder', getSpawnedModels(gazebo))
+      removeModel(gazebo, 'Cylinder');
+    end
+    if ismember(['Cylinder_' num2str(ii-1)], getSpawnedModels(gazebo))
+      removeModel(gazebo, ['Cylinder_' num2str(ii-1)]);
+    end
+  end
   
-  if ismember('Ball', getSpawnedModels(gazebo))
-    removeModel(gazebo,'Ball');
-  end
-  if ismember('Box', getSpawnedModels(gazebo))
-    removeModel(gazebo,'Box');
-  end
   
   resumeSim(gazebo);
   
 end
 
-
 clear;
-
-
 rosshutdown;
