@@ -1,7 +1,6 @@
 close all
 clear all
 
-% roslaunch pips_trajectory_testing gazebo_empty.launch
 %
 WORLD_NUM = 10
 WORLD_RANGE_X = [0.5 8]
@@ -90,9 +89,9 @@ for iter = 1:WORLD_NUM
   imwrite(color_img, ['./output/color_world_' num2str(iter)], 'PNG');
   
   depth_img = readImage(receive(depthsub));
-  depth_img(isnan(depth_img)) = 0;
   figure(2);
   imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
+  depth_img(depth_img=NaN) = 0;
   imwrite(depth_img, ['./output/depth_world_' num2str(iter)], 'PNG');
   
   pauseSim(gazebo);
@@ -122,6 +121,7 @@ for iter = 1:WORLD_NUM
       removeModel(gazebo, ['Cylinder_' num2str(ii-1)]);
     end
   end
+  
   
   resumeSim(gazebo);
   
