@@ -1,6 +1,7 @@
 MAX_RANGE = 8;
 
-rosinit('localhost');
+% rosinit('localhost');
+% rosinit
 gazebo = ExampleHelperGazeboCommunicator();
 
 if ismember('/camera/rgb/image_raw', rostopic('list'))
@@ -17,44 +18,52 @@ setPhysics(gazebo,phys);
 %resetSim(gazebo);
 ind = 0;
 
-for x = 5:8
-    
-ind = ind+1;
-ball = ExampleHelperGazeboModel('Ball');
-spherelink = addLink(ball,'sphere',1,'color',[0 0 1 1]);
-spawnModel(gazebo,ball,[x,0,1]);
-
-box = ExampleHelperGazeboModel('Box');
-boxlink = addLink(box,'box',0.0,'color',[1 0 0 1]); %Note: I can't seem to control the size of the box- 0.0 can be replaced with anything without affecting results
-spawnModel(gazebo,box,[x-1.8,0,.5]);
-
-pause(1);
-
-img = receive(imsub);
-figure(ind)
-imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
-
-ind = ind+1;
-img = receive(depthsub);
-figure(ind);
-imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
-
-pauseSim(gazebo);
-%[position, orientation, velocity] = getState(ball)
-
-models = getSpawnedModels(gazebo);
-
-pause(2);
-
-if ismember('Ball', getSpawnedModels(gazebo))
-        removeModel(gazebo,'Ball');
-end
-if ismember('Box', getSpawnedModels(gazebo))
-        removeModel(gazebo,'Box');
-end
-
-resumeSim(gazebo);
-
+for iter = 1:10
+  
+  ind = ind+1;
+  ball = ExampleHelperGazeboModel('Ball');
+  spherelink = addLink(ball,'sphere',1,'color',[0 0 1 1]);
+  
+  %
+  p = rand([3 1]) * 10;
+  r = rand([3 1]) * pi;
+  spawnModel(gazebo,ball,[p(1),p(2),p(3)], [r(1),r(2),r(3)]);
+  
+%   box = ExampleHelperGazeboModel('Box');
+%   boxlink = addLink(box,'box',0.0,'color',[1 0 0 1]); %Note: I can't seem to control the size of the box- 0.0 can be replaced with anything without affecting results
+%   spawnModel(gazebo,box,[x-1.8,0,.5]);
+%   
+%   cyl = ExampleHelperGazeboModel('Cylinder');
+%   spherelink = addLink(cyl,'cylinder',1,'color',[0 0 1 1]);
+%   spawnModel(gazebo,cyl,[x,0,1]);
+  
+  pause(1);
+  
+  img = receive(imsub);
+  figure(ind)
+  imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
+  
+  ind = ind+1;
+  img = receive(depthsub);
+  figure(ind);
+  imshow(readImage(img),'DisplayRange',[0,MAX_RANGE]);
+  
+  pauseSim(gazebo);
+  %[position, orientation, velocity] = getState(ball)
+  
+  models = getSpawnedModels(gazebo);
+  
+  pause(2);
+  
+  if ismember('Ball', getSpawnedModels(gazebo))
+    removeModel(gazebo,'Ball');
+  end
+  if ismember('Box', getSpawnedModels(gazebo))
+    removeModel(gazebo,'Box');
+  end
+  
+  resumeSim(gazebo);
+  
 end
 
 
