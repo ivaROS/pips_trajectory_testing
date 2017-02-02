@@ -6,7 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
-        - /Desired Paths1
+        - /Tested Paths1
       Splitter Ratio: 0.624535
     Tree Height: 341
   - Class: rviz/Selection
@@ -363,12 +363,12 @@ Visualization Manager:
         Imu: true
         LaserScan: true
         Odometry: true
-        Paths Tested: true
         PointCloud2: true
         Projected Depth Image: true
         RobotModel: true
         TF: true
         Target Trajectory: true
+        Tested Paths: true
         Value: true
       Zoom Factor: 1
     - Class: rviz/Camera
@@ -388,29 +388,15 @@ Visualization Manager:
         Imu: true
         LaserScan: true
         Odometry: true
-        Paths Tested: true
         PointCloud2: true
         Projected Depth Image: true
         RGB Camera: true
         RobotModel: true
         TF: true
         Target Trajectory: true
+        Tested Paths: true
         Value: true
       Zoom Factor: 1
-    - Alpha: 1
-      Buffer Length: 21
-      Class: rviz/Path
-      Color: 25; 255; 0
-      Enabled: true
-      Line Style: Lines
-      Line Width: 0.03
-      Name: Paths Tested
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Topic: /GenAndTest/tested_paths
-      Value: true
     - Class: rviz/Image
       Enabled: false
       Image Topic: /depth_image_out
@@ -476,10 +462,13 @@ Visualization Manager:
       Topic: /desired_path
       Value: true
     - Alpha: 1
-      Buffer Length: 21
-      Class: rviz/Path
-      Color: 0; 170; 255
+      Buffer Length: 1
+      Class: pips_visualization/PathArray
+      Color: 255; 85; 255
       Enabled: true
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
       Line Style: Lines
       Line Width: 0.03
       Name: Desired Paths
@@ -487,7 +476,32 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
       Topic: /GenAndTest/desired_paths
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: pips_visualization/PathArray
+      Color: 255; 85; 255
+      Enabled: true
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
+      Line Style: Lines
+      Line Width: 0.03
+      Name: Tested Paths
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
+      Topic: /GenAndTest/tested_paths
       Value: true
   Enabled: true
   Global Options:
@@ -521,11 +535,11 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 96.3611
+      Scale: 72.5065
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: -1.29903
-      Y: -10.8081
+      X: 0.0339696
+      Y: 0.208905
     Saved: ~
 Window Geometry:
   Depth Camera:
