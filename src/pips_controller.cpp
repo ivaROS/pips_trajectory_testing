@@ -132,6 +132,8 @@ namespace kobuki
     wander_ = config.wander;
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
+    
+    // TODO: Add robot model here
   }
   
   
@@ -142,15 +144,15 @@ namespace kobuki
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
-    depthsub_.subscribe(nh_, depth_image_topic, 100);
-    depth_info_sub_.subscribe(nh_, depth_info_topic, 100);
-    synced_images.reset(new image_synchronizer(image_synchronizer(100), depthsub_, depth_info_sub_) );
+    depthsub_.subscribe(nh_, depth_image_topic, 3);
+    depth_info_sub_.subscribe(nh_, depth_info_topic, 3);
+    synced_images.reset(new image_synchronizer(image_synchronizer(3), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
     bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &PipsTrajectoryController::bumperCB, this);
     
-    commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1);
+    commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1, true);
   }
   
   //Pressing button 0 activates wander mode
@@ -186,7 +188,9 @@ namespace kobuki
   void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
-
+    if(info_msg->header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
+      return;
+      
     ros::Duration timeout(0);
     
     image_rate.addTime(info_msg->header);
