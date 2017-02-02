@@ -2,10 +2,10 @@ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `ls
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install ros-$ROS_DISTRO-gazebo7-ros-pkgs pyqt4-dev-tools
+
 cd ~/catkin_ws/src
 git clone https://github.com/turtlebot/turtlebot_simulator.git -b indigo
 git clone https://github.gatech.edu/ivabots/kobuki_desktop.git -b indigo
-
 
 cd ..
 catkin_make

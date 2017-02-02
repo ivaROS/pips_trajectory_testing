@@ -96,13 +96,16 @@ for iter = 1:WORLD_NUM
   imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
   imwrite(uint16(depth_img * SCALE_FACTOR), ['./output/depth_world_' num2str(iter)], 'PNG');
   
-%   depth_load = imread(['./output/depth_world_' num2str(iter)]);
-%   [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
-%   pcd_loaded = pointCloud(pcd_loaded);
-%   
-%   pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
-%   figure(3)
-%   pcshowpair(pcd_sensed,pcd_loaded);
+  depth_load = imread(['./output/depth_world_' num2str(iter)]);
+  [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
+  pcd_loaded = pointCloud(pcd_loaded);
+  
+  pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
+  figure(3)
+  pcshowpair(pcd_sensed,pcd_loaded)
+%   pcshow(pcd_sensed);
+%   pcshow(pcd_loaded);
+  %   scatter3(pcd(:,1), pcd(:,2), pcd(:,3), '.');
   
   pauseSim(gazebo);
   %[position, orientation, velocity] = getState(ball)
