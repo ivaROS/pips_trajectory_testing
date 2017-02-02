@@ -1,7 +1,8 @@
 close all
 clear all
 
-% roslaunch pips_trajectory_testing gazebo_empty.launch
+% bash: roslaunch pips_trajectory_testing gazebo_empty.launch
+% matlab: rosinit('localhost');
 %
 WORLD_NUM = 10
 WORLD_RANGE_X = [0.5 8]
@@ -13,15 +14,15 @@ OBJECT_RADIUS = [0.1 0.5]
 OBJECT_HEIGHT = [0.1 0.5]
 %
 MAX_DEPTH_RANGE = 8
+SCALE_FACTOR = 1000
 
 %% initial gazebo communicator
-% rosinit('localhost');
-% rosinit
 gazebo = ExampleHelperGazeboCommunicator();
 
 if ismember('/camera/rgb/image_raw', rostopic('list'))
   imsub = rossubscriber('/camera/rgb/image_raw');
   depthsub = rossubscriber('/camera/depth/image_raw');
+  pcdsub = rossubscriber('/camera/depth/points');
 end
 
 phys = readPhysics(gazebo);
@@ -79,7 +80,7 @@ for iter = 1:WORLD_NUM
         spawnModel(gazebo,obj_model{ii},[pose(1),pose(2),0], [0,0,orient(1)]);
       end
     otherwise
-        %
+      %
   end
   
   pause(3)
@@ -93,12 +94,20 @@ for iter = 1:WORLD_NUM
   depth_img(isnan(depth_img)) = 0;
   figure(2);
   imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
-  imwrite(depth_img, ['./output/depth_world_' num2str(iter)], 'PNG');
+  imwrite(uint16(depth_img * SCALE_FACTOR), ['./output/depth_world_' num2str(iter)], 'PNG');
+  
+%   depth_load = imread(['./output/depth_world_' num2str(iter)]);
+%   [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
+%   pcd_loaded = pointCloud(pcd_loaded);
+%   
+%   pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
+%   figure(3)
+%   pcshowpair(pcd_sensed,pcd_loaded);
   
   pauseSim(gazebo);
   %[position, orientation, velocity] = getState(ball)
   
-%   models = getSpawnedModels(gazebo);
+  %   models = getSpawnedModels(gazebo);
   
   for ii=1:OBJECT_NUM
     if ismember('Ball', getSpawnedModels(gazebo))
