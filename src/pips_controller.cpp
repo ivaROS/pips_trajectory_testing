@@ -175,7 +175,7 @@ namespace kobuki
     if (wander_ && msg->state == kobuki_msgs::BumperEvent::PRESSED )
     {
       wander_ = false;
-      ROS_INFO_STREAM_NAMED(name_,  "Deactivating Wander");
+      ROS_INFO_STREAM_NAMED(name_,  "Robot collided with obstacle! Deactivating Wander");
     }
     else
     {
@@ -255,7 +255,8 @@ namespace kobuki
         //Generate trajectories and assign best
         if(!executing_ || replan)
         {    
-          ROS_DEBUG_STREAM_NAMED(name_, "Not currently executing, test new trajectories");
+          ROS_DEBUG_STREAM_COND_NAMED(!executing_, name_, "Not currently executing, test new trajectories");
+          ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
           std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
@@ -265,9 +266,10 @@ namespace kobuki
           if(valid_trajs.size() >0)
           {
             ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
-            //executeTrajectory
 
-            if(chosen_traj->times.back() > min_ttc_.toSec())
+            ROS_INFO_STREAM_NAMED(name_, "Length of longest trajectory: " << chosen_traj->getDuration());
+
+            if(chosen_traj->getDuration() > min_ttc_)
             {
               foundPath = true;
               trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
@@ -281,7 +283,7 @@ namespace kobuki
           }
           
           //If no satisfactory trajectory was found, then command a halt.
-          if(~foundPath)
+          if(!foundPath)
           {
             stop();
           }
