@@ -240,19 +240,20 @@ namespace kobuki
         traj_tester_->setImage(image_msg, info_msg);
         
         
+        bool replan = false;
         //check if current path is still clear
         if(executing_)
         {
           ROS_DEBUG_STREAM_NAMED(name_, "Executing: Checking if current path clear");
           if(PipsTrajectoryController::checkCurrentTrajectory(info_msg->header))
           {
-            executing_ = false;
+            replan = true;
           }
 
         }
         
         //Generate trajectories and assign best
-        if(!executing_)
+        if(!executing_ || replan)
         {    
           ROS_DEBUG_STREAM_NAMED(name_, "Not currently executing, test new trajectories");
           std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
@@ -312,7 +313,7 @@ namespace kobuki
     trajectory_generator::trajectory_points localTrajectory;
     try
     {
-      localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, header.stamp, odom_frame_id_, ros::Duration(.1)); // This was where the transform exceptions were actually coming from!
+      localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, ros::Duration(.1)); // This was where the transform exceptions were actually coming from!
     
       ROS_DEBUG_STREAM_NAMED(name_, "Successfully transformed current trajectory from frame [" << trimmed_trajectory.header.frame_id << "] to frame [" << localTrajectory.header.frame_id << "] at time " << localTrajectory.header.stamp);
     }
