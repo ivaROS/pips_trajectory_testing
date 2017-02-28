@@ -101,7 +101,7 @@ for iter = 1:WORLD_NUM
     figure(1)
     imshow(color_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
   end
-  imwrite(color_img, ['./output/color_world_' num2str(iter)], 'PNG');
+  imwrite(color_img, ['./output/color_world_' num2str(iter) '.png'], 'PNG');
   
   depth_img = readImage(receive(depthsub));
   depth_img(isnan(depth_img)) = 0;
@@ -109,7 +109,7 @@ for iter = 1:WORLD_NUM
     figure(2);
     imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
   end
-  imwrite(uint16(depth_img * SCALE_FACTOR), ['./output/depth_world_' num2str(iter)], 'PNG');
+  imwrite(uint16(depth_img * SCALE_FACTOR), ['./output/depth_world_' num2str(iter) '.png'], 'PNG');
   
   % SANITY CHECK OF DEPTH IMAGE
   %
