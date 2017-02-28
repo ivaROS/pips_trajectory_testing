@@ -16,13 +16,23 @@ OBJECT_HEIGHT = [0.1 0.5]
 MAX_DEPTH_RANGE = 8
 SCALE_FACTOR = 1000
 
+%
+do_viz = true
+
 %% initial gazebo communicator
 gazebo = ExampleHelperGazeboCommunicator();
 
+% subscribe for camera info
 if ismember('/camera/rgb/image_raw', rostopic('list'))
   imsub = rossubscriber('/camera/rgb/image_raw');
   depthsub = rossubscriber('/camera/depth/image_raw');
   pcdsub = rossubscriber('/camera/depth/points');
+end
+
+% subscribe for tf info
+if ismember('/tf', rostopic('list'))
+  tfsub = rossubscriber('/tf');
+  tfstatsub = rossubscriber('/tf_static');
 end
 
 phys = readPhysics(gazebo);
@@ -35,7 +45,7 @@ setPhysics(gazebo,phys);
 %resetSim(gazebo);
 for iter = 1:WORLD_NUM
   
-  % spawn random object
+  %% [1]== Spawn random object in the world
   switch OBJECT_TYPE
     case 'Ball'
       for ii=1:OBJECT_NUM
@@ -82,33 +92,81 @@ for iter = 1:WORLD_NUM
     otherwise
       %
   end
-  
+  %
   pause(3)
   
+  %% [2]== Grab color & depth image captured at the simulated scenario
   color_img = readImage(receive(imsub));
-  figure(1)
-  imshow(color_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
+  if do_viz
+    figure(1)
+    imshow(color_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
+  end
   imwrite(color_img, ['./output/color_world_' num2str(iter)], 'PNG');
   
   depth_img = readImage(receive(depthsub));
   depth_img(isnan(depth_img)) = 0;
-  figure(2);
-  imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
+  if do_viz
+    figure(2);
+    imshow(depth_img,'DisplayRange',[0,MAX_DEPTH_RANGE]);
+  end
   imwrite(uint16(depth_img * SCALE_FACTOR), ['./output/depth_world_' num2str(iter)], 'PNG');
   
-%   depth_load = imread(['./output/depth_world_' num2str(iter)]);
-%   [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
-%   pcd_loaded = pointCloud(pcd_loaded);
-%   
-%   pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
-%   figure(3)
-%   pcshowpair(pcd_sensed,pcd_loaded);
+  % SANITY CHECK OF DEPTH IMAGE
+  %
+  %   depth_load = imread(['./output/depth_world_' num2str(iter)]);
+  %   [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
+  %   pcd_loaded = pointCloud(pcd_loaded);
+  %
+  %   pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
+  %   figure(3)
+  %   pcshowpair(pcd_sensed,pcd_loaded);
+  
+  pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
   
   pauseSim(gazebo);
-  %[position, orientation, velocity] = getState(ball)
   
-  %   models = getSpawnedModels(gazebo);
+  %% [3]== Perform collision check on the simulated scenario
+  %
+  % Ideally this should be done on robot frame; however I don't know how to
+  % convert from sensor frame to robot frame yet. As a simple approximation,
+  % I perform the checking on the X-Z plane of sensor frame
+  %
+  %   receive(tfsub)
+  %   receive(tfstatsub)
   
+  pcd_is_obs = pcd_sensed.Location(:, 2) < 0.3;
+  
+  pcd_proj = pcd_sensed.Location(pcd_is_obs, [1,3])';
+  
+  % define the parm of descrete ogm
+  ogm_scl = [5; 5];
+  ogm_res = [0.02; 0.02];
+  ogm_sz = uint16(ogm_scl ./ ogm_res);
+  ogm_proj = zeros(ogm_sz');
+  
+  % convert from X-Z plane to ogm frame
+  filled_idx = round(pcd_proj ./ repmat(ogm_res, 1, size(pcd_proj,2)) + ...
+    repmat([double(ogm_sz(1))/2; 0], 1, size(pcd_proj,2)));
+  linear_idx = sub2ind(ogm_sz, filled_idx(1, :), filled_idx(2, :));
+  ogm_proj(linear_idx) = 1;
+  
+  % perform erode on a descrete ogm with predined size and resolution
+  robot_radius = 0.4;
+  se = strel('disk', robot_radius / ogm_res(1));
+  ogm_eroded = imerode(gpuArray(ogm_proj), se);
+  
+  if do_viz
+    figure(3)
+    subplot(1,2,1)
+    imshow(ogm_proj)
+    subplot(1,2,2)
+    imshow(ogm_eroded)
+  end
+  
+  % convert from the eroded ogm to sensor frame
+  
+  
+  %% [4]== Recycle the world for next run of simulation
   for ii=1:OBJECT_NUM
     if ismember('Ball', getSpawnedModels(gazebo))
       removeModel(gazebo, 'Ball');
