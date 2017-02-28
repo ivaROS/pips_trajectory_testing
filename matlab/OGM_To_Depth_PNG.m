@@ -1,6 +1,6 @@
 function [ depth_data ] = OGM_To_Depth_PNG( ogm_data, ogm_sz, ogm_res )
 
-MAX_DEPTH = 5.0;
+MAX_DEPTH = 8.0;
 
 % Kinect depth camera intrinsic parameter(s):
 % fx = 579.83; % in axis x

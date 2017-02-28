@@ -162,7 +162,10 @@ for iter = 1:WORLD_NUM
   end
   
   % convert from the eroded ogm to sensor frame
+  disp 'Time cost of ray tracing:'
+  tic
   collide_rng = OGM_To_Depth_PNG(ogm_eroded, ogm_sz, ogm_res);
+  toc
   if do_viz
     figure(4)
     plot(collide_rng, '--o')
