@@ -18,7 +18,7 @@
 %       - Invalid depth measurements constitute locations with depth value,
 %           2047 (ie. max 11-bit value)
 % 
-function [ point_cloud_filt , valid_inds ] = depth_png_to_pcd( depth_data )
+function [ point_cloud_filt , valid_inds ] = Depth_PNG_To_PCD( depth_data )
 % 11-bit Depth to Meter Conversion:
 %                       1.0 / (depthValue * -0.0030711016 + 3.3309495161)
 %                       1054 -> 10.64 meters

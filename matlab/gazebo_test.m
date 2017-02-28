@@ -4,12 +4,12 @@ clear all
 % bash: roslaunch pips_trajectory_testing gazebo_empty.launch
 % matlab: rosinit('localhost');
 %
-WORLD_NUM = 10
+WORLD_NUM = 500
 WORLD_RANGE_X = [0.5 8]
 WORLD_RANGE_Y = [-1 1]
 %
 OBJECT_TYPE = 'Cylinder'
-OBJECT_NUM = 5
+OBJECT_NUM = 3 % 5
 OBJECT_RADIUS = [0.1 0.5]
 OBJECT_HEIGHT = [0.1 0.5]
 %
@@ -114,7 +114,7 @@ for iter = 1:WORLD_NUM
   % SANITY CHECK OF DEPTH IMAGE
   %
   %   depth_load = imread(['./output/depth_world_' num2str(iter)]);
-  %   [pcd_loaded, ~] = depth_png_to_pcd( depth_load );
+  %   [pcd_loaded, ~] = Depth_PNG_To_PCD( depth_load );
   %   pcd_loaded = pointCloud(pcd_loaded);
   %
   %   pcd_sensed = pointCloud(readXYZ(receive(pcdsub)));
@@ -136,8 +136,6 @@ for iter = 1:WORLD_NUM
   
   pcd_is_obs = pcd_sensed.Location(:, 2) < 0.3;
   
-  pcd_proj = pcd_sensed.Location(pcd_is_obs, [1,3])';
-  
   % define the parm of descrete ogm
   ogm_scl = [5; 5];
   ogm_res = [0.02; 0.02];
@@ -145,15 +143,15 @@ for iter = 1:WORLD_NUM
   ogm_proj = zeros(ogm_sz');
   
   % convert from X-Z plane to ogm frame
-  filled_idx = round(pcd_proj ./ repmat(ogm_res, 1, size(pcd_proj,2)) + ...
-    repmat([double(ogm_sz(1))/2; 0], 1, size(pcd_proj,2)));
+  filled_idx = PCD_to_OGM(pcd_sensed, pcd_is_obs, ogm_sz, ogm_res);
   linear_idx = sub2ind(ogm_sz, filled_idx(1, :), filled_idx(2, :));
   ogm_proj(linear_idx) = 1;
+  ogm_proj = logical(ogm_proj);
   
-  % perform erode on a descrete ogm with predined size and resolution
-  robot_radius = 0.4;
-  se = strel('disk', robot_radius / ogm_res(1));
-  ogm_eroded = imerode(gpuArray(ogm_proj), se);
+  % perform dilate on a descrete ogm with predined size and resolution
+  robot_radius = 0.18;
+  se = strel('disk', robot_radius / ogm_res(1), 0);
+  ogm_eroded = imdilate(gpuArray(ogm_proj), se);
   
   if do_viz
     figure(3)
@@ -164,7 +162,12 @@ for iter = 1:WORLD_NUM
   end
   
   % convert from the eroded ogm to sensor frame
-  
+  collide_rng = OGM_To_Depth_PNG(ogm_eroded, ogm_sz, ogm_res);
+  if do_viz
+    figure(4)
+    plot(collide_rng, '--o')
+  end
+  save(['./output/collide_dist_' num2str(iter) '.mat'], 'collide_rng');
   
   %% [4]== Recycle the world for next run of simulation
   for ii=1:OBJECT_NUM
