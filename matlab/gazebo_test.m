@@ -9,7 +9,7 @@ WORLD_RANGE_X = [0.5 8]
 WORLD_RANGE_Y = [-1 1]
 %
 OBJECT_TYPE = 'Cylinder'
-OBJECT_NUM = 3 % 5
+OBJECT_NUM = 5 % 3 % 
 OBJECT_RADIUS = [0.1 0.5]
 OBJECT_HEIGHT = [0.1 0.5]
 %
