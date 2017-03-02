@@ -105,7 +105,7 @@ do_viz = false
 % save 'data_loaded'
 
 %% Training
-load 'data_loaded'
+load '/mnt/BACK/GoogleDrive/Projects/Collision_Prediction/data_loaded'
 
 % enhance X with the column idx in depth image
 X = [repmat(1:640, 1, WORLD_NUM)', X];
@@ -138,6 +138,9 @@ figure;plot(miArr_sorted, '--o')
 %
 selectedIdx = miIdx(1:150);
 X = X(:, selectedIdx);
+% map Y into discrete value?
+% discreteFac = 10;
+% Y = round(Y*discreteFac)/discreteFac;
 
 regressor_type = 2
 
@@ -152,13 +155,10 @@ switch regressor_type
   case 2
     % Ensemble
     t = templateTree('Surrogate','on');
-    ensemble_final = fitensemble(X(1:10000, :), Y(1:10000), 'Bag', 500, ...
-      t, 'NPrint', 50, 'Type', 'Classification');
-    figure;
-    clf
-    plot(loss(ensemble_final, X, Y, 'mode', 'cumulative'));
-    xlabel('Number of trees');
-    ylabel('Component classification error');
+    %     ensemble_final = fitensemble(X(1:30000, :), Y(1:30000), 'Bag', 200, ...
+    %       t, 'NPrint', 50, 'Type', 'regression');
+    ensemble_final = fitensemble(X, Y, 'Bag', 500, ...
+      t, 'NPrint', 50, 'Type', 'regression');
     
     %     case 3
     %       % High-dimension data linear regression (SVM + LASSO)
@@ -200,4 +200,15 @@ switch regressor_type
     %       beta_HDLR_Manual = Mdl.Beta
 end
 
-save('./output/regressor_debug.mat', 'beta_final', 'ensemble_final', 'X', 'Y');
+save('/mnt/BACK/GoogleDrive/Projects/Collision_Prediction/regressor_full.mat', ...
+  'ensemble_final', 'selectedIdx');
+%
+ensemble_cpt = compact(ensemble_final);
+save('/mnt/BACK/GoogleDrive/Projects/Collision_Prediction/regressor_compact.mat', ...
+  'ensemble_cpt', 'selectedIdx');
+
+figure;
+clf
+plot(loss(ensemble_final, X, Y, 'mode', 'cumulative', 'lossfun', 'mse'));
+xlabel('Number of trees');
+ylabel('Regression loss');
