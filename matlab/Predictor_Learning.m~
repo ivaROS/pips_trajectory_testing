@@ -15,7 +15,7 @@ do_viz = false
 % for iter = 1:WORLD_NUM
 %   %
 %   disp(['start extracting features for simulate world ' num2str(iter)])
-%   
+%
 %   color_img = imread(['./output/color_world_' num2str(iter) '.png']);
 %   depth_img = imread(['./output/depth_world_' num2str(iter) '.png']);
 %   depth_img = double(depth_img) / SCALE_FACTOR;
@@ -50,7 +50,7 @@ do_viz = false
 %     xlim([1 640])
 %     ylim([0 MAX_DEPTH_RANGE])
 %   end
-%   
+%
 %   %% Feature extraction
 %   % [1]== project the depth image to x-axis
 %   %   depth_min = min(double(depth_img{iter}) / SCALE_FACTOR, 1);
@@ -101,11 +101,41 @@ do_viz = false
 %   Y((iter-1)*640+1 : iter*640) = labelr;
 %   %
 % end
-% 
+%
 % save 'data_loaded'
 
 %% Training
 load 'data_loaded'
+
+% enhance X with the column idx in depth image
+X = [repmat(1:640, 1, WORLD_NUM)', X];
+
+% get rid of X rows with All NaN measurement
+validIdx = any(~isnan(X(:, 2:end)), 2);
+X = X(validIdx, :);
+Y = Y(validIdx);
+
+% randomnize the data for future training
+rd_idx = randperm(length(Y));
+X = X(rd_idx, :);
+Y = Y(rd_idx);
+
+% search for features that contribute most to regression
+%
+% c = cvpartition(Y,'k',10);
+% opts = statset('display','iter');
+% [fs,history] = sequentialfs(critfun,X,Y,'cv',c,'options',opts)
+%
+% compute mutual information between each predictor & regression value
+for pn=1:size(X, 2)
+  [~, MI_prob] = get_histogram(X(:, pn), Y, 512);
+  [miArr(pn), ~] = get_NMI(MI_prob);
+end
+figure;plot(miArr, '--o')
+%
+[miArr_sorted, miIdx] = sort(miArr, 'descend');
+figure;plot(miArr_sorted, '--o')
+miIdx(1:100)
 
 regressor_type = 2
 
@@ -120,7 +150,7 @@ switch regressor_type
   case 2
     % Ensemble
     t = templateTree('Surrogate','on');
-    ensemble_final = fitensemble(X(1:), Y, 'Bag', 200, ...
+    ensemble_final = fitensemble(X(1:10000, :), Y(1:10000), 'Bag', 500, ...
       t, 'NPrint', 50, 'Type', 'Classification');
     figure;
     clf
