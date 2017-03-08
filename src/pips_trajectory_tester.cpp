@@ -41,10 +41,10 @@ GenAndTest::GenAndTest()
     GenAndTest::constructor();
 }
 
-GenAndTest::GenAndTest(std::shared_ptr<HallucinatedRobotModel> robot_model, geometry_msgs::TransformStamped& depth_base_transform)
+GenAndTest::GenAndTest(geometry_msgs::TransformStamped& depth_base_transform)
 {
     GenAndTest::constructor();
-    GenAndTest::setRobotInfo(robot_model, depth_base_transform);
+    GenAndTest::setRobotInfo(depth_base_transform);
 }
 
 void GenAndTest::constructor()
@@ -53,9 +53,9 @@ void GenAndTest::constructor()
     params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
 }
 
-void GenAndTest::setRobotInfo(std::shared_ptr<HallucinatedRobotModel> robot_model, geometry_msgs::TransformStamped& depth_base_transform)
+void GenAndTest::setRobotInfo(geometry_msgs::TransformStamped& depth_base_transform)
 {
-    cc_ = std::make_shared<CollisionChecker>(depth_base_transform, robot_model, true);
+    cc_ = std::make_shared<CollisionChecker>(depth_base_transform);
     base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
     header_.frame_id = base_frame_id_;
 }
@@ -371,6 +371,7 @@ std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func
 
     return trajectoryImages;
   }
+  
   
   
   cv::Mat GenAndTest::generateTrajectoryDepthImage(const pips_trajectory_ptr& traj)

@@ -2,14 +2,14 @@
 
 <arg name="camera" default="camera"/>
 
-<arg name="bagfile" default="/mnt/DATA/Datasets/PiPS/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
+<arg name="bagfile" default="/media/justin/data/bag_files/tf_fixed/rgb_down_the_hall_2015-10-20-20-56-35.bag"/>
 <arg name="start_time" default="13"/>
 
 <arg name="rgb_image" default="camera/rgb/image_color"/>
 <arg name="depth_image" default="camera/depth/image_raw"/>
 <arg name="depth_info" default="camera/depth/camera_info"/>
 
-<node name="pips_demo_node" pkg="pips_trajectory_testing" type="pips_demo_node" args="/base_link" output="screen">
+<node name="pips_demo_node" pkg="pips_trajectory_testing" type="pips_demo_node" args="/base_link" output="screen" launch-prefix="xterm -e gdb --args">
     <remap from="rgb_image" to="$(arg rgb_image)" />
     <remap from="depth_image" to="$(arg depth_image)" />
     <remap from="depth_info" to="$(arg depth_info)" />

@@ -32,6 +32,8 @@
 class TestTrajectory
 {
 
+  /* TODO: replace all these pointers with shared pointers */
+
   private:
   ros::NodeHandle nh_;
   image_transport::ImageTransport* it_;
@@ -48,7 +50,6 @@ class TestTrajectory
   tf2_ros::TransformListener* tf_listener_;
   bool firstDepthFrame_, generate;
 
-  std::shared_ptr<HallucinatedRobotModel> robot_model_;
   CollisionChecker* cc_;
   GenAndTest* traj_tester_;
 

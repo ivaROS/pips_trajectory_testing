@@ -88,13 +88,6 @@ namespace kobuki
   {
     traj_tester_ = std::make_shared<GenAndTest>();
     
-    double radius = .178;
-    double height = .48;
-    double floor_tolerance = .03;
-    double safety_expansion = .02;
-
-    robot_model_ = std::make_shared<CylindricalModel>(radius, height, safety_expansion, floor_tolerance);
-    
   };
   
   /**
@@ -133,7 +126,6 @@ namespace kobuki
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
     
-    // TODO: Add robot model here
   }
   
   
@@ -204,7 +196,7 @@ namespace kobuki
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
           geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
-          traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
+          traj_tester_->setRobotInfo(depth_base_transform);
          
           ready_ = true;
 

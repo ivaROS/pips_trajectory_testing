@@ -37,15 +37,6 @@ void TestTrajectory::init(ros::NodeHandle nh)
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&TestTrajectory::depthImageCb, this, _1, _2));
-
-
-    double radius = .178;
-    double height = .48;
-    double floor_tolerance = .03;
-    double safety_expansion = .02;
-
-
-    robot_model_ = std::make_shared<CylindricalModel>(radius, height, safety_expansion, floor_tolerance);
   
 }
   
@@ -76,7 +67,7 @@ void TestTrajectory::depthImageCb(const sensor_msgs::ImageConstPtr& image_msg,
             //Get the transform that takes a point in the base frame and transforms it to the depth optical
             geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id, ros::Time(0), timeout);
 
-            traj_tester_->setRobotInfo(robot_model_, depth_base_transform);
+            traj_tester_->setRobotInfo(depth_base_transform);
 
             firstDepthFrame_ = false;
 
