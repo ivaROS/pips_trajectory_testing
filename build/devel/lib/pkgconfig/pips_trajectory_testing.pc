@@ -1,8 +1,0 @@
-prefix=/home/yipuzhao/ros_workspace/package_dir/pips_trajectory_testing/build/devel
-
-Name: pips_trajectory_testing
-Description: Description of pips_trajectory_testing
-Version: 0.0.0
-Cflags: -I/home/yipuzhao/ros_workspace/package_dir/pips_trajectory_testing/build/devel/include -I/home/yipuzhao/ros_workspace/package_dir/pips_trajectory_testing/include
-Libs: -L/home/yipuzhao/ros_workspace/package_dir/pips_trajectory_testing/build/devel/lib 
-Requires: pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure

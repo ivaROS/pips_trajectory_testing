@@ -1,1 +1,4 @@
+./matlab/output/*.png
+./matlab/output/*.mat
+./matlab/*.mat
 ./build/*
