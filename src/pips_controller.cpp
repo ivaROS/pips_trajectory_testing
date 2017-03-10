@@ -209,6 +209,10 @@ namespace kobuki
         }
     }
     
+    ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
+    //Update tester with new image/camera info
+    traj_tester_->setImage(image_msg, info_msg);
+    
     if(ready_)
     {
       ROS_DEBUG_STREAM_NAMED(name_, "Ready");
@@ -224,11 +228,8 @@ namespace kobuki
         ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current image");
       }
       
-      
-            
-      ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
-      //Update tester with new image/camera info
-      traj_tester_->setImage(image_msg, info_msg);
+    
+
       if(wander_)
       {
 
