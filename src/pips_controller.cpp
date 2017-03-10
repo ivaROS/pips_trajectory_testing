@@ -136,9 +136,9 @@ namespace kobuki
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
-    depthsub_.subscribe(nh_, depth_image_topic, 3);
-    depth_info_sub_.subscribe(nh_, depth_info_topic, 3);
-    synced_images.reset(new image_synchronizer(image_synchronizer(3), depthsub_, depth_info_sub_) );
+    depthsub_.subscribe(nh_, depth_image_topic, 10);
+    depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
+    synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
@@ -224,14 +224,14 @@ namespace kobuki
         ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current image");
       }
       
+      
+            
+      ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
+      //Update tester with new image/camera info
+      traj_tester_->setImage(image_msg, info_msg);
       if(wander_)
       {
-      
-        ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
-        //Update tester with new image/camera info
-        traj_tester_->setImage(image_msg, info_msg);
-        
-        
+
         bool replan = false;
         //check if current path is still clear
         if(executing_)
@@ -272,7 +272,7 @@ namespace kobuki
               ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time to collision (min_ttc) (" << min_ttc_ << ")" );
             }
 
-          }
+           }
           
           //If no satisfactory trajectory was found, then command a halt.
           if(!foundPath)
@@ -283,7 +283,13 @@ namespace kobuki
     
 
       }
-            
+
+    else
+    {
+      std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
+      std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+    }
+                
 
     
    
