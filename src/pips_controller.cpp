@@ -181,7 +181,10 @@ namespace kobuki
                const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     if(info_msg->header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
+    {
+      ROS_WARN_STREAM_NAMED( name_,"Bad timestamp");
       return;
+    }
       
     ros::Duration timeout(0);
     
