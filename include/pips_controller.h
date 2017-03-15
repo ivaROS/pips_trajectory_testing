@@ -34,16 +34,18 @@
 namespace kobuki
 {
 
+
+
 /**
  * @ brief 
  *
  * A simple nodelet-based controller intended to avoid obstacles using PIPS.
  */
-class PipsTrajectoryController : public kobuki::TrajectoryController
+class ObstacleAvoidanceController : public kobuki::TrajectoryController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
-  ~PipsTrajectoryController(){};
+  ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
+  ~ObstacleAvoidanceController(){};
 
   /**
    * Set-up necessary publishers/subscribers
@@ -58,19 +60,15 @@ protected:
 
 
   
-private:
+protected:
 
   
   bool wander_,ready_;
   
-  message_filters::Subscriber<sensor_msgs::Image> depthsub_;
-  message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
-  
+
   ros::Subscriber button_sub_, bumper_sub_;
   ros::Publisher commanded_trajectory_publisher_;
   
-  
-  std::shared_ptr<HallucinatedRobotModel> robot_model_;
 
   GenAndTest_ptr traj_tester_;
   ros::Duration min_ttc_;
@@ -85,15 +83,12 @@ private:
   double v_des_;
   
   
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
-                                                      sensor_msgs::CameraInfo> image_sync_policy;
-  typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
-  boost::shared_ptr<image_synchronizer> synced_images;
+
     
   void buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg);
   void bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg);
-  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+
+  void sensorCb(const SensorDataPtr& sensorData);
   void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);             
 
   //Internal methods can pass by reference safely

@@ -16,8 +16,6 @@
 #include <fstream>
 #include <memory>
 
-
-
 class PipsTrajectory : public ni_trajectory
 {
   int collision_ind_ = -1;
@@ -76,7 +74,7 @@ public:
   void init(ros::NodeHandle& nh);
   void setRobotInfo(std::vector<cv::Point3d>& co_offsets, geometry_msgs::TransformStamped& depth_base_transform);
   void setRobotInfo(geometry_msgs::TransformStamped& depth_base_transform);
-  void setImage(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
+  void setSensorData(const SensorDataPtr& sensorData);
   
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry::ConstPtr curr_odom);
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions);

@@ -81,7 +81,7 @@ public:
 namespace kobuki
 {
 
-  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) : 
+  ObstacleAvoidanceController::ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) : 
       kobuki::TrajectoryController(nh, pnh, name), 
       wander_(false), 
       ready_(false)
@@ -94,19 +94,19 @@ namespace kobuki
    * Set-up necessary publishers/subscribers
    * @return true, if successful
    */
-  bool PipsTrajectoryController::init()
+  bool ObstacleAvoidanceController::init()
   {
     kobuki::TrajectoryController::init();
     traj_tester_->init(nh_);
 
     //Using pointer
     reconfigure_server_.reset( new ReconfigureServer(pnh_));
-    reconfigure_server_->setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
+    reconfigure_server_->setCallback(boost::bind(&ObstacleAvoidanceController::configCB, this, _1, _2));
     
     //If not using pointer:
-    //param_server_.setCallback(boost::bind(&PipsTrajectoryController::configCB, this, _1, _2));
+    //param_server_.setCallback(boost::bind(&ObstacleAvoidanceController::configCB, this, _1, _2));
   
-    PipsTrajectoryController::setupPublishersSubscribers();
+    ObstacleAvoidanceController::setupPublishersSubscribers();
     
     
     //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
@@ -116,7 +116,7 @@ namespace kobuki
     return true;
   }
 
-  void PipsTrajectoryController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
+  void ObstacleAvoidanceController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request:\n\tMin_ttc =\t" << config.min_ttc << "\n\tMin_tte =\t"<< config.min_tte <<"\n\tWander =\t" << (config.wander?"True":"False") << "\n\tv_des =\t" << config.v_des); //<< config.num_paths 
     min_ttc_ = ros::Duration(config.min_ttc);
     min_tte_ = ros::Duration(config.min_tte);
@@ -129,26 +129,18 @@ namespace kobuki
   }
   
   
-  void PipsTrajectoryController::setupPublishersSubscribers()
+  void ObstacleAvoidanceController::setupPublishersSubscribers()
   {
-    std::string depth_image_topic = "/camera/depth/image_raw";
-    std::string depth_info_topic = "/camera/depth/camera_info";
-
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
-
-    depthsub_.subscribe(nh_, depth_image_topic, 10);
-    depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
-    synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
-    synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     
-    button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &PipsTrajectoryController::buttonCB, this);
-    bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &PipsTrajectoryController::bumperCB, this);
+    button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &ObstacleAvoidanceController::buttonCB, this);
+    bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &ObstacleAvoidanceController::bumperCB, this);
     
     commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1, true);
   }
   
   //Pressing button 0 activates wander mode
-  void PipsTrajectoryController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
+  void ObstacleAvoidanceController::buttonCB(const kobuki_msgs::ButtonEvent::ConstPtr& msg)
   {
     if (msg->button == kobuki_msgs::ButtonEvent::Button0 && msg->state == kobuki_msgs::ButtonEvent::RELEASED )
     {
@@ -162,7 +154,7 @@ namespace kobuki
   };
   
   //Hitting the bumper deactivates wander mode
-  void PipsTrajectoryController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
+  void ObstacleAvoidanceController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
     if (wander_ && msg->state == kobuki_msgs::BumperEvent::PRESSED )
     {
@@ -175,20 +167,28 @@ namespace kobuki
     }
   };
   
+  
   //Note: Is it really necessary to get both image and camera info? More importantly, does it slow things much to do a synchronized callback like this?
   //If it does, then should have separate callbacks- this one would just get the image, and the other would check if camerainfo changes, and if so update it. That does sound messy though. On the other hand, if the only thing that changes is the size, then the image msg has that anyway so it would be easy.
-  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+  void ObstacleAvoidanceController::sensorCb(const SensorDataPtr& sensorData)
   {
-    if(info_msg->header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
+    std_msgs::Header header = sensorData->getHeader();
+    
+    if(header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
     {
       ROS_WARN_STREAM_NAMED( name_,"Bad timestamp");
-      return;
+      return false;
     }
-      
+    
+
+    
+    //Update tester with new data
+    ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
+    traj_tester_->setSensorData(sensorData);
+    
     ros::Duration timeout(0);
     
-    image_rate.addTime(info_msg->header);
+    image_rate.addTime(header);
     
     ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
@@ -198,8 +198,8 @@ namespace kobuki
         try
         {
           //Get the transform that takes a point in the base frame and transforms it to the depth optical
-          geometry_msgs::TransformStamped depth_base_transform = tfBuffer_->lookupTransform(info_msg->header.frame_id, base_frame_id_, ros::Time(0));
-          traj_tester_->setRobotInfo(depth_base_transform);
+          geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
+          traj_tester_->setRobotInfo(sensor_base_transform);
          
           ready_ = true;
 
@@ -212,9 +212,7 @@ namespace kobuki
         }
     }
     
-    ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
-    //Update tester with new image/camera info
-    traj_tester_->setImage(image_msg, info_msg);
+
     
     if(ready_)
     {
@@ -227,7 +225,7 @@ namespace kobuki
       }
       else
       {
-        ros::Duration delta_t = curr_odom_->header.stamp - info_msg->header.stamp;
+        ros::Duration delta_t = curr_odom_->header.stamp - header.stamp;
         ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current image");
       }
       
@@ -241,7 +239,7 @@ namespace kobuki
         if(executing_)
         {
           ROS_DEBUG_STREAM_NAMED(name_, "Executing: Checking if current path clear");
-          if(PipsTrajectoryController::checkCurrentTrajectory(info_msg->header))
+          if(ObstacleAvoidanceController::checkCurrentTrajectory(header))
           {
             replan = true;
           }
@@ -253,7 +251,7 @@ namespace kobuki
         {    
           ROS_DEBUG_STREAM_COND_NAMED(!executing_, name_, "Not currently executing, test new trajectories");
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
-          std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
+          std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
@@ -290,7 +288,7 @@ namespace kobuki
 
     else
     {
-      std::vector<traj_func_ptr> trajectory_functions = PipsTrajectoryController::getTrajectoryFunctions();
+      std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
       std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
     }
                 
@@ -301,7 +299,7 @@ namespace kobuki
   }
 
 
-  bool PipsTrajectoryController::checkCurrentTrajectory(const std_msgs::Header& header)
+  bool ObstacleAvoidanceController::checkCurrentTrajectory(const std_msgs::Header& header)
   {
     trajectory_generator::trajectory_points trimmed_trajectory;
 
@@ -347,7 +345,7 @@ namespace kobuki
   }
   
   
-  std::vector<traj_func_ptr> PipsTrajectoryController::getTrajectoryFunctions()
+  std::vector<traj_func_ptr> ObstacleAvoidanceController::getTrajectoryFunctions()
   {
 
     //Set trajectory departure angles and speed

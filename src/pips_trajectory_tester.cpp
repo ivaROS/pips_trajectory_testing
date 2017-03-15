@@ -114,10 +114,10 @@ void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &c
     
 }
 
-void GenAndTest::setImage(const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& info_msg)
+void GenAndTest::setSensorData(const SensorDataPtr& sensor_data)
 {
-    cc_->setImage(image_msg, info_msg);
-    header_.stamp = image_msg->header.stamp;
+    cc_->setSensorData(sensor_data);
+    header_.stamp = sensor_data->getHeader().stamp;
 }
 
 
