@@ -89,6 +89,7 @@ add_library(pips_demo_nodelet MODULE
 ## Declare a cpp library
 add_library(pips_controller
    src/pips_controller.cpp
+   src/pips_controller_impl.cpp
 )
 
 add_dependencies(pips_controller ${PROJECT_NAME}_gencfg)

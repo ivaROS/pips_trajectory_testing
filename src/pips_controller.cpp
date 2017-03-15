@@ -168,23 +168,14 @@ namespace kobuki
   };
   
   
-  //Note: Is it really necessary to get both image and camera info? More importantly, does it slow things much to do a synchronized callback like this?
-  //If it does, then should have separate callbacks- this one would just get the image, and the other would check if camerainfo changes, and if so update it. That does sound messy though. On the other hand, if the only thing that changes is the size, then the image msg has that anyway so it would be easy.
-  void ObstacleAvoidanceController::sensorCb(const SensorDataPtr& sensorData)
+  void ObstacleAvoidanceController::sensorCb(const std_msgs::Header& header)
   {
-    std_msgs::Header header = sensorData->getHeader();
     
     if(header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
     {
       ROS_WARN_STREAM_NAMED( name_,"Bad timestamp");
-      return false;
+      return;
     }
-    
-
-    
-    //Update tester with new data
-    ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
-    traj_tester_->setSensorData(sensorData);
     
     ros::Duration timeout(0);
     
@@ -192,27 +183,10 @@ namespace kobuki
     
     ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
-
-    if(!ready_) {
-        ROS_DEBUG_STREAM_ONCE_NAMED(name_, "Not ready, check for transform...");
-        try
-        {
-          //Get the transform that takes a point in the base frame and transforms it to the depth optical
-          geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
-          traj_tester_->setRobotInfo(sensor_base_transform);
-         
-          ready_ = true;
-
-          ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Initializing trajectory testing with robot info");
-
-        }
-        catch (tf2::TransformException &ex) {
-          ROS_WARN_STREAM_THROTTLE_NAMED(5, name_, "Problem finding transform:\n" <<ex.what());
-          return;
-        }
+    if(!ready_)
+    {
+      ready_ = isReady(header);
     }
-    
-
     
     if(ready_)
     {
@@ -285,8 +259,8 @@ namespace kobuki
     
 
       }
-
-    else
+    //If we're not wandering, then calculate trajectories constantly
+    else  
     {
       std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
       std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);

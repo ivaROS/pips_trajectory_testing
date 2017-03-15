@@ -53,11 +53,9 @@ void GenAndTest::constructor()
     params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
 }
 
-void GenAndTest::setRobotInfo(geometry_msgs::TransformStamped& depth_base_transform)
+void GenAndTest::setCollisionChecker(CollisionChecker_ptr cc)
 {
-    cc_ = std::make_shared<CollisionChecker>(depth_base_transform);
-    base_frame_id_ = depth_base_transform.child_frame_id; //.header.frame_id;
-    header_.frame_id = base_frame_id_;
+  cc_ = cc;
 }
 
 void GenAndTest::init(ros::NodeHandle& nh)
@@ -113,13 +111,6 @@ void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &c
     params_->w_dot_max = config.w_dot_max;
     
 }
-
-void GenAndTest::setSensorData(const SensorDataPtr& sensor_data)
-{
-    cc_->setSensorData(sensor_data);
-    header_.stamp = sensor_data->getHeader().stamp;
-}
-
 
 
 std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions)

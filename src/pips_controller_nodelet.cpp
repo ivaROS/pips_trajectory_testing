@@ -74,7 +74,7 @@ public:
     name = name.substr(pos + 1);
 
     NODELET_INFO_STREAM("Initialising nodelet... [" << name << "]");
-    controller_.reset(new PipsTrajectoryController(nh, pnh, name));
+    controller_ = std::make_shared<PipsTrajectoryController>(nh, pnh, name));
 
     // Initialises the controller
     if (controller_->init())
@@ -87,7 +87,7 @@ public:
     }
   }
 private:
-  boost::shared_ptr<PipsTrajectoryController> controller_;
+  boost::shared_ptr<PipsTrajectoryControllerImpl> controller_;
 };
 
 } // namespace kobuki
