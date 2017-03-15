@@ -71,15 +71,17 @@ add_library(pips_trajectory_tester
 )
 
 
+##Don't need the next 2 for now
+
 ## Declare a cpp library
-add_library(pips_demo
-   src/pips_demo.cpp
-)
+#add_library(pips_demo
+#   src/pips_demo.cpp
+#)
 
 ## Declare a cpp executable
-add_executable(pips_demo_node
-   src/pips_demo_node.cpp
-)
+#add_executable(pips_demo_node
+#   src/pips_demo_node.cpp
+#)
 
 ## Declare a cpp library
 add_library(pips_demo_nodelet MODULE
@@ -123,20 +125,21 @@ target_link_libraries(pips_trajectory_tester
    ${catkin_LIBRARIES}
 )
 
-target_link_libraries(pips_demo
-   ${catkin_LIBRARIES} 
-   pips_trajectory_tester
-)
 
-target_link_libraries(pips_demo_nodelet
-   ${catkin_LIBRARIES} 
-   pips_demo
-)
+#target_link_libraries(pips_demo
+#   ${catkin_LIBRARIES} 
+#   pips_trajectory_tester
+#)
 
-target_link_libraries(pips_demo_node
-   ${catkin_LIBRARIES} 
-   pips_demo
-)
+#target_link_libraries(pips_demo_nodelet
+#   ${catkin_LIBRARIES} 
+#   pips_demo
+#)
+
+#target_link_libraries(pips_demo_node
+#   ${catkin_LIBRARIES} 
+#   pips_demo
+#)
 
 
 target_link_libraries(pips_controller

@@ -1,10 +1,10 @@
-#include pips_controller_impl.h
+#include "pips_controller_impl.h"
  
  namespace kobuki
 {
 
   // Could separate the image and camera_info callbacks to allow non synchronized messages
-  void PipsTrajectoryController::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+  void PipsTrajectoryControllerImpl::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg)
   {
     if(image_msg->header.stamp == ros::Time(0) || info_msg->header.stamp == ros::Time(0))  // Gazebo occasionally publishes Image and CameraInfo messages with time=0
@@ -19,12 +19,12 @@
     cc_->setImage(image_msg, info_msg);
     
     //Let controller know that we have new sensor data
-    sensorCb(image_msg->header.stamp);
+    ObstacleAvoidanceController::sensorCb(image_msg->header);
  }
 
   // Note: I haven't fully thought through other implementations, but this may be generic after all...
   // If so, then this code will probably move back to the main controller but be renamed 'transformReady' or something
-  bool isReady(const std_msgs::Header& header)
+  bool PipsTrajectoryControllerImpl::isReady(const std_msgs::Header& header)
   {
     ROS_DEBUG_STREAM_ONCE_NAMED(name_, "Not ready, check for transform...");
     try
@@ -43,14 +43,15 @@
     return true;
   }
   
+  //Actually, the creation should probably happen in the constructor, and just pass it here
   // This will need to generate a derived collision checker class
-  CollisionChecker_ptr getCollisionChecker()
+  CollisionChecker_ptr PipsTrajectoryControllerImpl::getCollisionChecker()
   {
     cc_ = std::make_shared<CollisionChecker>();
     return cc_;
   }
   
-  void PipsTrajectoryController::setupPublishersSubscribers()
+  void PipsTrajectoryControllerImpl::setupPublishersSubscribers()
   {
     ObstacleAvoidanceController::setupPublishersSubscribers();
     

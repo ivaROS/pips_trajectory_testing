@@ -3,14 +3,14 @@
 ** Ifdefs
 *****************************************************************************/
 
-#ifndef PIPS_TRAJECTORY_CONTROLLER_H_
-#define PIPS_TRAJECTORY_CONTROLLER_H_
+#ifndef PIPS_TRAJECTORY_CONTROLLER_IMPL_H_
+#define PIPS_TRAJECTORY_CONTROLLER_IMPL_H_
 
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
 // %Tag(FULLTEXT)%
-#include <trajectory_controller.h>
+#include "pips_controller.h"
 #include "pips_trajectory_tester.h"
 #include <pips_trajectory_testing/PipsControllerConfig.h>
 
@@ -42,22 +42,24 @@ namespace kobuki
  *
  * A simple nodelet-based controller intended to avoid obstacles using PIPS.
  */
-class PipsTrajectoryControllerImpl : public kobuki::TrajectoryController
+class PipsTrajectoryControllerImpl : public kobuki::ObstacleAvoidanceController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
-  ~PipsTrajectoryController(){};
+  PipsTrajectoryControllerImpl(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
+  ~PipsTrajectoryControllerImpl(){};
 
   /**
    * Set-up necessary publishers/subscribers
    * @return true, if successful
    */
-  bool init();
-  
-  typedef std::shared_ptr<GenAndTest> GenAndTest_ptr;
+
 
 protected:
   void setupPublishersSubscribers();
+  virtual bool isReady(const std_msgs::Header& header);
+  virtual bool init();
+  
+  virtual CollisionChecker_ptr getCollisionChecker();
 
   CollisionChecker_ptr cc_;
   
@@ -74,6 +76,8 @@ private:
   
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+               
+               
 
 
 };

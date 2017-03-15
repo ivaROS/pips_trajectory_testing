@@ -51,7 +51,7 @@ public:
    * Set-up necessary publishers/subscribers
    * @return true, if successful
    */
-  bool init();
+  virtual bool init();
   
   typedef std::shared_ptr<GenAndTest> GenAndTest_ptr;
 
@@ -90,7 +90,10 @@ protected:
   void bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg);
 
   void sensorCb(const std_msgs::Header& header);
-  void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);             
+  void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);
+  
+  virtual bool isReady(const std_msgs::Header& header)=0;
+  virtual CollisionChecker_ptr getCollisionChecker()=0;
 
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);

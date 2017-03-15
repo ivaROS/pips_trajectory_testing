@@ -41,12 +41,6 @@ GenAndTest::GenAndTest()
     GenAndTest::constructor();
 }
 
-GenAndTest::GenAndTest(geometry_msgs::TransformStamped& depth_base_transform)
-{
-    GenAndTest::constructor();
-    GenAndTest::setRobotInfo(depth_base_transform);
-}
-
 void GenAndTest::constructor()
 {
     traj_gen_bridge_ = std::make_shared<TrajectoryGeneratorBridge>();
