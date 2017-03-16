@@ -100,19 +100,13 @@ namespace kobuki
     traj_tester_->init(nh_);
 
     //Using pointer
-    reconfigure_server_.reset( new ReconfigureServer(pnh_));
+    reconfigure_server_ = std::make_shared<ReconfigureServer>(pnh_);
     reconfigure_server_->setCallback(boost::bind(&ObstacleAvoidanceController::configCB, this, _1, _2));
     
-    //If not using pointer:
-    //param_server_.setCallback(boost::bind(&ObstacleAvoidanceController::configCB, this, _1, _2));
-  
+
     ObstacleAvoidanceController::setupPublishersSubscribers();
     
-    
-    //these next 2 lines are just for initial testing! Although perhaps wander should be on by default in any case...
-    //wander_ = true;
-    //this->disable();
-    
+
     return true;
   }
 
@@ -126,8 +120,23 @@ namespace kobuki
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
     
+    
   }
   
+  bool ObstacleAvoidanceController::isReady(const std_msgs::Header& header)
+  {
+    if(!curr_odom_)
+    {
+      ROS_WARN_STREAM_THROTTLE_NAMED(5 , name_,  "No odometry received!");
+      return false;
+    }
+    else
+    {
+      ros::Duration delta_t = curr_odom_->header.stamp - header.stamp;
+      ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current sensor data");
+    }
+    return true;
+  }
   
   void ObstacleAvoidanceController::setupPublishersSubscribers()
   {
@@ -177,34 +186,15 @@ namespace kobuki
       return;
     }
     
-    ros::Duration timeout(0);
+
     
     image_rate.addTime(header);
     
     ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
-    if(!ready_)
+    if(isReady(header));
     {
-      ready_ = isReady(header);
-    }
-    
-    if(ready_)
-    {
-      ROS_DEBUG_STREAM_NAMED(name_, "Ready");
       
-      if(!curr_odom_)
-      {
-        ROS_WARN_STREAM_THROTTLE_NAMED(5 , name_,  "No odometry received!");
-        return;
-      }
-      else
-      {
-        ros::Duration delta_t = curr_odom_->header.stamp - header.stamp;
-        ROS_DEBUG_STREAM_NAMED(name_, "Odometry is " << delta_t << " newer than current image");
-      }
-      
-    
-
       if(wander_)
       {
 

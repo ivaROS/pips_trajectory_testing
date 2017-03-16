@@ -3,8 +3,8 @@
 ** Ifdefs
 *****************************************************************************/
 
-#ifndef PIPS_TRAJECTORY_CONTROLLER_H_
-#define PIPS_TRAJECTORY_CONTROLLER_H_
+#ifndef OBSTACLE_AVOIDANCE_CONTROLLER_H_
+#define OBSTACLE_AVOIDANCE_CONTROLLER_H_
 
 /*****************************************************************************
 ** Includes
@@ -78,7 +78,7 @@ protected:
   rate_tracker image_rate;
   
   typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsControllerConfig> ReconfigureServer;
-  boost::shared_ptr<ReconfigureServer> reconfigure_server_;
+  std::shared_ptr<ReconfigureServer> reconfigure_server_;
 
   int num_paths_;
   double v_des_;
@@ -92,8 +92,7 @@ protected:
   void sensorCb(const std_msgs::Header& header);
   void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);
   
-  virtual bool isReady(const std_msgs::Header& header)=0;
-  virtual CollisionChecker_ptr getCollisionChecker()=0;
+  virtual bool isReady(const std_msgs::Header& header);
 
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);

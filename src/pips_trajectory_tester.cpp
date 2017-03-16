@@ -81,11 +81,6 @@ void GenAndTest::init(ros::NodeHandle& nh)
     */
 }
 
-void GenAndTest::updateParams()
-{
-    //Should probably make this dynamnically reconfigurable, or at least cache the results
-    //  nh_.param<double>("tf", params_->tf, 10);
-}
 
 void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level) {
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False"));

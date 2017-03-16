@@ -68,8 +68,6 @@ public:
   GenAndTest();
   void constructor();
   
-  void updateParams();
-  
   void init(ros::NodeHandle& nh);
   void setCollisionChecker(CollisionChecker_ptr cc);
   

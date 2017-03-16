@@ -1,7 +1,17 @@
 #include "pips_controller_impl.h"
- 
+
  namespace kobuki
 {
+  PipsTrajectoryControllerImpl::PipsTrajectoryControllerImpl(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) :
+    ObstacleAvoidanceController(nh, pnh, name)
+  {
+      cc_ = std::make_shared<CollisionChecker>();
+      traj_tester_->setCollisionChecker(cc_);
+  }
+
+
+
+
 
   // Could separate the image and camera_info callbacks to allow non synchronized messages
   void PipsTrajectoryControllerImpl::depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
@@ -26,34 +36,37 @@
   // If so, then this code will probably move back to the main controller but be renamed 'transformReady' or something
   bool PipsTrajectoryControllerImpl::isReady(const std_msgs::Header& header)
   {
-    ROS_DEBUG_STREAM_ONCE_NAMED(name_, "Not ready, check for transform...");
-    try
+    if(!ObstacleAvoidanceController::isReady(header))
     {
-      //Get the transform that takes a point in the base frame and transforms it to the depth optical
-      geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
-      cc_->setTransform(sensor_base_transform);
-
-      ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Passing transform to collision checker");
-
-    }
-    catch (tf2::TransformException &ex) {
-      ROS_WARN_STREAM_THROTTLE_NAMED(5, name_, "Problem finding transform:\n" <<ex.what());
       return false;
+    }
+
+    ros::Duration timeout(0); //Could be used for transform lookup?
+    
+    if(!hasTransform_)
+    {
+      ROS_DEBUG_STREAM_ONCE_NAMED(name_, "Not ready, check for transform...");
+      try
+      {
+        //Get the transform that takes a point in the base frame and transforms it to the depth optical
+        geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
+        cc_->setTransform(sensor_base_transform);
+
+        ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Passing transform to collision checker");
+
+      }
+      catch (tf2::TransformException &ex) {
+        ROS_WARN_STREAM_THROTTLE_NAMED(5, name_, "Problem finding transform:\n" <<ex.what());
+        return false;
+      }
     }
     return true;
   }
   
-  //Actually, the creation should probably happen in the constructor, and just pass it here
-  // This will need to generate a derived collision checker class
-  CollisionChecker_ptr PipsTrajectoryControllerImpl::getCollisionChecker()
-  {
-    cc_ = std::make_shared<CollisionChecker>();
-    return cc_;
-  }
   
-  void PipsTrajectoryControllerImpl::setupPublishersSubscribers()
+  bool PipsTrajectoryControllerImpl::init()
   {
-    ObstacleAvoidanceController::setupPublishersSubscribers();
+    ObstacleAvoidanceController::init();
     
     std::string depth_image_topic = "/camera/depth/image_raw";
     std::string depth_info_topic = "/camera/depth/camera_info";
@@ -63,7 +76,9 @@
     depthsub_.subscribe(nh_, depth_image_topic, 10);
     depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
-    synced_images->registerCallback(bind(&ObstacleAvoidanceController::depthImageCb, this, _1, _2));
+    synced_images->registerCallback(bind(&PipsTrajectoryControllerImpl::depthImageCb, this, _1, _2));
+    
+    return true;
   }
   
 }

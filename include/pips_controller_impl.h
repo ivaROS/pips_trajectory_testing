@@ -12,7 +12,7 @@
 // %Tag(FULLTEXT)%
 #include "pips_controller.h"
 #include "pips_trajectory_tester.h"
-#include <pips_trajectory_testing/PipsControllerConfig.h>
+//#include <pips_trajectory_testing/PipsControllerConfig.h>
 
 
 #include <sensor_msgs/Image.h>
@@ -21,14 +21,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <dynamic_reconfigure/server.h>
+//#include <dynamic_reconfigure/server.h>
 
 #include <memory>
 
 #include <ros/callback_queue.h>
-
-#include <kobuki_msgs/ButtonEvent.h>
-#include <kobuki_msgs/BumperEvent.h>
 
 
 namespace kobuki
@@ -48,10 +45,6 @@ public:
   PipsTrajectoryControllerImpl(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
   ~PipsTrajectoryControllerImpl(){};
 
-  /**
-   * Set-up necessary publishers/subscribers
-   * @return true, if successful
-   */
 
 
 protected:
@@ -59,12 +52,12 @@ protected:
   virtual bool isReady(const std_msgs::Header& header);
   virtual bool init();
   
-  virtual CollisionChecker_ptr getCollisionChecker();
 
   CollisionChecker_ptr cc_;
   
 private:
   
+  bool hasTransform_ = false;
   
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
