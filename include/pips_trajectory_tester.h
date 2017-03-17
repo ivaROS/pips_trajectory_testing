@@ -8,13 +8,20 @@
 #include <ros/ros.h>
 
 #include <sensor_msgs/Image.h>
-#include <geometry_msgs/PoseArray.h>
-#include <geometry_msgs/PointStamped.h>
+
 #include <std_msgs/Header.h>
 #include <dynamic_reconfigure/server.h>
 
 #include <fstream>
 #include <memory>
+
+/*
+class CollisionChecker;
+class TrajectoryGeneratorBridge;
+class geometry_msgs::PointStamped;
+class cv::Mat;
+
+*/
 
 class PipsTrajectory : public ni_trajectory
 {
@@ -42,7 +49,6 @@ typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
 class GenAndTest
 {
   ros::NodeHandle nh_, pnh_;
-  std::vector<cv::Point3d> co_offsets_;
   geometry_msgs::TransformStamped depth_base_transform_;
 
   void configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level);
@@ -61,6 +67,7 @@ class GenAndTest
   std::string name_ = "GenAndTest";
   traj_params_ptr params_;
 
+  // Actually, this should probably be a collision checker-specific thing...
   double min_dist = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
 
 public:

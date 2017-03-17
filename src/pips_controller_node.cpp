@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
     
-    kobuki::PipsTrajectoryControllerImpl controller(nh, pnh, name);
+    kobuki::PipsTrajectoryController controller(nh, pnh, name);
     controller.init();
 
 

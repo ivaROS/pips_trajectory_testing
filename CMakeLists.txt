@@ -71,7 +71,7 @@ add_library(pips_trajectory_tester
 )
 
 
-##Don't need the next 2 for now
+##Don't need the next 3 for now
 
 ## Declare a cpp library
 #add_library(pips_demo
@@ -84,18 +84,21 @@ add_library(pips_trajectory_tester
 #)
 
 ## Declare a cpp library
-add_library(pips_demo_nodelet MODULE
-   src/pips_demo_nodelet.cpp
+#add_library(pips_demo_nodelet MODULE
+#   src/pips_demo_nodelet.cpp
+#)
+
+## Declare a cpp library
+add_library(obstacle_avoidance_controller
+   src/obstacle_avoidance_controller.cpp
 )
+
+add_dependencies(obstacle_avoidance_controller ${PROJECT_NAME}_gencfg)
 
 ## Declare a cpp library
 add_library(pips_controller
    src/pips_controller.cpp
-   src/pips_controller_impl.cpp
 )
-
-add_dependencies(pips_controller ${PROJECT_NAME}_gencfg)
-
 
 ## Declare a cpp library
 add_library(pips_controller_nodelet MODULE
@@ -107,9 +110,9 @@ add_executable(pips_controller_node
    src/pips_controller_node.cpp
 )
 
-add_executable(delayed_nodelet 
-   src/delayed_nodelet.cpp
-)
+#add_executable(delayed_nodelet 
+#   src/delayed_nodelet.cpp
+#)
 
 add_library(rosbag_publisher_nodelet MODULE
    src/rosbag_nodelet_publisher.cpp
@@ -142,9 +145,14 @@ target_link_libraries(pips_trajectory_tester
 #)
 
 
-target_link_libraries(pips_controller
+target_link_libraries(obstacle_avoidance_controller
    ${catkin_LIBRARIES} 
    pips_trajectory_tester
+)
+
+target_link_libraries(pips_controller
+   ${catkin_LIBRARIES} 
+   obstacle_avoidance_controller
 )
 
 target_link_libraries(pips_controller_nodelet
@@ -157,9 +165,9 @@ target_link_libraries(pips_controller_node
    pips_controller
 )
 
-target_link_libraries(delayed_nodelet
-   ${catkin_LIBRARIES}
-)
+#target_link_libraries(delayed_nodelet
+#   ${catkin_LIBRARIES}
+#)
 
 target_link_libraries(rosbag_publisher_nodelet
    ${catkin_LIBRARIES}
