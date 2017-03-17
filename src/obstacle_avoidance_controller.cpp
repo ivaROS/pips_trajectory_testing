@@ -81,12 +81,13 @@ public:
 namespace kobuki
 {
 
-  ObstacleAvoidanceController::ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) : 
-      kobuki::TrajectoryController(nh, pnh, name), 
+  ObstacleAvoidanceController::ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh) : 
+      kobuki::TrajectoryController(nh, pnh), 
+      pnh_(pnh),
       wander_(false), 
       ready_(false)
   {
-    traj_tester_ = std::make_shared<GenAndTest>();
+    traj_tester_ = std::make_shared<GenAndTest>(nh_, pnh_);
     
   };
   
@@ -97,7 +98,7 @@ namespace kobuki
   bool ObstacleAvoidanceController::init()
   {
     kobuki::TrajectoryController::init();
-    traj_tester_->init(nh_);
+    traj_tester_->init();
 
     //Using pointer
     reconfigure_server_ = std::make_shared<ReconfigureServer>(pnh_);

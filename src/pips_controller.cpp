@@ -2,10 +2,10 @@
 
  namespace kobuki
 {
-  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name) :
-    ObstacleAvoidanceController(nh, pnh, name)
+  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
+    ObstacleAvoidanceController(nh, pnh), pnh_(pnh, name_), cc_(std::make_shared<CollisionChecker>(nh_, pnh_))
   {
-      cc_ = std::make_shared<CollisionChecker>();
+      //cc_ = std::make_shared<CollisionChecker>(nh, pnh);
       traj_tester_->setCollisionChecker(cc_);
   }
 
@@ -68,8 +68,8 @@
   {
     ObstacleAvoidanceController::init();
     
-    std::string depth_image_topic = "/camera/depth/image_raw";
-    std::string depth_info_topic = "/camera/depth/camera_info";
+    std::string depth_image_topic = "camera/depth/image_raw";
+    std::string depth_info_topic = "camera/depth/camera_info";
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 

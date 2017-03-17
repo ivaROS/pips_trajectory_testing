@@ -44,7 +44,7 @@ namespace kobuki
 class ObstacleAvoidanceController : public kobuki::TrajectoryController
 {
 public:
-  ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
+  ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh);
   ~ObstacleAvoidanceController(){};
 
   /**
@@ -58,7 +58,9 @@ public:
 protected:
   void setupPublishersSubscribers();
 
-
+private:
+  ros::NodeHandle pnh_;
+  std::string name_ = "ObstacleAvoidanceController";
   
 protected:
 

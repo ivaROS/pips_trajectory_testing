@@ -48,6 +48,7 @@ typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
 
 class GenAndTest
 {
+  std::string name_ = "GenAndTest";
   ros::NodeHandle nh_, pnh_;
   geometry_msgs::TransformStamped depth_base_transform_;
 
@@ -64,7 +65,7 @@ class GenAndTest
   std_msgs::Header header_;
 
   bool parallelism_enabled_ = true;
-  std::string name_ = "GenAndTest";
+
   traj_params_ptr params_;
 
   // Actually, this should probably be a collision checker-specific thing...
@@ -72,10 +73,9 @@ class GenAndTest
 
 public:
 
-  GenAndTest();
-  void constructor();
+  GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh);
   
-  void init(ros::NodeHandle& nh);
+  void init();
   void setCollisionChecker(CollisionChecker_ptr cc);
   
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry::ConstPtr curr_odom);

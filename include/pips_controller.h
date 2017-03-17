@@ -42,7 +42,7 @@ namespace kobuki
 class PipsTrajectoryController : public kobuki::ObstacleAvoidanceController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::string& name);
+  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh);
   ~PipsTrajectoryController(){};
 
   virtual bool init();
@@ -50,11 +50,15 @@ public:
 protected:
   virtual bool isReady(const std_msgs::Header& header);
 
+
+
+private:
+  std::string name_ = "PipsController";
+  ros::NodeHandle pnh_;
+  CollisionChecker_ptr cc_;
+
   
 
-  CollisionChecker_ptr cc_;
-  
-private:
   
   bool hasTransform_ = false;
   
