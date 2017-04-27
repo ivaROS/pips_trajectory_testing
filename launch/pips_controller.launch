@@ -4,6 +4,10 @@
 
 <arg name="gazebo" default="false"/>
 
+<arg name="debug" default="false"/>
+
+<arg name="debug_prefix" value="" unless="$(arg debug)"/>
+<arg name="debug_prefix" value="xterm -e gdb --args" if="$(arg debug)"/>
 
 <arg name="depth_image_raw" default="/camera/depth/image_raw"/>
 <arg name="depth_info_raw" default="/camera/depth/camera_info"/>
@@ -68,7 +72,7 @@
 
 
 
-<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" unless="$(arg nodelet)">
+<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
     <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
     <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
     <param name="odom_spinner" value="$(arg spinner)"/>
