@@ -85,6 +85,7 @@ namespace kobuki
       kobuki::TrajectoryController(nh, pnh), 
       pnh_(pnh),
       wander_(false), 
+      idle_eval_(false),
       ready_(false)
   {
     traj_tester_ = std::make_shared<GenAndTest>(nh_, pnh_);
@@ -118,6 +119,7 @@ namespace kobuki
     
 
     wander_ = config.wander;
+    idle_eval_ = config.idle_eval;
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
     
@@ -250,13 +252,13 @@ namespace kobuki
     
 
       }
-    //If we're not wandering, then calculate trajectories constantly
-    else  
-    {
-      std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
-      std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
-    }
-                
+      //If we're not wandering, then calculate trajectories constantly
+      else if(idle_eval_)
+      {
+        std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
+        std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+      }
+                  
 
     
    
