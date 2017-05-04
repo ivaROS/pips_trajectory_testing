@@ -3,10 +3,10 @@
  namespace kobuki
 {
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-    ObstacleAvoidanceController(nh, pnh), pnh_(pnh, name_), cc_(std::make_shared<CollisionChecker>(nh_, pnh_))
+    ObstacleAvoidanceController(nh, pnh), pnh_(pnh, name_)
   {
       //cc_ = std::make_shared<CollisionChecker>(nh, pnh);
-      traj_tester_->setCollisionChecker(cc_);
+      //traj_tester_->setCollisionChecker(cc_);
   }
 
 
@@ -24,12 +24,15 @@
     }
     
     
-    //Update tester with new data
-    ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
-    cc_->setImage(image_msg, info_msg);
-    
-    //Let controller know that we have new sensor data
-    ObstacleAvoidanceController::sensorCb(image_msg->header);
+    if(isReady(image_msg->header))
+    {
+      //Update tester with new data
+      ROS_DEBUG_STREAM_NAMED(name_, "Updating collision checker image");
+      cc_->setImage(image_msg, info_msg);
+      
+      //Let controller know that we have new sensor data
+      ObstacleAvoidanceController::sensorCb(image_msg->header);
+    }
  }
 
   // Note: I haven't fully thought through other implementations, but this may be generic after all...
@@ -50,9 +53,14 @@
       {
         //Get the transform that takes a point in the base frame and transforms it to the depth optical
         geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
+        
+        cc_ = std::make_shared<CollisionChecker>(nh_, pnh_);
         cc_->setTransform(sensor_base_transform);
+        traj_tester_->setCollisionChecker(cc_);
+
 
         ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Passing transform to collision checker");
+        hasTransform_ = true;
 
       }
       catch (tf2::TransformException &ex) {
