@@ -5,8 +5,8 @@
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
     ObstacleAvoidanceController(nh, pnh), pnh_(pnh, name_)
   {
-      //cc_ = std::make_shared<CollisionChecker>(nh, pnh);
-      //traj_tester_->setCollisionChecker(cc_);
+      cc_ = std::make_shared<CollisionChecker>(nh, pnh);
+      traj_tester_->setCollisionChecker(cc_);
   }
 
 
@@ -54,10 +54,11 @@
         //Get the transform that takes a point in the base frame and transforms it to the depth optical
         geometry_msgs::TransformStamped sensor_base_transform = tfBuffer_->lookupTransform(header.frame_id, base_frame_id_, ros::Time(0));
         
-        cc_ = std::make_shared<CollisionChecker>(nh_, pnh_);
+        //cc_ = std::make_shared<CollisionChecker>(nh_, pnh_);  // it appears that the first reconfigure call happens as part of the constructor in some way, meaning that it happened before the next line here
         cc_->setTransform(sensor_base_transform);
-        traj_tester_->setCollisionChecker(cc_);
+        //traj_tester_->setCollisionChecker(cc_);
 
+        cc_->init();
 
         ROS_DEBUG_STREAM_NAMED(name_,  "Transform found! Passing transform to collision checker");
         hasTransform_ = true;
