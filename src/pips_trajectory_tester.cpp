@@ -1,6 +1,6 @@
 #include "pips_trajectory_tester.h"
 
-#include <collision_checker.h>
+#include <pips/collision_testing/collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
 #include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 

@@ -1,7 +1,7 @@
 #ifndef PIPS_TRAJECTORY_TESTER_H
 #define PIPS_TRAJECTORY_TESTER_H
 
-#include <collision_checker.h>
+#include <pips/collision_testing/collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
 #include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 
