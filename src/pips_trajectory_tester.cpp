@@ -4,7 +4,9 @@
 #include <trajectory_generator_ros_interface.h>
 #include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 
-#include <chrono>
+#include <pips_trajectory_msgs/trajectory_point.h>
+#include <pips_trajectory_msgs/trajectory_points.h>
+
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -13,8 +15,9 @@
 #include <std_msgs/Header.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <fstream>
 #include <memory>
-
+#include <chrono>
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
@@ -225,13 +228,13 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
 }
 
-int GenAndTest::evaluateTrajectory(trajectory_generator::trajectory_points& trajectory)
+int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& trajectory)
 {
 
     for(size_t i = 0; i < trajectory.points.size(); i++)
     {
 
-        trajectory_generator::trajectory_point pt = trajectory.points[i];
+        pips_trajectory_msgs::trajectory_point pt = trajectory.points[i];
         double coords[3];
         coords[0] = pt.x;
         coords[1] = pt.y;
