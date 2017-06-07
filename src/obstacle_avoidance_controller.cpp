@@ -317,7 +317,7 @@ namespace kobuki
   {
 
     //Set trajectory departure angles and speed
-    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
+    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4}; //,.6,.8,1,1.2,1.6,2,2.4};
     double v = v_des_;  //.25;
 
     size_t num_paths = dep_angles.size(); // = num_paths_; 

@@ -209,8 +209,8 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
         if(pt.x > min_dist)
         {
-
-            double coords[3];
+            //TODO: make sure collision_checker can handle input of type geometry_msgs::Point (or maybe Pose) then remove this conversion
+            double coords[3];   
             coords[0] = pt.x;
             coords[1] = pt.y;
             coords[2] = pt.z;
@@ -233,8 +233,8 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
 
     for(size_t i = 0; i < trajectory.points.size(); i++)
     {
-
-        pips_trajectory_msgs::trajectory_point pt = trajectory.points[i];
+        //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
+        pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
         double coords[3];
         coords[0] = pt.x;
         coords[1] = pt.y;
@@ -304,8 +304,6 @@ std::vector<traj_func_ptr> GenAndTest::getDenseTrajectoryFunctions()
 
 std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
 {
-    
-    ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
     
