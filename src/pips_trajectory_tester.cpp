@@ -1,10 +1,12 @@
 #include "pips_trajectory_tester.h"
 
-#include <collision_checker.h>
+#include <pips/collision_testing/collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
 #include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
 
-#include <chrono>
+#include <pips_trajectory_msgs/trajectory_point.h>
+#include <pips_trajectory_msgs/trajectory_points.h>
+
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -13,8 +15,9 @@
 #include <std_msgs/Header.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <fstream>
 #include <memory>
-
+#include <chrono>
 
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
@@ -206,8 +209,8 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
         if(pt.x > min_dist)
         {
-
-            double coords[3];
+            //TODO: make sure collision_checker can handle input of type geometry_msgs::Point (or maybe Pose) then remove this conversion
+            double coords[3];   
             coords[0] = pt.x;
             coords[1] = pt.y;
             coords[2] = pt.z;
@@ -225,13 +228,13 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
 }
 
-int GenAndTest::evaluateTrajectory(trajectory_generator::trajectory_points& trajectory)
+int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& trajectory)
 {
 
     for(size_t i = 0; i < trajectory.points.size(); i++)
     {
-
-        trajectory_generator::trajectory_point pt = trajectory.points[i];
+        //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
+        pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
         double coords[3];
         coords[0] = pt.x;
         coords[1] = pt.y;
@@ -301,8 +304,6 @@ std::vector<traj_func_ptr> GenAndTest::getDenseTrajectoryFunctions()
 
 std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
 {
-    
-    ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Depth Images");
     

@@ -1,5 +1,8 @@
 <launch>
   <arg name="world_file"  default="$(find pips_trajectory_testing)/world.xml"/>
+  
+  
+  <arg name="debug" default="false"/>
 
   <arg name="base"      value="$(optenv TURTLEBOT_BASE kobuki)"/> <!-- create, roomba -->
   <arg name="battery"   value="$(optenv TURTLEBOT_BATTERY /proc/acpi/battery/BAT0)"/>  <!-- /proc/acpi/battery/BAT0 --> 
@@ -14,7 +17,7 @@
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="use_sim_time" value="true"/>
-    <arg name="debug" value="false"/>
+    <arg name="debug" value="$(arg debug)"/>
     <arg name="gui" value="$(arg gui)" />
     <arg name="world_name" value="$(arg world_file)"/>
   </include>
@@ -25,6 +28,17 @@
     <arg name="stacks" value="$(arg stacks)"/>
     <arg name="3d_sensor" value="$(arg 3d_sensor)"/>
   </include>
+  
+  <!--http://answers.ros.org/question/11271/call-a-service-at-startup-with-a-launch-file/# -->
+  <node pkg="rosservice" type="rosservice" name="set_turtlebot_pose" args="call --wait gazebo/set_model_state '{model_state: {model_name: mobile_base, pose: {position: {x: 6.84347, y: -3.54066, z: -0.001131}, orientation: {x: 0.00315388632678, y: -0.00246070833208, z: 0.784208770176, w: 0.620484167965}}}}'"/>
+  
+
+  <rosparam command="load" param="initial_pose">
+    pose: {position: {x: 6.84347, y: -3.54066, z: -0.001131}, orientation: {x: 0.00315388632678, y: -0.00246070833208, z: 0.784208770176, w: 0.620484167965}}
+    model_name: mobile_base
+  </rosparam>
+  
+  <node pkg="pips_trajectory_testing" type="set_model_pose.py" name="initial_pose_setter" />
 
 
   <node pkg="rviz" type="rviz" name="pips_rviz" args="-d $(find pips_trajectory_testing)/turtlebot_pips_gazebo.rviz">

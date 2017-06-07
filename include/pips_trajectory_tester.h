@@ -1,9 +1,12 @@
 #ifndef PIPS_TRAJECTORY_TESTER_H
 #define PIPS_TRAJECTORY_TESTER_H
 
-#include <collision_checker.h>
+#include <pips/collision_testing/collision_checker.h>
 #include <trajectory_generator_ros_interface.h>
 #include <pips_trajectory_testing/PipsTrajectoryTesterConfig.h>
+
+//#include <pips_trajectory_msgs/trajectory_point.h>
+#include <pips_trajectory_msgs/trajectory_points.h>
 
 #include <ros/ros.h>
 
@@ -86,7 +89,7 @@ public:
   int evaluateTrajectory(ni_trajectory_ptr& traj);
   void evaluateTrajectory(pips_trajectory_ptr& traj);
 
-  int evaluateTrajectory(trajectory_generator::trajectory_points& trajectory);
+  int evaluateTrajectory(pips_trajectory_msgs::trajectory_points& trajectory);
   
   std::vector<cv::Mat> generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header);
   cv::Mat generateTrajectoryDepthImage(const pips_trajectory_ptr& traj);

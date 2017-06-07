@@ -70,6 +70,8 @@ add_library(pips_trajectory_tester
    src/pips_trajectory_tester.cpp
 )
 
+add_dependencies(pips_trajectory_tester ${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS}) #could use ${${PROJECT_NAME}_EXPORTED_TARGETS} instead
+
 
 ##Don't need the next 3 for now
 
@@ -93,7 +95,7 @@ add_library(obstacle_avoidance_controller
    src/obstacle_avoidance_controller.cpp
 )
 
-add_dependencies(obstacle_avoidance_controller ${PROJECT_NAME}_gencfg)
+add_dependencies(obstacle_avoidance_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Declare a cpp library
 add_library(pips_controller

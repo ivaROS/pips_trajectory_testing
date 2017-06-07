@@ -46,6 +46,7 @@
 #include "pips_trajectory_tester.h"
 #include <trajectory_controller.h>
 #include <pips_trajectory_testing/PipsControllerConfig.h> //Dynamic Reconfigure for high level pips controller functions
+#include <tf2_pips/tf2_trajectory.h>
 
 #include <opencv/cv.h>
 #include <sensor_msgs/Image.h>
@@ -148,7 +149,7 @@ namespace kobuki
     button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &ObstacleAvoidanceController::buttonCB, this);
     bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &ObstacleAvoidanceController::bumperCB, this);
     
-    commanded_trajectory_publisher_ = nh_.advertise< trajectory_generator::trajectory_points >("/desired_trajectory", 1, true);
+    commanded_trajectory_publisher_ = nh_.advertise< pips_trajectory_msgs::trajectory_points >("/desired_trajectory", 1, true);
   }
   
   //Pressing button 0 activates wander mode
@@ -233,7 +234,7 @@ namespace kobuki
             if(chosen_traj->getDuration() > min_ttc_)
             {
               foundPath = true;
-              trajectory_generator::trajectory_points msg = chosen_traj->toTrajectoryMsg();
+              pips_trajectory_msgs::trajectory_points msg = chosen_traj->toTrajectoryMsg();
               commanded_trajectory_publisher_.publish(msg);
             }
             else
@@ -268,7 +269,7 @@ namespace kobuki
 
   bool ObstacleAvoidanceController::checkCurrentTrajectory(const std_msgs::Header& header)
   {
-    trajectory_generator::trajectory_points trimmed_trajectory;
+    pips_trajectory_msgs::trajectory_points trimmed_trajectory;
 
     
     //Lock trajectory mutex while copying
@@ -276,10 +277,10 @@ namespace kobuki
       boost::mutex::scoped_lock lock(trajectory_mutex_);
       
       trimmed_trajectory.header = desired_trajectory_.header;
-      trimmed_trajectory.points = std::vector<trajectory_generator::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
+      trimmed_trajectory.points = std::vector<pips_trajectory_msgs::trajectory_point>(desired_trajectory_.points.begin() + curr_index_, desired_trajectory_.points.end());
     }
     
-    trajectory_generator::trajectory_points localTrajectory;
+    pips_trajectory_msgs::trajectory_points localTrajectory;
     try
     {
       localTrajectory = tfBuffer_->transform(trimmed_trajectory, base_frame_id_, ros::Duration(.1)); // This was where the transform exceptions were actually coming from!
@@ -316,7 +317,7 @@ namespace kobuki
   {
 
     //Set trajectory departure angles and speed
-    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
+    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4}; //,.6,.8,1,1.2,1.6,2,2.4};
     double v = v_des_;  //.25;
 
     size_t num_paths = dep_angles.size(); // = num_paths_; 
