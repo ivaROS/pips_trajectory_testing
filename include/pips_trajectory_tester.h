@@ -18,13 +18,6 @@
 #include <fstream>
 #include <memory>
 
-/*
-class CollisionChecker;
-class TrajectoryGeneratorBridge;
-class geometry_msgs::PointStamped;
-class cv::Mat;
-
-*/
 
 class PipsTrajectory : public ni_trajectory
 {
@@ -91,15 +84,15 @@ public:
 
   int evaluateTrajectory(pips_trajectory_msgs::trajectory_points& trajectory);
   
-  std::vector<cv::Mat> generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header);
-  cv::Mat generateTrajectoryDepthImage(const pips_trajectory_ptr& traj);
+ // std::vector<cv::Mat> generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header);
+ // cv::Mat generateTrajectoryDepthImage(const pips_trajectory_ptr& traj);
 
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
   static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
   static std::vector<traj_func_ptr> getDenseTrajectoryFunctions();
   
-  void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);
+//  void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);
   
   std::fstream save_check_data_;
   

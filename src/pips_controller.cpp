@@ -3,10 +3,11 @@
  namespace kobuki
 {
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-    ObstacleAvoidanceController(nh, pnh), pnh_(pnh, name_)
+    ObstacleAvoidanceController(nh, pnh), nh_(nh, name_), pnh_(pnh, name_)
   {
-      cc_ = std::make_shared<CollisionChecker>(nh, pnh);
+      cc_ = std::make_shared<PipsCollisionChecker>(nh_, pnh_);
       traj_tester_->setCollisionChecker(cc_);
+      
   }
 
 
@@ -82,8 +83,8 @@
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
-    depthsub_.subscribe(nh_, depth_image_topic, 10);
-    depth_info_sub_.subscribe(nh_, depth_info_topic, 10);
+    depthsub_.subscribe(ObstacleAvoidanceController::nh_, depth_image_topic, 10);
+    depth_info_sub_.subscribe(ObstacleAvoidanceController::nh_, depth_info_topic, 10);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     

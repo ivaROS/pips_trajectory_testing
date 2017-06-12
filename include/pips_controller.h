@@ -13,6 +13,7 @@
 #include "obstacle_avoidance_controller.h"
 #include "pips_trajectory_tester.h"
 //#include <pips_trajectory_testing/PipsControllerConfig.h>
+#include <pips/collision_testing/pips_collision_checker.h>
 
 
 #include <sensor_msgs/Image.h>
@@ -54,8 +55,8 @@ protected:
 
 private:
   std::string name_ = "PipsController";
-  ros::NodeHandle pnh_;
-  CollisionChecker_ptr cc_;
+  ros::NodeHandle nh_, pnh_;
+  std::shared_ptr<PipsCollisionChecker> cc_;
 
   
 

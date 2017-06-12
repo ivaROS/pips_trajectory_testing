@@ -301,7 +301,10 @@ std::vector<traj_func_ptr> GenAndTest::getDenseTrajectoryFunctions()
 }
 
 
-
+/* TODO: The following 2 methods are really the only ones that are specific to depth space checking; 
+ * they should probably go into derived classes or something
+ */
+/*
 std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
 {
     
@@ -401,8 +404,9 @@ std::vector<cv::Mat> GenAndTest::generateDepthImages(const std::vector<traj_func
     return result;
 
 }
+*/
 
-
+/*
 //
 void GenAndTest::saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions)
 {
@@ -453,6 +457,8 @@ void GenAndTest::saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_f
 
     save_check_data_.close();
 }
+
+*/
 
 
 bool PipsTrajectory::collides()
