@@ -199,23 +199,20 @@ void GenAndTest::evaluateTrajectory(pips_trajectory_ptr& traj)
 }
 
 //Test whether trajectory collides
+//Idea: move this to header, template it, and make the type of pose retrieved depend on the type desired 
+//That way, approaches without orientation info will end up calling the Point version directly (perhaps stamped?)
 int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 {
 
     for(size_t i = 0; i < traj->num_states(); i++)
     {
 
-        geometry_msgs::Point pt = traj->getPoint(i);
+        geometry_msgs::Pose pose = traj->getPose(i);
 
-        if(pt.x > min_dist)
+        if(pose.position.x > min_dist)
         {
-            //TODO: make sure collision_checker can handle input of type geometry_msgs::Point (or maybe Pose) then remove this conversion
-            double coords[3];   
-            coords[0] = pt.x;
-            coords[1] = pt.y;
-            coords[2] = pt.z;
 
-            if(cc_->testCollision(coords))
+            if(cc_->testCollision(pose))
             {
                 return i;
 
