@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pips_trajectory_testing)
 
-set(trajectory_generator_DIR ../trajectory_generator/build/devel/share/trajectory_generator/cmake)
-set(pips_DIR ../pips/build/devel/share/pips/cmake)
-set(turtlebot_trajectory_controller_DIR ../turtlebot_trajectory_controller/build/devel/share/turtlebot_trajectory_controller/cmake)
-
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -13,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   image_transport
-  image_view
+#  image_view
   tf
   tf2
   dynamic_reconfigure
@@ -70,7 +65,7 @@ add_library(pips_trajectory_tester
    src/pips_trajectory_tester.cpp
 )
 
-add_dependencies(pips_trajectory_tester ${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS}) #could use ${${PROJECT_NAME}_EXPORTED_TARGETS} instead
+add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
 
 
 ##Don't need the next 3 for now
@@ -95,7 +90,7 @@ add_library(obstacle_avoidance_controller
    src/obstacle_avoidance_controller.cpp
 )
 
-add_dependencies(obstacle_avoidance_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+add_dependencies(obstacle_avoidance_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a cpp library
 add_library(pips_controller
@@ -120,10 +115,6 @@ add_library(rosbag_publisher_nodelet MODULE
    src/rosbag_nodelet_publisher.cpp
 )
 
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(pips_trajectory_testing_node pips_trajectory_testing_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pips_trajectory_tester
