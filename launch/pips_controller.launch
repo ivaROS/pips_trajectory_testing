@@ -13,8 +13,8 @@
 <arg name="depth_image_raw" default="/camera/depth/image_raw"/>
 <arg name="depth_info_raw" default="/camera/depth/camera_info"/>
 
-<arg name="depth_image_dec" default="/camera/decimated/depth_image"/>
-<arg name="depth_info_dec" default="/camera/decimated/depth_info"/>
+<arg name="depth_image_dec" default="/camera/depth_decimated/image"/>
+<arg name="depth_info_dec" default="/camera/depth_decimated/camera_info"/>
 
 <!--If driver_decimation is on, then the temporary topic is set to the raw stream. Otherwise, it is set to the decimated stream-->
 <arg name="depth_image_topic_t" value="$(arg depth_image_raw)" if="$(arg driver_decimation)"/>
@@ -62,20 +62,26 @@
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
 
-
+<!-- other topics to remap: enable, disable, GenAndTest/desired_path -->
 <node name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_controller_nodelet $(arg camera)/camera_nodelet_manager" if="$(arg nodelet)" >
-    <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
-    <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
+    <remap from="$(arg camera)/depth/image_raw" to="$(arg depth_image)" />
+    <remap from="$(arg camera)/depth/camera_info" to="$(arg depth_info)" />
     <remap from="$(arg camera)/GenAndTest/tested_paths" to="/GenAndTest/tested_paths"/>
     <remap from="$(arg camera)/GenAndTest/collision_points" to="/GenAndTest/collision_points"/>
+    <remap from="$(arg camera)/odom" to="/odom"/>
+    <remap from="$(arg camera)/cmd_vel_mux/input/navi" to="cmd_vel_mux/input/navi"/>
+    <remap from="$(arg camera)/desired_trajectory" to="desired_trajectory"/>
+    <remap from="$(arg camera)/desired_odom" to="desired_odom"/>
+    <remap from="$(arg camera)/transformed_trajectory" to="transformed_trajectory"/>
+
     <param name="odom_spinner" value="$(arg spinner)"/>
 </node>
 
 
 
 <node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
-    <remap from="/camera/depth/image_raw" to="$(arg depth_image)" />
-    <remap from="/camera/depth/camera_info" to="$(arg depth_info)" />
+    <remap from="/camera/camera/depth/image_raw" to="$(arg depth_image)" />
+    <remap from="/camera/camera/depth/camera_info" to="$(arg depth_info)" />
     <param name="odom_spinner" value="$(arg spinner)"/>
 </node>
 
