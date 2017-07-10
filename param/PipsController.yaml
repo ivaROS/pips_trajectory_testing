@@ -1,0 +1,27 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      idle_eval: false
+      min_ttc: 3.0
+      min_tte: 5.0
+      name: Default
+      num_paths: 5
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      type: ''
+      v_des: 0.25
+      wander: true
+    state: []
+  idle_eval: false
+  min_ttc: 3.0
+  min_tte: 5.0
+  num_paths: 5
+  v_des: 0.25
+  wander: true
+state: []

@@ -61,9 +61,13 @@
 
 <param name="enable_parallel_loop" value="$(arg parfor)"/>
 
+<arg name="controller_name" value="pips_controller_nodelet" if="$(arg nodelet)"/>
+<arg name="controller_name" value="pips_controller_node" unless="$(arg nodelet)"/>
+
+
 
 <!-- other topics to remap: enable, disable, GenAndTest/desired_path -->
-<node name="pips_controller_nodelet" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_controller_nodelet camera_nodelet_manager" ns="$(arg camera)" if="$(arg nodelet)" >
+<node name="$(arg controller_name)" pkg="nodelet" type="nodelet" args="load pips_trajectory_testing/pips_controller_nodelet camera_nodelet_manager" ns="$(arg camera)" if="$(arg nodelet)" >
     <remap from="camera/depth/image_raw" to="depth_decimated/image" />
     <remap from="camera/depth/camera_info" to="depth_decimated/camera_info" />
     <remap from="GenAndTest/tested_paths" to="/GenAndTest/tested_paths"/>
@@ -73,13 +77,23 @@
     <remap from="desired_trajectory" to="/desired_trajectory"/>
     <remap from="desired_odom" to="/desired_odom"/>
     <remap from="transformed_trajectory" to="/transformed_trajectory"/>
-
     <param name="odom_spinner" value="$(arg spinner)"/>
 </node>
 
 
 
-<node name="pips_controller_node" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
+
+<group unless="$(arg gazebo)">
+  <node name="dynparam_pips_controller" pkg="dynamic_reconfigure" type="dynparam" args="load $(arg controller_name) $(find pips_trajectory_testing)/param/PipsController.yaml"/> 
+  
+  <node name="dynparam_genandtest" pkg="dynamic_reconfigure" type="dynparam" args="load $(arg controller_name)/GenAndTest $(find pips_trajectory_testing)/param/GenAndTest.yaml"/> 
+  
+  
+</group>
+
+
+
+<node name="$(arg controller_name)" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
     <remap from="/camera/camera/depth/image_raw" to="$(arg depth_image)" />
     <remap from="/camera/camera/depth/camera_info" to="$(arg depth_info)" />
     <param name="odom_spinner" value="$(arg spinner)"/>
