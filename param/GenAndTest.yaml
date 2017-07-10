@@ -1,0 +1,37 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  a_max: 0.1
+  cd: 5.0
+  cl: 1.0
+  cp: 1.0
+  dt: 0.1
+  eps: 0.01
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      a_max: 0.1
+      cd: 5.0
+      cl: 1.0
+      cp: 1.0
+      dt: 0.1
+      eps: 0.01
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      name: Default
+      parallelism: true
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      state: true
+      tf: 10.0
+      type: ''
+      v_max: 0.35
+      w_dot_max: 0.5 
+      w_max: 3.0
+    state: []
+  parallelism: true
+  tf: 10.0
+  v_max: 0.35
+  w_dot_max: 0.5
+  w_max: 3.0
+state: []
