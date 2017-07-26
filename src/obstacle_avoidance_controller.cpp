@@ -130,8 +130,9 @@ namespace kobuki
   //Hitting the bumper deactivates wander mode
   void ObstacleAvoidanceController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
-    if (wander_ && msg->state == kobuki_msgs::BumperEvent::PRESSED )
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED )
     {
+      stop();
       wander_ = false;
       ROS_INFO_STREAM_NAMED(name_,  "Robot collided with obstacle! Deactivating Wander");
     }
@@ -208,6 +209,7 @@ namespace kobuki
           //If no satisfactory trajectory was found, then command a halt.
           if(!foundPath)
           {
+              ROS_WARN_STREAM_NAMED(name_, "No path found, halting." );
             stop();
           }
         }
