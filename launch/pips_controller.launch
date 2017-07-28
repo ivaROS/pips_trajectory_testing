@@ -83,7 +83,7 @@
 
 
 
-
+<!--
 <group ns="$(arg ns)"  unless="$(arg gazebo)">
   <node name="dynparam_pips_controller" pkg="dynamic_reconfigure" type="dynparam" args="load $(arg controller_name) $(find pips_trajectory_testing)/param/PipsController.yaml"/> 
   
@@ -91,7 +91,7 @@
   
   
 </group>
-
+-->
 
 
 <node name="$(arg controller_name)" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">

@@ -19,6 +19,8 @@
 #include <memory>
 #include <chrono>
 
+#include <omp.h>
+
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
 
@@ -157,6 +159,7 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
 #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
         for(size_t i = 0; i < num_paths; i++)
         {
+
             pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
             traj->header = header;
             traj->params = params_;
@@ -169,6 +172,18 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
             evaluateTrajectory(traj);
 
             trajectories[i] = traj;
+
+
+            if(omp_in_parallel())
+            {
+              int thread_id = omp_get_thread_num();
+              auto t2 = std::chrono::high_resolution_clock::now();
+              std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
+              ROS_WARN_DEBUG("OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
+            
+             }
+
         }
     }
     else
