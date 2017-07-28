@@ -180,7 +180,7 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
               auto t2 = std::chrono::high_resolution_clock::now();
               std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
 
-              ROS_WARN_DEBUG("OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
+              ROS_DEBUG_STREAM_NAMED(name_,"OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
             
              }
 
