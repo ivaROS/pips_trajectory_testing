@@ -42,6 +42,26 @@ typedef std::shared_ptr<PipsTrajectory> pips_trajectory_ptr;
 typedef std::shared_ptr<TrajectoryGeneratorBridge> TrajectoryGeneratorBridge_ptr;
 typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
 
+
+//Generates a straight line trajectory with a given angle and speed
+class angled_straight_traj_func : public traj_func{
+
+    double dep_angle_;
+    double v_;
+
+public:
+    angled_straight_traj_func( double dep_angle, double v ) : dep_angle_(dep_angle), v_(v) { }
+
+    void dState ( const state_type &x , state_type &dxdt , const double  t  )
+    {
+        dxdt[near_identity::XD_IND] = v_*cos( dep_angle_);
+        dxdt[near_identity::YD_IND] = v_*sin( dep_angle_);
+    }
+
+
+};
+
+
 class GenAndTest
 {
   std::string name_ = "GenAndTest";
@@ -77,7 +97,9 @@ public:
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry::ConstPtr curr_odom);
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions);
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, double v0, std_msgs::Header& header);
   std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header);
+  std::vector<ni_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header, traj_params_ptr params);
   
   int evaluateTrajectory(ni_trajectory_ptr& traj);
   void evaluateTrajectory(pips_trajectory_ptr& traj);

@@ -78,6 +78,7 @@
   {
     ObstacleAvoidanceController::init();
     
+    //TODO: change these to just 'image' and 'camera_info' to facilitate easier remapping
     std::string depth_image_topic = "camera/depth/image_raw";
     std::string depth_info_topic = "camera/depth/camera_info";
 

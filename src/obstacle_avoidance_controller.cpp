@@ -21,7 +21,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <memory>
 
-
+/*
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
 
@@ -39,6 +39,8 @@ public:
     
     
 };
+
+*/
 
 namespace kobuki
 {
@@ -140,6 +142,7 @@ namespace kobuki
       ROS_DEBUG_STREAM_NAMED(name_,  "Non-handled Bumper event");
     }
   };
+  
   
   
   void ObstacleAvoidanceController::sensorCb(const std_msgs::Header& header)
@@ -292,6 +295,7 @@ namespace kobuki
     }
     return trajectory_functions;
   }
+  
 
 
 

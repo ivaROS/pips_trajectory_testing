@@ -29,9 +29,6 @@
     <arg name="3d_sensor" value="$(arg 3d_sensor)"/>
   </include>
   
-  <!--http://answers.ros.org/question/11271/call-a-service-at-startup-with-a-launch-file/# -->
-  <node pkg="rosservice" type="rosservice" name="set_turtlebot_pose" args="call --wait gazebo/set_model_state '{model_state: {model_name: mobile_base, pose: {position: {x: 6.84347, y: -3.54066, z: -0.001131}, orientation: {x: 0.00315388632678, y: -0.00246070833208, z: 0.784208770176, w: 0.620484167965}}}}'"/>
-  
 
   <rosparam command="load" param="initial_pose">
     pose: {position: {x: 6.84347, y: -3.54066, z: -0.001131}, orientation: {x: 0.00315388632678, y: -0.00246070833208, z: 0.784208770176, w: 0.620484167965}}

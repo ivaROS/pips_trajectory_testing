@@ -19,6 +19,7 @@
 #include <memory>
 #include <chrono>
 
+/*
 //Generates a straight line trajectory with a given angle and speed
 class angled_straight_traj_func : public traj_func{
 
@@ -36,7 +37,7 @@ public:
     
     
 };
-
+*/
 
 
 GenAndTest::GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
@@ -79,6 +80,7 @@ void GenAndTest::init()
 
 
 void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level) {
+    //TODO: Need to add the rest of these
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False"));
     
     parallelism_enabled_ = config.parallelism;
@@ -114,29 +116,36 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     return GenAndTest::run(trajectory_functions, x0, header);
 }
 
-
+//This is for cases where no header is available
 std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0)
 {
-    return GenAndTest::run(trajectory_functions, x0, header_);
+    std_msgs::Header header;
+    return GenAndTest::run(trajectory_functions, x0, header);
+}
+
+std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, double v0, std_msgs::Header& header)
+{
+    state_type x0 = traj_gen_bridge_->initState();
+    x0[near_identity::V_IND] = v0;
+    return GenAndTest::run(trajectory_functions, x0, header);
+}
+
+//This version is for standard online running
+std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+{
+    std::vector<ni_trajectory_ptr> trajectories = run(trajectory_functions, x0, header, params_);
+    
+    //It is debateable whether path publishing belongs in this class...
+    TrajectoryGeneratorBridge::publishPaths(path_pub_, trajectories);
+    TrajectoryGeneratorBridge::publishDesiredPaths(desired_path_pub_, trajectories);
+
+    return trajectories;
 }
 
 //This is the lowest level version that is actually run; the rest are for convenience
-std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header)
+std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, std_msgs::Header& header, traj_params_ptr params)
 {
-    num_frames=num_frames+1;
-    
-    ROS_DEBUG_STREAM_NAMED(name_, "Num frames: " << num_frames);
-    
-    
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
-
-    if(num_frames == 1)
-    {
-        /* Should use a service call to trigger the generation+publication */
-        //generateDepthImages(trajectory_functions, x0, header);
-    }
-    
-    
     size_t num_paths = trajectory_functions.size();
     
     std::vector<ni_trajectory_ptr> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
@@ -149,12 +158,12 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     coords[1] = 0;
     coords[2] = 0;
 
-    if(~cc_->testCollision(coords))
+    if(!cc_->testCollision(coords))
     {
         ROS_DEBUG_STREAM_NAMED(name_, "Parallelism: " << parallelism_enabled_);
         //Perform trajectory generation and collision detection in parallel if enabled
         //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
-#pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+        #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
         for(size_t i = 0; i < num_paths; i++)
         {
             pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
@@ -180,12 +189,8 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     //End timer
     auto t2 = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
-
     
     ROS_DEBUG_STREAM_NAMED(name_, "Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
-
-    TrajectoryGeneratorBridge::publishPaths(path_pub_, trajectories);
-    TrajectoryGeneratorBridge::publishDesiredPaths(desired_path_pub_, trajectories);
 
     return trajectories;
 }
