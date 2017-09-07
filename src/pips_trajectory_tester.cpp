@@ -13,6 +13,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
+#include <../../visualization_msgs/include/visualization_msgs/Marker.h>
 #include <dynamic_reconfigure/server.h>
 
 #include <fstream>
@@ -43,7 +44,7 @@ void GenAndTest::init()
     //Create the various visualization publishers
     path_pub_ = nh_.advertise<pips_msgs::PathArray>("tested_paths", 5);
     desired_path_pub_ = nh_.advertise<pips_msgs::PathArray>("desired_paths", 5);
-    pose_array_pub_ = nh_.advertise<geometry_msgs::PoseArray>("collision_points", 5);
+    visualization_pub_ = nh_.advertise<visualization_msgs::Marker>("collision_points", 5);
 
     
     reconfigure_server_.reset( new ReconfigureServer(pnh_));
@@ -123,18 +124,28 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     TrajectoryGeneratorBridge::publishPaths(path_pub_, trajectories);
     TrajectoryGeneratorBridge::publishDesiredPaths(desired_path_pub_, trajectories);
     
-    geometry_msgs::PoseArray collision_poses;
-    collision_poses.header = header;
+    
+    visualization_msgs::Marker colliding_points;
+    colliding_points.header = header;
+    colliding_points.pose.orientation.w=1;
+    colliding_points.ns = "collision_points";
+    colliding_points.type = visualization_msgs::Marker::POINTS;
+    colliding_points.action = visualization_msgs::Marker::ADD;
+    colliding_points.scale.x = .05;
+    colliding_points.scale.y = .05;
+    colliding_points.color.a=1;
+    colliding_points.color.r=1;
+    
     for(auto ni_traj : trajectories)
     {
         pips_trajectory_ptr traj= std::static_pointer_cast<PipsTrajectory>(ni_traj);
 
 	if(traj->collides())
 	{
-	    collision_poses.poses.push_back(traj->get_collision_pose());
+	    colliding_points.points.push_back(traj->get_collision_pose().pose.position);
 	}
     }
-    pose_array_pub_.publish(collision_poses);
+    visualization_pub_.publish(colliding_points);
 
     return trajectories;
 }
@@ -533,12 +544,12 @@ void PipsTrajectory::get_collision_ind(int & ind)
     ind = collision_ind_;
 }
 
-geometry_msgs::Pose PipsTrajectory::get_collision_pose()
+geometry_msgs::PoseStamped PipsTrajectory::get_collision_pose()
 {
-    geometry_msgs::Pose pose;
+    geometry_msgs::PoseStamped pose;
     if(collides())
     {
-        pose = ni_trajectory::getPose(collision_ind_);
+        pose = ni_trajectory::getPoseStamped(collision_ind_);
     }
     else
     {

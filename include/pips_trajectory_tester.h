@@ -34,7 +34,7 @@ public:
   //
   void get_collision_ind(int & ind);
   geometry_msgs::PointStamped get_check_point(const int ind);
-  geometry_msgs::Pose get_collision_pose();
+  geometry_msgs::PoseStamped get_collision_pose();
 
 };
 
@@ -77,7 +77,7 @@ class GenAndTest
 
   CollisionChecker_ptr cc_;
 
-  ros::Publisher path_pub_, desired_path_pub_, pose_array_pub_;
+  ros::Publisher path_pub_, desired_path_pub_, visualization_pub_;
   int num_frames =0;
   std::string base_frame_id_ = "";
   std_msgs::Header header_;
