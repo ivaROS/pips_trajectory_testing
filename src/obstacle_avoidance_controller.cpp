@@ -289,10 +289,10 @@ namespace kobuki
   {
 
     //Set trajectory departure angles and speed
-    std::vector<double> dep_angles = getDepartureAngles(); //,.6,.8,1,1.2,1.6,2,2.4};
-    double v = v_des_;  //default is .25;
+    //std::vector<double> dep_angles = getDepartureAngles(); //,.6,.8,1,1.2,1.6,2,2.4};
+    //double v = v_des_;  //default is .25;
 
-    return GenAndTest::getTrajectoryFunctions(dep_angles,v);
+    return GenAndTest::getTrajectoryFunctions(num_paths_, v_des_);
   }
   
   
