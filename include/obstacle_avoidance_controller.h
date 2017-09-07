@@ -98,7 +98,9 @@ protected:
 
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);
-  std::vector<traj_func_ptr> getTrajectoryFunctions();
+  virtual std::vector<traj_func_ptr> getTrajectoryFunctions();
+  virtual std::vector<double> getDepartureAngles();
+
 };
 
 } //ns kobuki

@@ -19,25 +19,9 @@
 #include <memory>
 #include <chrono>
 
-/*
-//Generates a straight line trajectory with a given angle and speed
-class angled_straight_traj_func : public traj_func{
+#include <omp.h>
 
-    double dep_angle_;
-    double v_;
 
-public:
-    angled_straight_traj_func( double dep_angle, double v ) : dep_angle_(dep_angle), v_(v) { }
-    
-    void dState ( const state_type &x , state_type &dxdt , const double  t  )
-    {
-        dxdt[near_identity::XD_IND] = v_*cos( dep_angle_);
-        dxdt[near_identity::YD_IND] = v_*sin( dep_angle_);
-    }
-    
-    
-};
-*/
 
 
 GenAndTest::GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
@@ -166,6 +150,7 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
         #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
         for(size_t i = 0; i < num_paths; i++)
         {
+
             pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
             traj->header = header;
             traj->params = params_;
@@ -178,6 +163,18 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
             evaluateTrajectory(traj);
 
             trajectories[i] = traj;
+
+
+            if(omp_in_parallel())
+            {
+              int thread_id = omp_get_thread_num();
+              auto t2 = std::chrono::high_resolution_clock::now();
+              std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+
+              ROS_DEBUG_STREAM_NAMED(name_,"OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
+            
+             }
+
         }
     }
     else
@@ -253,6 +250,35 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
 
 }
 
+  std::vector<traj_func_ptr> GenAndTest::getTrajectoryFunctions(unsigned int num_paths, double velocity)
+  {
+
+    //Set trajectory departure angles and speed
+    std::vector<double> dep_angles = {-.4,.4}; //,.6,.8,1,1.2,1.6,2,2.4};
+
+    std::vector<traj_func_ptr> trajectory_functions(num_paths);
+    
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      double dep_angle = dep_angles[0] + i*(dep_angles[1] - dep_angles[0])/(num_paths - 1); 
+      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angle, velocity);
+
+    }
+    return trajectory_functions;
+  }
+
+  std::vector<traj_func_ptr> GenAndTest::getTrajectoryFunctions(const std::vector<double>& dep_angles, double velocity)
+  {
+    unsigned int num_paths = dep_angles.size();
+    
+    std::vector<traj_func_ptr> trajectory_functions(num_paths);
+    
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angles[i], velocity);
+    }
+    return trajectory_functions;
+  }
 
 std::vector<traj_func_ptr> GenAndTest::getDefaultTrajectoryFunctions()
 {
@@ -261,16 +287,7 @@ std::vector<traj_func_ptr> GenAndTest::getDefaultTrajectoryFunctions()
     std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
     double v = .25;
 
-    size_t num_paths = dep_angles.size();
-    
-    std::vector<traj_func_ptr> trajectory_functions(num_paths);
-    
-    for(size_t i = 0; i < num_paths; i++)
-    {
-        double dep_angle = dep_angles[i];
-        trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angle, v);
-    }
-    return trajectory_functions;
+    return getTrajectoryFunctions(dep_angles, v);
 }
 
 

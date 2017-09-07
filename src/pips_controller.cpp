@@ -84,8 +84,8 @@
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
-    depthsub_.subscribe(ObstacleAvoidanceController::nh_, depth_image_topic, 10);
-    depth_info_sub_.subscribe(ObstacleAvoidanceController::nh_, depth_info_topic, 10);
+    depthsub_.subscribe(ObstacleAvoidanceController::nh_, depth_image_topic, 1);
+    depth_info_sub_.subscribe(ObstacleAvoidanceController::nh_, depth_info_topic, 1);
     synced_images.reset(new image_synchronizer(image_synchronizer(10), depthsub_, depth_info_sub_) );
     synced_images->registerCallback(bind(&PipsTrajectoryController::depthImageCb, this, _1, _2));
     

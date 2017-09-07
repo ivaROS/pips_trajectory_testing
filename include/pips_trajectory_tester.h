@@ -112,6 +112,10 @@ public:
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
   static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
+  static std::vector<traj_func_ptr> getTrajectoryFunctions(const std::vector<double>& dep_angles, double velocity);
+  static std::vector<traj_func_ptr> getTrajectoryFunctions(unsigned int num_paths, double velocity);
+
+
   static std::vector<traj_func_ptr> getDenseTrajectoryFunctions();
   
 //  void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);

@@ -17,7 +17,7 @@
 
 
 #include <sensor_msgs/Image.h>
-#include <image_transport/subscriber_filter.h>
+//#include <image_transport/subscriber_filter.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
@@ -51,7 +51,8 @@ public:
 protected:
   virtual bool isReady(const std_msgs::Header& header);
 
-
+  virtual void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+               const sensor_msgs::CameraInfo::ConstPtr& info_msg);
 
 private:
   std::string name_ = "PipsController";
@@ -66,13 +67,12 @@ private:
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
                                                       sensor_msgs::CameraInfo> image_sync_policy;
   typedef message_filters::Synchronizer<image_sync_policy> image_synchronizer;
-  boost::shared_ptr<image_synchronizer> synced_images;
   
   message_filters::Subscriber<sensor_msgs::Image> depthsub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> depth_info_sub_;
-  
-  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-               const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+  boost::shared_ptr<image_synchronizer> synced_images;
+ 
+
                
                
 

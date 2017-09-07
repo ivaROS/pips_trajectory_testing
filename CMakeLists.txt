@@ -39,8 +39,8 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES obstacle_avoidance_controller pips_trajectory_tester
-  CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure
+  LIBRARIES obstacle_avoidance_controller pips_trajectory_tester pips_controller
+  CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
 ##  DEPENDS system_lib
 )
 

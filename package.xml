@@ -48,7 +48,8 @@
   <build_depend>pips</build_depend>
   <build_depend>tf2_pips</build_depend>
   <build_depend>turtlebot_trajectory_controller</build_depend>
-
+  <build_depend>image_transport</build_depend>
+  <build_depend>sensor_msgs</build_depend>
   
   <run_depend>nodelet</run_depend>
   <run_depend>roscpp</run_depend>
@@ -60,6 +61,8 @@
   <run_depend>tf2_pips</run_depend>
   <run_depend>trajectory_generator</run_depend>
   <run_depend>turtlebot_trajectory_controller</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>sensor_msgs</run_depend>
 
 
   <export>

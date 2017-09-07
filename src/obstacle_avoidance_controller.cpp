@@ -132,8 +132,9 @@ namespace kobuki
   //Hitting the bumper deactivates wander mode
   void ObstacleAvoidanceController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
-    if (wander_ && msg->state == kobuki_msgs::BumperEvent::PRESSED )
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED )
     {
+      stop();
       wander_ = false;
       ROS_INFO_STREAM_NAMED(name_,  "Robot collided with obstacle! Deactivating Wander");
     }
@@ -183,7 +184,8 @@ namespace kobuki
         {    
           ROS_DEBUG_STREAM_COND_NAMED(!executing_, name_, "Not currently executing, test new trajectories");
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
-          std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
+	  
+	  std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
@@ -211,6 +213,7 @@ namespace kobuki
           //If no satisfactory trajectory was found, then command a halt.
           if(!foundPath)
           {
+              ROS_WARN_STREAM_NAMED(name_, "No path found, halting." );
             stop();
           }
         }
@@ -276,25 +279,22 @@ namespace kobuki
     }
   }
   
+  std::vector<double> ObstacleAvoidanceController::getDepartureAngles()
+  {
+    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4};
+    return dep_angles;
+  }
   
   std::vector<traj_func_ptr> ObstacleAvoidanceController::getTrajectoryFunctions()
   {
 
     //Set trajectory departure angles and speed
-    std::vector<double> dep_angles = {-.4,-.2,0,.2,.4}; //,.6,.8,1,1.2,1.6,2,2.4};
-    double v = v_des_;  //.25;
+    std::vector<double> dep_angles = getDepartureAngles(); //,.6,.8,1,1.2,1.6,2,2.4};
+    double v = v_des_;  //default is .25;
 
-    size_t num_paths = dep_angles.size(); // = num_paths_; 
-    
-    std::vector<traj_func_ptr> trajectory_functions(num_paths);
-    
-    for(size_t i = 0; i < num_paths; i++)
-    {
-      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angles[i], v);
-
-    }
-    return trajectory_functions;
+    return GenAndTest::getTrajectoryFunctions(dep_angles,v);
   }
+  
   
 
 
