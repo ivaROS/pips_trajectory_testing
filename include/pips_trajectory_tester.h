@@ -34,6 +34,8 @@ public:
   //
   void get_collision_ind(int & ind);
   geometry_msgs::PointStamped get_check_point(const int ind);
+  geometry_msgs::Pose get_collision_pose();
+
 };
 
 typedef std::shared_ptr<PipsTrajectory> pips_trajectory_ptr;

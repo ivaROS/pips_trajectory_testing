@@ -122,6 +122,19 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     //It is debateable whether path publishing belongs in this class...
     TrajectoryGeneratorBridge::publishPaths(path_pub_, trajectories);
     TrajectoryGeneratorBridge::publishDesiredPaths(desired_path_pub_, trajectories);
+    
+    geometry_msgs::PoseArray collision_poses;
+    collision_poses.header = header;
+    for(auto ni_traj : trajectories)
+    {
+        pips_trajectory_ptr traj= std::static_pointer_cast<PipsTrajectory>(ni_traj);
+
+	if(traj->collides())
+	{
+	    collision_poses.poses.push_back(traj->get_collision_pose());
+	}
+    }
+    pose_array_pub_.publish(collision_poses);
 
     return trajectories;
 }
@@ -518,6 +531,20 @@ size_t PipsTrajectory::num_states()
 void PipsTrajectory::get_collision_ind(int & ind)
 {
     ind = collision_ind_;
+}
+
+geometry_msgs::Pose PipsTrajectory::get_collision_pose()
+{
+    geometry_msgs::Pose pose;
+    if(collides())
+    {
+        pose = ni_trajectory::getPose(collision_ind_);
+    }
+    else
+    {
+	ROS_ERROR("Error! Attempting to get colliding pose from trajectory that does not collide!");
+    }
+    return pose;
 }
 
 geometry_msgs::PointStamped PipsTrajectory::get_check_point(const int ind)
