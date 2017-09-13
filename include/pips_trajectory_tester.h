@@ -71,6 +71,9 @@ class GenAndTest
   geometry_msgs::TransformStamped depth_base_transform_;
 
   void configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level);
+  
+  bool preCheck();
+
 
   typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsTrajectoryTesterConfig> ReconfigureServer;
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
@@ -86,7 +89,7 @@ class GenAndTest
 
   traj_params_ptr params_;
 
-  // Actually, this should probably be a collision checker-specific thing...
+  // TODO: move this into the collision checker
   double min_dist = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
 
 public:

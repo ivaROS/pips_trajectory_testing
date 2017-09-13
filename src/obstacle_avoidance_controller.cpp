@@ -223,7 +223,7 @@ namespace kobuki
       //If we're not wandering, then calculate trajectories constantly
       else if(idle_eval_)
       {
-        std::vector<traj_func_ptr> trajectory_functions = ObstacleAvoidanceController::getTrajectoryFunctions();
+        std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
         std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
       }
                   

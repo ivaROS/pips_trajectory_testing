@@ -161,12 +161,7 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    double coords[3];
-    coords[0] = min_dist;
-    coords[1] = 0;
-    coords[2] = 0;
-
-    if(!cc_->testCollision(coords))
+    if(!preCheck())
     {
         ROS_DEBUG_STREAM_NAMED(name_, "Parallelism: " << parallelism_enabled_);
         //Perform trajectory generation and collision detection in parallel if enabled
@@ -177,7 +172,7 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
 
             pips_trajectory_ptr traj = std::make_shared<PipsTrajectory>();
             traj->header = header;
-            traj->params = params_;
+            traj->params = params;
 
             traj->trajpntr = trajectory_functions[i];
             traj->x0_ = x0;
@@ -217,6 +212,22 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
 }
 
 
+bool GenAndTest::preCheck()
+{
+    bool returnValue = false;
+    
+    if(cc_)
+    {
+      double coords[3];
+      coords[0] = min_dist;
+      coords[1] = 0;
+      coords[2] = 0;
+
+      returnValue = cc_->testCollision(coords);
+    }
+    return returnValue;
+}
+
 void GenAndTest::evaluateTrajectory(pips_trajectory_ptr& traj)
 {
     ni_trajectory_ptr ni_traj= std::static_pointer_cast<ni_trajectory>(traj);
@@ -229,22 +240,24 @@ void GenAndTest::evaluateTrajectory(pips_trajectory_ptr& traj)
 //That way, approaches without orientation info will end up calling the Point version directly (perhaps stamped?)
 int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 {
+    if(cc_)
+      {
+      for(size_t i = 0; i < traj->num_states(); i++)
+      {
 
-    for(size_t i = 0; i < traj->num_states(); i++)
-    {
+	  geometry_msgs::Pose pose = traj->getPose(i);
 
-        geometry_msgs::Pose pose = traj->getPose(i);
+	  if(pose.position.x > min_dist)
+	  {
 
-        if(pose.position.x > min_dist)
-        {
+	      if(cc_->testCollision(pose))
+	      {
+		  return i;
 
-            if(cc_->testCollision(pose))
-            {
-                return i;
+	      }
+	  }
 
-            }
-        }
-
+      }
     }
 
     return -1;
@@ -253,21 +266,23 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
 int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& trajectory)
 {
-
-    for(size_t i = 0; i < trajectory.points.size(); i++)
+    if(cc_)
     {
-        //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
-        pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
-        double coords[3];
-        coords[0] = pt.x;
-        coords[1] = pt.y;
-        coords[2] = 0;
-        
-        if(cc_->testCollision(coords))
-        {
-            return i;
-        }
+      for(size_t i = 0; i < trajectory.points.size(); i++)
+      {
+	  //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
+	  pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
+	  double coords[3];
+	  coords[0] = pt.x;
+	  coords[1] = pt.y;
+	  coords[2] = 0;
+	  
+	  if(cc_->testCollision(coords))
+	  {
+	      return i;
+	  }
 
+      }
     }
 
     return -1;
