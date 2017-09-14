@@ -13,7 +13,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Header.h>
-#include <../../visualization_msgs/include/visualization_msgs/Marker.h>
+#include <visualization_msgs/Marker.h>
 #include <dynamic_reconfigure/server.h>
 
 #include <fstream>
