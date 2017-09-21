@@ -57,8 +57,10 @@ include_directories(
 )
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -std=c++11 ${OpenMP_CXX_FLAGS}")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ${OpenMP_C_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -std=c++11 ${OpenMP_CXX_FLAGS}")
+
+
 
 ## Declare a cpp library
 add_library(pips_trajectory_tester
@@ -66,6 +68,8 @@ add_library(pips_trajectory_tester
 )
 
 add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
+
+target_compile_options(pips_trajectory_tester PUBLIC -Wall ${OpenMP_CXX_FLAGS} -std=c++11)
 
 
 ##Don't need the next 3 for now
@@ -119,6 +123,7 @@ add_library(rosbag_publisher_nodelet MODULE
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pips_trajectory_tester
    ${catkin_LIBRARIES}
+   ${OpenMP_CXX_FLAGS}
 )
 
 

@@ -65,7 +65,7 @@ private:
 protected:
 
   
-  bool wander_,ready_,idle_eval_;
+  bool wander_,idle_eval_,ready_;
   
 
   ros::Subscriber button_sub_, bumper_sub_;
