@@ -68,8 +68,8 @@ add_library(pips_trajectory_tester
 )
 
 add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
-
-target_compile_options(pips_trajectory_tester PUBLIC -Wall ${OpenMP_CXX_FLAGS} -std=c++11)
+target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS}  -fprofile-generate)
+target_compile_options(pips_trajectory_tester PUBLIC  -std=c++11)
 
 
 ##Don't need the next 3 for now
@@ -122,8 +122,11 @@ add_library(rosbag_publisher_nodelet MODULE
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pips_trajectory_tester
+  PUBLIC
    ${catkin_LIBRARIES}
+   PRIVATE
    ${OpenMP_CXX_FLAGS}
+   -fprofile-generate
 )
 
 
