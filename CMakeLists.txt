@@ -57,8 +57,8 @@ include_directories(
 )
 
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall ${OpenMP_C_FLAGS}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -std=c++11 ${OpenMP_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ")
 
 
 
@@ -68,7 +68,7 @@ add_library(pips_trajectory_tester
 )
 
 add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
-target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS}  -fprofile-generate)
+target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS})
 target_compile_options(pips_trajectory_tester PUBLIC  -std=c++11)
 
 
@@ -126,7 +126,6 @@ target_link_libraries(pips_trajectory_tester
    ${catkin_LIBRARIES}
    PRIVATE
    ${OpenMP_CXX_FLAGS}
-   -fprofile-generate
 )
 
 
