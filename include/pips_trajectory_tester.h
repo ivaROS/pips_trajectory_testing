@@ -125,8 +125,8 @@ public:
   
 //  void saveCollisionCheckData(std::vector<traj_func_ptr>& trajectory_functions);
   
-  std::fstream save_check_data_;
-  
+//  std::fstream save_check_data_;
+    
 };
 
 

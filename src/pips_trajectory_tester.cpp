@@ -268,7 +268,11 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
 	  //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
 	  pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
 	  
-	  if(cc_->testCollision(pt))
+	  geometry_msgs::Pose pose;
+	  pose.position.x = pt.x;
+	  pose.position.y = pt.y;
+	  TrajectoryGeneratorBridge::yawToQuaternion(pt.theta);
+	  if(cc_->testCollision(pose))
 	  {
 	      return i;
 	  }
