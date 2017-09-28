@@ -79,8 +79,8 @@
     ObstacleAvoidanceController::init();
     
     //TODO: change these to just 'image' and 'camera_info' to facilitate easier remapping
-    std::string depth_image_topic = "camera/depth/image_raw";
-    std::string depth_info_topic = "camera/depth/camera_info";
+    std::string depth_image_topic = "/image";
+    std::string depth_info_topic = "/camera_info";
 
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
 
