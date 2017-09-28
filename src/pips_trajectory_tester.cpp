@@ -218,12 +218,7 @@ bool GenAndTest::preCheck()
     
     if(cc_)
     {
-      double coords[3];
-      coords[0] = min_dist;
-      coords[1] = 0;
-      coords[2] = 0;
-
-      returnValue = cc_->testCollision(coords);
+      returnValue = cc_->testCollision(min_dist_);
     }
     return returnValue;
 }
@@ -247,7 +242,7 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
 	  geometry_msgs::Pose pose = traj->getPose(i);
 
-	  if(pose.position.x > min_dist)
+	  if(pose.position.x > min_dist_)
 	  {
 
 	      if(cc_->testCollision(pose))
@@ -272,12 +267,8 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
       {
 	  //TODO: make sure collision_checker can handle input of type pips_trajectory_msgs::trajectory_point then remove this conversion
 	  pips_trajectory_msgs::trajectory_point pt = trajectory.points[i]; 
-	  double coords[3];
-	  coords[0] = pt.x;
-	  coords[1] = pt.y;
-	  coords[2] = 0;
 	  
-	  if(cc_->testCollision(coords))
+	  if(cc_->testCollision(pt))
 	  {
 	      return i;
 	  }

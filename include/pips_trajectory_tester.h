@@ -90,7 +90,7 @@ class GenAndTest
   traj_params_ptr params_;
 
   // TODO: move this into the collision checker
-  double min_dist = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
+  double min_dist_ = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
 
 public:
 
