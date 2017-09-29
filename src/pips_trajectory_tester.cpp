@@ -166,6 +166,10 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
         ROS_DEBUG_STREAM_NAMED(name_, "Parallelism: " << parallelism_enabled_);
         //Perform trajectory generation and collision detection in parallel if enabled
         //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
+	
+	if (omp_get_dynamic())
+	  omp_set_dynamic(0);
+
         #pragma omp parallel for schedule(dynamic) num_threads(4) if(parallelism_enabled_) //schedule(dynamic)
         for(size_t i = 0; i < num_paths; i++)
         {
