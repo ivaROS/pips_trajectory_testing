@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf2
   dynamic_reconfigure
-  
+  visualization_msgs
   trajectory_generator
   pips
   turtlebot_trajectory_controller
