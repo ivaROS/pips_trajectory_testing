@@ -79,6 +79,8 @@ class GenAndTest
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
 
   CollisionChecker_ptr cc_;
+  
+  CCOptions cc_options_;
 
   ros::Publisher path_pub_, desired_path_pub_, visualization_pub_;
   int num_frames =0;

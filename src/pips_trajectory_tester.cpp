@@ -69,6 +69,11 @@ void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &c
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False"));
     
     parallelism_enabled_ = config.parallelism;
+    //TODO: add option set max number of threads, 0 corresponding to 'auto'
+    
+    cc_options_ = CCOptions(true);
+    
+    
     params_->tf = config.tf;
     params_->dt = config.dt;
     
@@ -249,7 +254,7 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 	  if(pose.position.x > min_dist_)
 	  {
 
-	      if(cc_->testCollision(pose))
+	      if(cc_->testCollision(pose, cc_options_))
 	      {
 		  return i;
 
