@@ -94,7 +94,7 @@
 -->
 
 
-<node name="$(arg controller_name)" pkg="pips_trajectory_testing" type="pips_controller_node" output="screen" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
+<node name="$(arg controller_name)" pkg="pips_trajectory_testing" type="pips_controller_node" output="log" args="" launch-prefix="$(arg debug_prefix)" unless="$(arg nodelet)">
     <remap from="/image" to="$(arg depth_image)" />
     <remap from="/camera_info" to="$(arg depth_info)" />
     <param name="odom_spinner" value="$(arg spinner)"/>

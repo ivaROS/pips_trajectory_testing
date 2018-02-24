@@ -66,12 +66,12 @@ void GenAndTest::init()
 
 void GenAndTest::configCB(pips_trajectory_testing::PipsTrajectoryTesterConfig &config, uint32_t level) {
     //TODO: Need to add the rest of these
-    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False"));
+    ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False") << ", detailed_collisions=" << (config.collision_details?"Enabled":"Disabled"));
     
     parallelism_enabled_ = config.parallelism;
     //TODO: add option set max number of threads, 0 corresponding to 'auto'
     
-    cc_options_ = CCOptions(true);
+    cc_options_ = CCOptions(config.collision_details);
     
     
     params_->tf = config.tf;
@@ -227,7 +227,7 @@ bool GenAndTest::preCheck()
     
     if(cc_)
     {
-      returnValue = cc_->testCollision(min_dist_);
+      //returnValue = cc_->testCollision(min_dist_);
     }
     return returnValue;
 }
@@ -281,7 +281,7 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
 	  pose.position.x = pt.x;
 	  pose.position.y = pt.y;
 	  TrajectoryGeneratorBridge::yawToQuaternion(pt.theta);
-	  if(cc_->testCollision(pose))
+	  if(cc_->testCollision(pose, cc_options_))
 	  {
 	      return i;
 	  }
