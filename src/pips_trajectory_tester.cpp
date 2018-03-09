@@ -172,10 +172,14 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
         //Perform trajectory generation and collision detection in parallel if enabled
         //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
 	
-	if (omp_get_dynamic())
-	  omp_set_dynamic(0);
 
-        #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+        
+        //To aid in debugging, disable parallel loop completely in debug mode
+        #ifdef NDEBUG 
+          if (omp_get_dynamic())
+            omp_set_dynamic(0);
+          #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+        #endif
         for(size_t i = 0; i < num_paths; i++)
         {
 
@@ -192,16 +196,17 @@ std::vector<ni_trajectory_ptr> GenAndTest::run(std::vector<traj_func_ptr>& traje
 
             trajectories[i] = traj;
 
+            #ifdef NDEBUG 
+              if(omp_in_parallel())
+              {
+                int thread_id = omp_get_thread_num();
+                auto t2 = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
 
-            if(omp_in_parallel())
-            {
-              int thread_id = omp_get_thread_num();
-              auto t2 = std::chrono::high_resolution_clock::now();
-              std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
-
-              ROS_DEBUG_STREAM_NAMED(name_,"OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
-            
-             }
+                ROS_DEBUG_STREAM_NAMED(name_,"OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
+              
+              }
+             #endif
 
         }
     }
