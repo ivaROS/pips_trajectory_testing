@@ -5,7 +5,7 @@
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
     ObstacleAvoidanceController(nh, pnh), nh_(nh, name_), pnh_(pnh, name_)
   {
-      cc_ = std::make_shared<PipsCollisionChecker>(nh_, pnh_);
+      cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh_, pnh_);
       traj_tester_->setCollisionChecker(cc_);
       
   }
