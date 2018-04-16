@@ -83,7 +83,7 @@ protected:
   std::shared_ptr<ReconfigureServer> reconfigure_server_;
 
   int num_paths_;
-  double v_des_;
+  double v_des_, path_limits_;
   
   
 

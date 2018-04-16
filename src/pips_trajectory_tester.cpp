@@ -314,6 +314,24 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
     }
     return trajectory_functions;
   }
+  
+  
+  std::vector<traj_func_ptr> GenAndTest::getTrajectoryFunctions(unsigned int num_paths, double velocity, double path_limits)
+  {
+    
+    //Set trajectory departure angles and speed
+    std::vector<double> dep_angles = {-path_limits/2,path_limits/2}; //,.6,.8,1,1.2,1.6,2,2.4};
+    
+    std::vector<traj_func_ptr> trajectory_functions(num_paths);
+    
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      double dep_angle = dep_angles[0] + i*(dep_angles[1] - dep_angles[0])/(num_paths - 1); 
+      trajectory_functions[i] = std::make_shared<angled_straight_traj_func>(dep_angle, velocity);
+      
+    }
+    return trajectory_functions;
+  }
 
   std::vector<traj_func_ptr> GenAndTest::getTrajectoryFunctions(const std::vector<double>& dep_angles, double velocity)
   {

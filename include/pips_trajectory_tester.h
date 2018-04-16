@@ -120,6 +120,8 @@ public:
   
   static std::vector<traj_func_ptr> getDefaultTrajectoryFunctions();
   static std::vector<traj_func_ptr> getTrajectoryFunctions(const std::vector<double>& dep_angles, double velocity);
+  static std::vector<traj_func_ptr> getTrajectoryFunctions(unsigned int num_paths, double velocity, double path_limits);
+  
   static std::vector<traj_func_ptr> getTrajectoryFunctions(unsigned int num_paths, double velocity);
 
 

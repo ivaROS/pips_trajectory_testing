@@ -86,7 +86,7 @@ namespace kobuki
     idle_eval_ = config.idle_eval;
     num_paths_ = config.num_paths;
     v_des_ = config.v_des;
-    
+    path_limits_ = config.path_limits;
     
   }
   
@@ -292,7 +292,7 @@ namespace kobuki
     //std::vector<double> dep_angles = getDepartureAngles(); //,.6,.8,1,1.2,1.6,2,2.4};
     //double v = v_des_;  //default is .25;
 
-    return GenAndTest::getTrajectoryFunctions(num_paths_, v_des_);
+    return GenAndTest::getTrajectoryFunctions(num_paths_, v_des_, path_limits_);
   }
   
   
