@@ -173,3 +173,31 @@ target_link_libraries(rosbag_publisher_nodelet
    ${catkin_LIBRARIES}
 )
 
+
+add_library(pips_cc_wrapper
+   src/pips_cc_wrapper.cpp
+)
+
+target_compile_options(pips_cc_wrapper PUBLIC  -std=c++11)
+
+add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(pips_cc_wrapper
+  PUBLIC
+   ${catkin_LIBRARIES}
+)
+
+add_library(depth_image_cc_wrapper
+   src/depth_image_cc_wrapper.cpp
+)
+
+target_compile_options(depth_image_cc_wrapper PUBLIC  -std=c++11)
+
+add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(depth_image_cc_wrapper
+  PUBLIC
+   ${catkin_LIBRARIES}
+)

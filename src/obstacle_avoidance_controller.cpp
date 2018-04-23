@@ -161,7 +161,7 @@ namespace kobuki
     
     ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
-    if(isReady(header));
+    if(isReady(header))
     {
       
       if(wander_)
