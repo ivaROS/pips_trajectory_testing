@@ -72,7 +72,7 @@ protected:
   ros::Publisher commanded_trajectory_publisher_;
   
 
-  GenAndTest_ptr traj_tester_;
+  GenAndTest_ptr traj_tester_, traj_tester2_;
   CollisionChecker_ptr cc_;
   ros::Duration min_ttc_;
   ros::Duration min_tte_;
@@ -95,6 +95,8 @@ protected:
   void configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level);
   
   virtual bool isReady(const std_msgs::Header& header);
+  
+  virtual void setupTrajectoryTesters()=0;
 
   //Internal methods can pass by reference safely
   bool checkCurrentTrajectory(const std_msgs::Header& header);

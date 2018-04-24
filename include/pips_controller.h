@@ -47,6 +47,9 @@ protected:
   void sensorCb(const std_msgs::Header& header);
   
   void generateTrajectories();
+  
+  virtual void setupTrajectoryTesters();
+ 
 
 
   

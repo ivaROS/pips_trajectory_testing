@@ -52,7 +52,6 @@ namespace kobuki
       idle_eval_(false),
       ready_(false)
   {
-    traj_tester_ = std::make_shared<GenAndTest>(nh_, pnh_);
     
   };
   
@@ -63,7 +62,8 @@ namespace kobuki
   bool ObstacleAvoidanceController::init()
   {
     kobuki::TrajectoryController::init();
-    traj_tester_->init();
+    
+    setupTrajectoryTesters();
 
     //Using pointer
     reconfigure_server_ = std::make_shared<ReconfigureServer>(pnh_);
@@ -75,6 +75,7 @@ namespace kobuki
 
     return true;
   }
+  
 
   void ObstacleAvoidanceController::configCB(pips_trajectory_testing::PipsControllerConfig &config, uint32_t level) {
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request:\n\tMin_ttc =\t" << config.min_ttc << "\n\tMin_tte =\t"<< config.min_tte <<"\n\tWander =\t" << (config.wander?"True":"False") << "\n\tv_des =\t" << config.v_des); //<< config.num_paths 
@@ -261,7 +262,7 @@ namespace kobuki
     
 
     
-    int collision_ind = traj_tester_->evaluateTrajectory(localTrajectory);
+    int collision_ind = traj_tester2_->evaluateTrajectory(localTrajectory);
     
     if((collision_ind >=0) && (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time) < min_ttc_)
     {

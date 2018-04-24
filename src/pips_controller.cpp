@@ -7,11 +7,22 @@
   PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
     ObstacleAvoidanceController(nh, pnh), nh_(nh, name_), pnh_(pnh, name_)
   {
-      cc_wrapper_ = std::make_shared<pips_trajectory_testing::DepthImageCCWrapper>(nh_, pnh_,tfBuffer_);
-      traj_tester_->setCollisionChecker(cc_wrapper_->getCC());
+
       
   }
 
+  
+  void PipsTrajectoryController::setupTrajectoryTesters()
+  {
+        traj_tester_ = std::make_shared<GenAndTest>(nh_, pnh_);
+        traj_tester_->init();
+        traj_tester2_ = traj_tester_;
+        
+        cc_wrapper_ = std::make_shared<pips_trajectory_testing::DepthImageCCWrapper>(nh_, pnh_,tfBuffer_);
+        traj_tester_->setCollisionChecker(cc_wrapper_->getCC());
+  }
+  
+     
 
 
 
