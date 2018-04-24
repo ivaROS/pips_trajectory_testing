@@ -26,12 +26,21 @@
 
 
 GenAndTest::GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-nh_(nh, name_), pnh_(pnh, name_)
+    nh_(nh),
+    pnh_(pnh, name_)
 {
     traj_gen_bridge_ = std::make_shared<TrajectoryGeneratorBridge>();
     params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
 }
 
+GenAndTest::GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
+    name_(name),
+    nh_(nh),
+    pnh_(pnh, name_)
+{
+    traj_gen_bridge_ = std::make_shared<TrajectoryGeneratorBridge>();
+    params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());
+}
 
 void GenAndTest::setCollisionChecker(CollisionChecker_ptr cc)
 {
@@ -40,15 +49,19 @@ void GenAndTest::setCollisionChecker(CollisionChecker_ptr cc)
 
 void GenAndTest::init()
 {
+    if(!initialized_)
+    {
+        //Create the various visualization publishers
+        path_pub_ = pnh_.advertise<pips_msgs::PathArray>("tested_paths", 5);
+        desired_path_pub_ = pnh_.advertise<pips_msgs::PathArray>("desired_paths", 5);
+        visualization_pub_ = pnh_.advertise<visualization_msgs::Marker>("collision_points", 5);
 
-    //Create the various visualization publishers
-    path_pub_ = nh_.advertise<pips_msgs::PathArray>("tested_paths", 5);
-    desired_path_pub_ = nh_.advertise<pips_msgs::PathArray>("desired_paths", 5);
-    visualization_pub_ = nh_.advertise<visualization_msgs::Marker>("collision_points", 5);
-
-    
-    reconfigure_server_.reset( new ReconfigureServer(pnh_));
-    reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
+        
+        reconfigure_server_.reset( new ReconfigureServer(pnh_));
+        reconfigure_server_->setCallback(boost::bind(&GenAndTest::configCB, this, _1, _2));
+        
+        initialized_ = true;
+    }
     /*
     std::string key;
 
@@ -268,6 +281,10 @@ int GenAndTest::evaluateTrajectory(ni_trajectory_ptr& traj)
 
       }
     }
+    else
+    {
+        ROS_WARN_ONCE_NAMED(name_, "No collision checker has been created!");
+    }
 
     return -1;
 
@@ -293,6 +310,11 @@ int GenAndTest::evaluateTrajectory(pips_trajectory_msgs::trajectory_points& traj
 
       }
     }
+    else
+    {
+        ROS_WARN_ONCE_NAMED(name_, "No collision checker has been created!");
+    }
+        
 
     return -1;
 

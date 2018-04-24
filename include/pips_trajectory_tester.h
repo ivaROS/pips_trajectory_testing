@@ -90,6 +90,8 @@ class GenAndTest
   bool parallelism_enabled_ = true;
 
   traj_params_ptr params_;
+  
+  bool initialized_ = false;
 
   // TODO: move this into the collision checker
   double min_dist_ = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
@@ -97,6 +99,9 @@ class GenAndTest
 public:
 
   GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh);
+  
+  GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name);
+
   
   void init();
   void setCollisionChecker(CollisionChecker_ptr cc);
