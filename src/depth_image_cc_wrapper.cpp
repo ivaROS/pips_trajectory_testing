@@ -1,25 +1,31 @@
 #include <pips_trajectory_testing/depth_image_cc_wrapper.h>
 
+namespace pips_trajectory_testing
+{
 
 DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-  PipsCCWrapper(nh,pnh,"DepthImageCCWrapper")
+    PipsCCWrapper(nh,pnh,"depth_image_cc_wrapper")
 {
-  cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
-  
+    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
 }
 
 
 DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
-  PipsCCWrapper(nh,pnh,"DepthImageCCWrapper", tf_buffer)
+    PipsCCWrapper(nh,pnh,"depth_image_cc_wrapper", tf_buffer)
 {
-  cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
-  
+    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
 }
 
 bool DepthImageCCWrapper::init()
-{
-    std::string depth_image_topic = "camera/depth/image_raw";
-    std::string depth_info_topic = "camera/depth/camera_info";
+{    
+    // Get topic names
+    std::string depth_image_topic="/camera/depth/image_raw", depth_info_topic= "/camera/depth/camera_info";
+    
+    pnh_.getParam("depth_image_topic", depth_image_topic );
+    pnh_.getParam("depth_info_topic", depth_info_topic );
+    
+    // TODO: use parameters for base_frame_id and odom_frame_id
+    
     ROS_DEBUG_STREAM_NAMED ( name_,  "Setting up publishers and subscribers" );
 
     image_transport::ImageTransport it ( nh_ );
@@ -45,7 +51,8 @@ bool DepthImageCCWrapper::init()
 
 void DepthImageCCWrapper::update()
 {
-    if ( isReady ( current_image->header ) ) {
+    if ( isReady ( current_image->header ) ) 
+    {
         cc_->setImage ( current_image, current_camInfo );
         /*
         if ( _visualize ) {
@@ -60,8 +67,7 @@ void DepthImageCCWrapper::update()
 
     
     
-    
-    
+// TODO: Add a mutex to coordinate 'update' and 'depthImageCb'
 // Could separate the image and camera_info callbacks to allow non synchronized messages
 void DepthImageCCWrapper::depthImageCb ( const sensor_msgs::Image::ConstPtr& image_msg,
         const sensor_msgs::CameraInfo::ConstPtr& info_msg
@@ -72,8 +78,9 @@ void DepthImageCCWrapper::depthImageCb ( const sensor_msgs::Image::ConstPtr& ima
         return;
     }
 
-
-    if ( isReady ( image_msg->header ) ) {
+    // TODO: Not sure if this condition is necessary
+    //if ( isReady ( image_msg->header ) ) 
+    {
 
         //Update tester with new data
         ROS_DEBUG_STREAM_NAMED ( name_, "Updating collision checker image" );
@@ -93,5 +100,21 @@ void DepthImageCCWrapper::depthImageCb ( const sensor_msgs::Image::ConstPtr& ima
 
 
     }
+    doCallback();
+}
+
+std_msgs::Header DepthImageCCWrapper::getCurrentHeader()
+{
+    if(current_camInfo)
+    {
+        return current_camInfo->header;
+    }
+    else
+    {
+        return std_msgs::Header();
+    }
+}
+
+
 }
 

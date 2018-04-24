@@ -9,7 +9,8 @@
 
 namespace pips_trajectory_testing
 {
-  
+  typedef boost::function<void() > Callback;
+
   class PipsCCWrapper
   {
   private:
@@ -18,6 +19,10 @@ namespace pips_trajectory_testing
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     
     std::string base_frame_id_ = "base_footprint";
+    
+    Callback cb_;
+    
+
     
   public:
     
@@ -33,11 +38,18 @@ namespace pips_trajectory_testing
     
     bool isReady ( const std_msgs::Header& header );
     
+    void setCallback (Callback cb);
+    
+    virtual std_msgs::Header getCurrentHeader()=0;
+
+    
   protected:
     ros::NodeHandle nh_, pnh_;
     std::string name_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     
+    void doCallback();
+
 
   private:
     

@@ -6,9 +6,8 @@ namespace pips_trajectory_testing
   
   PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
     nh_(nh),
-    pnh_(pnh),
+    pnh_(pnh, name),
     name_(name)
-    
     {
       tf_buffer_ = std::make_shared<tf2_ros::Buffer>(); //optional parameter: ros::Duration(cache time) (default=10) (though it doesn't seem to accept it!)
       tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -16,7 +15,7 @@ namespace pips_trajectory_testing
   
   PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
     nh_(nh),
-    pnh_(pnh),
+    pnh_(pnh, name),
     name_(name),
     tf_buffer_(tf_buffer)
   {
@@ -33,7 +32,7 @@ namespace pips_trajectory_testing
           ROS_DEBUG_STREAM_ONCE_NAMED ( name_, "Not ready, check for transform..." );
           try {
               //Get the transform that takes a point in the base frame and transforms it to the depth optical
-              auto sensor_base_transform = tf_buffer_->lookupTransform ( header.frame_id, base_frame_id_, ros::Time ( 0 ) );
+              geometry_msgs::TransformStamped sensor_base_transform = tf_buffer_->lookupTransform ( header.frame_id, base_frame_id_, ros::Time ( 0 ) );
               getCC()->setTransform ( sensor_base_transform );
 
               getCC()->init();
@@ -47,6 +46,16 @@ namespace pips_trajectory_testing
           }
       }
       return true;
+  }
+  
+  void PipsCCWrapper::setCallback(Callback cb)
+  {
+      cb_ = cb;
+  }
+  
+  void PipsCCWrapper::doCallback()
+  {
+      cb_();
   }
 
 }

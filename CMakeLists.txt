@@ -39,7 +39,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES obstacle_avoidance_controller pips_trajectory_tester pips_controller
+  LIBRARIES obstacle_avoidance_controller pips_trajectory_tester pips_controller pips_cc_wrapper depth_image_cc_wrapper
   CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
 ##  DEPENDS system_lib
 )
@@ -59,6 +59,39 @@ include_directories(
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ")
+
+
+
+
+
+add_library(pips_cc_wrapper
+   src/pips_cc_wrapper.cpp
+)
+
+target_compile_options(pips_cc_wrapper PUBLIC  -std=c++11)
+
+add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(pips_cc_wrapper
+  PUBLIC
+   ${catkin_LIBRARIES}
+)
+
+add_library(depth_image_cc_wrapper
+   src/depth_image_cc_wrapper.cpp
+)
+
+target_compile_options(depth_image_cc_wrapper PUBLIC  -std=c++11)
+
+add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(depth_image_cc_wrapper
+  PUBLIC
+  pips_cc_wrapper
+   ${catkin_LIBRARIES}
+)
 
 
 
@@ -151,8 +184,9 @@ target_link_libraries(obstacle_avoidance_controller
 )
 
 target_link_libraries(pips_controller
+    obstacle_avoidance_controller
+   depth_image_cc_wrapper
    ${catkin_LIBRARIES} 
-   obstacle_avoidance_controller
 )
 
 target_link_libraries(pips_controller_nodelet
@@ -174,30 +208,3 @@ target_link_libraries(rosbag_publisher_nodelet
 )
 
 
-add_library(pips_cc_wrapper
-   src/pips_cc_wrapper.cpp
-)
-
-target_compile_options(pips_cc_wrapper PUBLIC  -std=c++11)
-
-add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(pips_cc_wrapper
-  PUBLIC
-   ${catkin_LIBRARIES}
-)
-
-add_library(depth_image_cc_wrapper
-   src/depth_image_cc_wrapper.cpp
-)
-
-target_compile_options(depth_image_cc_wrapper PUBLIC  -std=c++11)
-
-add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(depth_image_cc_wrapper
-  PUBLIC
-   ${catkin_LIBRARIES}
-)

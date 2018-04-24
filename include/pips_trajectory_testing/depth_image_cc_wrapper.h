@@ -14,7 +14,8 @@
 #include <image_transport/subscriber_filter.h>
 
 
-
+namespace pips_trajectory_testing
+{
 
 class DepthImageCCWrapper : public pips_trajectory_testing::PipsCCWrapper
 {
@@ -48,7 +49,9 @@ public:
   void update();
   
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-                    const sensor_msgs::CameraInfo::ConstPtr& info_msg);  
+                    const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+  
+  std_msgs::Header getCurrentHeader();
   
   std::shared_ptr<PipsCollisionChecker> getCC()
   {
@@ -57,5 +60,7 @@ public:
   
 
 };
+
+}
 
 #endif //DEPTH_IMAGE_CC_WRAPPER_H
