@@ -39,6 +39,9 @@ private:
   
   std::shared_ptr<pips::collision_testing::DepthImageCollisionChecker> cc_;
   
+  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
+                    const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+  
 public:
   DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh);
   DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
@@ -48,8 +51,7 @@ public:
   
   void update();
   
-  void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
-                    const sensor_msgs::CameraInfo::ConstPtr& info_msg);
+
   
   std_msgs::Header getCurrentHeader();
   
