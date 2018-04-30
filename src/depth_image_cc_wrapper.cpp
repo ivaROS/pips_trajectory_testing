@@ -6,14 +6,14 @@ namespace pips_trajectory_testing
 DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
     PipsCCWrapper(nh,pnh,"depth_image_cc_wrapper")
 {
-    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
+    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
 
 
-DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
-    PipsCCWrapper(nh,pnh,"depth_image_cc_wrapper", tf_buffer)
+DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer> tf_buffer, const std::string& name) :
+    PipsCCWrapper(nh,pnh,name, tf_buffer)
 {
-    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh);
+    cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
 
 bool DepthImageCCWrapper::init()
@@ -23,6 +23,11 @@ bool DepthImageCCWrapper::init()
     
     pnh_.getParam("depth_image_topic", depth_image_topic );
     pnh_.getParam("depth_info_topic", depth_info_topic );
+    
+    // The idea here is to set the parameter on the parameter server to the default value to make it easier to see what it is.
+    pnh_.setParam("depth_image_topic", depth_image_topic);
+    pnh_.setParam("depth_info_topic", depth_info_topic );
+
     
     // TODO: use parameters for base_frame_id and odom_frame_id
     

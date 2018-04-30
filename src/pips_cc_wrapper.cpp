@@ -3,7 +3,7 @@
 namespace pips_trajectory_testing
 {
 
-  
+  /*
   PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
     nh_(nh),
     pnh_(pnh, name),
@@ -12,8 +12,9 @@ namespace pips_trajectory_testing
       tf_buffer_ = std::make_shared<tf2_ros::Buffer>(); //optional parameter: ros::Duration(cache time) (default=10) (though it doesn't seem to accept it!)
       tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     }
+    */
   
-  PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
+  PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
     nh_(nh),
     pnh_(pnh, name),
     name_(name),

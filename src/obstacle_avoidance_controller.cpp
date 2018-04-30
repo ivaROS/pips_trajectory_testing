@@ -45,9 +45,9 @@ public:
 namespace kobuki
 {
 
-  ObstacleAvoidanceController::ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh) : 
+  ObstacleAvoidanceController::ObstacleAvoidanceController(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) : 
       kobuki::TrajectoryController(nh, pnh), 
-      pnh_(pnh),
+      pnh_(pnh, name),
       wander_(false), 
       idle_eval_(false),
       ready_(false)

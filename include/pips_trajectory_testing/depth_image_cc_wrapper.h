@@ -44,13 +44,14 @@ private:
   
 public:
   DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh);
-  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer> tf_buffer=std::make_shared<tf2_ros::Buffer>(), const std::string& name=DEFAULT_NAME);
   
   
   bool init();
   
   void update();
   
+  static constexpr const char* DEFAULT_NAME="depth_image_cc_wrapper";
 
   
   std_msgs::Header getCurrentHeader();

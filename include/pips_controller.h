@@ -36,10 +36,13 @@ namespace kobuki
 class PipsTrajectoryController : public kobuki::ObstacleAvoidanceController
 {
 public:
-  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh);
+  PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name=DEFAULT_NAME);
   ~PipsTrajectoryController(){};
 
   virtual bool init();
+  
+  static constexpr const char* DEFAULT_NAME="PipsController";
+
 
 protected:
   bool isReady(const std_msgs::Header& header);
@@ -54,8 +57,8 @@ protected:
 
   
 private:
-  std::string name_ = "PipsController";
-  ros::NodeHandle nh_, pnh_;
+  std::string name_;
+  ros::NodeHandle pnh_;
   
   std::shared_ptr<pips_trajectory_testing::PipsCCWrapper> cc_wrapper_;
 

@@ -4,8 +4,10 @@
 
  namespace kobuki
 {
-  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-    ObstacleAvoidanceController(nh, pnh), nh_(nh, name_), pnh_(pnh, name_)
+  PipsTrajectoryController::PipsTrajectoryController(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
+    ObstacleAvoidanceController(nh, pnh, "obstacle_avoidance"), 
+    name_(name),
+    pnh_(pnh)
   {
 
       
@@ -14,7 +16,7 @@
   
   void PipsTrajectoryController::setupTrajectoryTesters()
   {
-        traj_tester_ = std::make_shared<GenAndTest>(nh_, pnh_);
+        traj_tester_ = std::make_shared<GenAndTest>(nh_, ObstacleAvoidanceController::pnh_);
         traj_tester_->init();
         traj_tester2_ = traj_tester_;
         
