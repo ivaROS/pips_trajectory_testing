@@ -20,7 +20,7 @@ namespace pips_trajectory_testing
     
     std::string base_frame_id_ = "base_footprint";
     
-    Callback cb_;
+    Callback cb_=0;
     
 
     
@@ -36,7 +36,7 @@ namespace pips_trajectory_testing
     
     virtual std::shared_ptr<PipsCollisionChecker> getCC()=0;
     
-    bool isReady ( const std_msgs::Header& header );
+    virtual bool isReady ( const std_msgs::Header& header );
     
     void setCallback (Callback cb);
     

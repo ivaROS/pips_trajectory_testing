@@ -56,7 +56,10 @@ namespace pips_trajectory_testing
   
   void PipsCCWrapper::doCallback()
   {
-      cb_();
+      if(cb_)
+      {
+          cb_();
+      }
   }
 
 }

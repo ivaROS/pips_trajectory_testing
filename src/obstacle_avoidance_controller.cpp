@@ -110,10 +110,10 @@ namespace kobuki
   {
     ROS_DEBUG_STREAM_NAMED(name_,  "Setting up publishers and subscribers");
     
-    button_sub_ = nh_.subscribe("/mobile_base/events/button", 10, &ObstacleAvoidanceController::buttonCB, this);
-    bumper_sub_ = nh_.subscribe("/mobile_base/events/bumper", 10, &ObstacleAvoidanceController::bumperCB, this);
+    button_sub_ = nh_.subscribe("mobile_base/events/button", 10, &ObstacleAvoidanceController::buttonCB, this);
+    bumper_sub_ = nh_.subscribe("mobile_base/events/bumper", 10, &ObstacleAvoidanceController::bumperCB, this);
     
-    commanded_trajectory_publisher_ = nh_.advertise< pips_trajectory_msgs::trajectory_points >("/desired_trajectory", 1, true);
+    commanded_trajectory_publisher_ = nh_.advertise< pips_trajectory_msgs::trajectory_points >("desired_trajectory", 1, true); //kobuki::TrajectoryController::pnh_
   }
   
   //Pressing button 0 activates wander mode
@@ -133,11 +133,14 @@ namespace kobuki
   //Hitting the bumper deactivates wander mode
   void ObstacleAvoidanceController::bumperCB(const kobuki_msgs::BumperEvent::ConstPtr& msg)
   {
-    if (msg->state == kobuki_msgs::BumperEvent::PRESSED )
+    if (msg->state == kobuki_msgs::BumperEvent::PRESSED)
     {
       stop();
-      wander_ = false;
-      ROS_INFO_STREAM_NAMED(name_,  "Robot collided with obstacle! Deactivating Wander");
+      if(wander_ == true)
+      {
+        wander_ = false;
+        ROS_INFO_STREAM_NAMED(name_,  "Robot collided with obstacle! Deactivating Wander");
+      }
     }
     else
     {
@@ -186,7 +189,7 @@ namespace kobuki
           ROS_DEBUG_STREAM_COND_NAMED(!executing_, name_, "Not currently executing, test new trajectories");
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
 	  
-	  std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
+          std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
           std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
@@ -264,20 +267,30 @@ namespace kobuki
     
     int collision_ind = traj_tester2_->evaluateTrajectory(localTrajectory);
     
+    bool retval;
     if((collision_ind >=0) && (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time) < min_ttc_)
     {
       ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
-      return true;
+      retval = true;
     }
     else if((localTrajectory.points.back().time - localTrajectory.points.front().time) < min_tte_)
     {
       ROS_WARN_NAMED(name_, "No imminent collision, but close to end of trajectory"); //should be debug, but for now making more obvious
-      return true;
+      retval = true;
     }
     else
     {
-      return false;
+      retval = false;
     }
+    
+    
+    if(collision_ind >=0)
+    {
+        localTrajectory.points.resize(collision_ind);
+    }
+    //TODO: publish the noncolliding current trajectory message (probably as visualization msgs, with different colors for colliding/noncolliding
+    
+    return retval;
   }
   
   std::vector<double> ObstacleAvoidanceController::getDepartureAngles()

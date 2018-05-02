@@ -39,8 +39,15 @@
 
     else
     {
-        cc_wrapper_->update();
-      return cc_wrapper_->isReady(header);
+        if(cc_wrapper_->isReady(header))
+        {
+            cc_wrapper_->update();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
   }
   
