@@ -113,7 +113,7 @@ namespace kobuki
     button_sub_ = nh_.subscribe("mobile_base/events/button", 10, &ObstacleAvoidanceController::buttonCB, this);
     bumper_sub_ = nh_.subscribe("mobile_base/events/bumper", 10, &ObstacleAvoidanceController::bumperCB, this);
     
-    commanded_trajectory_publisher_ = nh_.advertise< pips_trajectory_msgs::trajectory_points >("desired_trajectory", 1, true); //kobuki::TrajectoryController::pnh_
+    commanded_trajectory_publisher_ = kobuki::TrajectoryController::pnh_.advertise< pips_trajectory_msgs::trajectory_points >("desired_trajectory", 1, true);
   }
   
   //Pressing button 0 activates wander mode
@@ -159,11 +159,11 @@ namespace kobuki
       return;
     }
     
-
+    ROS_DEBUG_STREAM_NAMED(name_, "SensorCB time: " << header.stamp );
     
     image_rate.addTime(header);
     
-    ROS_WARN_STREAM_THROTTLE_NAMED(2, name_,"Image rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
+    ROS_DEBUG_STREAM_THROTTLE_NAMED(2, name_,"Sensor Callback rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
 
     if(isReady(header))
     {
@@ -264,8 +264,10 @@ namespace kobuki
     }
     
 
-    
+    ros::WallTime start = ros::WallTime::now();
     int collision_ind = traj_tester2_->evaluateTrajectory(localTrajectory);
+    ROS_INFO_STREAM_NAMED(name_ + "timing", "Current trajectory evaluated in " <<  (ros::WallTime::now() - start).toSec() * 1e3 << "ms");
+
     
     bool retval;
     if((collision_ind >=0) && (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time) < min_ttc_)
