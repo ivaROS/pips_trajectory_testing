@@ -20,6 +20,14 @@ namespace pips_trajectory_testing
     name_(name),
     tf_buffer_(tf_buffer)
   {
+      //nh_.getParam("base_frame_id", base_frame_id_ );
+      //nh_.setParam("base_frame_id_t", base_frame_id_ );
+
+  }
+  
+  void PipsCCWrapper::setBaseFrame(const std::string& base_frame_id)
+  {
+      base_frame_id_ = base_frame_id;
   }
   
   // Note: I haven't fully thought through other implementations, but this may be generic after all...

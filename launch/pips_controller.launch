@@ -10,11 +10,11 @@
 <arg name="debug_prefix" value="xterm -e gdb --args" if="$(arg debug)"/>
 <arg name="debug_prefix1" value="valgrind --tool=memcheck " if="$(arg debug)"/>
 
-<arg name="depth_image_raw" default="/camera/depth/image_raw"/>
-<arg name="depth_info_raw" default="/camera/depth/camera_info"/>
+<arg name="depth_image_raw" default="camera/depth/image_raw"/>
+<arg name="depth_info_raw" default="camera/depth/camera_info"/>
 
-<arg name="depth_image_dec" default="/camera/depth_decimated/image"/>
-<arg name="depth_info_dec" default="/camera/depth_decimated/camera_info"/>
+<arg name="depth_image_dec" default="camera/depth_decimated/image"/>
+<arg name="depth_info_dec" default="camera/depth_decimated/camera_info"/>
 
 <!--If driver_decimation is on, then the temporary topic is set to the raw stream. Otherwise, it is set to the decimated stream-->
 <arg name="depth_image_topic_t" value="$(arg depth_image_raw)" if="$(arg driver_decimation)"/>

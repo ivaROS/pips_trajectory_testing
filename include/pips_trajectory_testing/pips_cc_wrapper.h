@@ -34,6 +34,9 @@ namespace pips_trajectory_testing
     
     virtual void update()=0;
     
+    void setBaseFrame(const std::string& base_frame_id);
+
+    
     virtual std::shared_ptr<PipsCollisionChecker> getCC()=0;
     
     virtual bool isReady ( const std_msgs::Header& header );

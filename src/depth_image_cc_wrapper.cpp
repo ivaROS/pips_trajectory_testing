@@ -28,7 +28,11 @@ bool DepthImageCCWrapper::init()
     pnh_.setParam("depth_image_topic", depth_image_topic);
     pnh_.setParam("depth_info_topic", depth_info_topic );
 
-    
+    std::string odom_frame_id = "odom";
+    nh_.getParam("odom_frame_id", odom_frame_id);
+    nh_.setParam("odom_frame_id", odom_frame_id);
+    //   nh_.setParam("odom_frame_id_t", odom_frame_id);
+
     // TODO: use parameters for base_frame_id and odom_frame_id
     
     ROS_DEBUG_STREAM_NAMED ( name_,  "Setting up publishers and subscribers" );
@@ -43,7 +47,7 @@ bool DepthImageCCWrapper::init()
     depth_info_sub_.subscribe ( nh_, depth_info_topic, 3 );    
     
     // Ensure that CameraInfo is transformable
-    info_tf_filter_ = boost::make_shared<tf_filter>(depth_info_sub_, *tf_buffer_, "odom", 2,nh_);
+    info_tf_filter_ = boost::make_shared<tf_filter>(depth_info_sub_, *tf_buffer_, odom_frame_id, 2,nh_);
     
     // Synchronize Image and CameraInfo callbacks
     image_synchronizer_ = boost::make_shared<time_synchronizer>(time_synchronizer(10),depth_sub_, *info_tf_filter_);

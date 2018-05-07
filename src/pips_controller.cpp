@@ -22,6 +22,8 @@
         
         cc_wrapper_ = std::make_shared<pips_trajectory_testing::DepthImageCCWrapper>(nh_, pnh_,tfBuffer_);
         traj_tester_->setCollisionChecker(cc_wrapper_->getCC());
+        
+        cc_wrapper_->setBaseFrame(base_frame_id_);
   }
   
      
