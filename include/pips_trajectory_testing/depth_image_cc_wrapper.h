@@ -37,14 +37,24 @@ private:
   sensor_msgs::Image::ConstPtr current_image;
   sensor_msgs::CameraInfo::ConstPtr current_camInfo;
   
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+  
+  static constexpr const int MAGIC_NUMBER = -17;  //The sole purpose of this is to ensure that the constructor with the 'optional' tfbuffer argument is not accidentally passed a tfbuffer object
+  
+  
   std::shared_ptr<pips::collision_testing::DepthImageCollisionChecker> cc_;
   
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                     const sensor_msgs::CameraInfo::ConstPtr& info_msg);
   
+  
+  
 public:
-  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh);
-  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer> tf_buffer=std::make_shared<tf2_ros::Buffer>(), const std::string& name=DEFAULT_NAME);
+  // Use this constructor if you don't have a tfbuffer
+  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name=DEFAULT_NAME, int tamper_prevention = MAGIC_NUMBER, std::shared_ptr<tf2_ros::Buffer> tf_buffer=std::make_shared<tf2_ros::Buffer>());
+  
+  // Use this constructor if you already have a tfbuffer
+  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name=DEFAULT_NAME);
   
   
   bool init();
@@ -55,11 +65,12 @@ public:
 
   
   static constexpr const char* DEFAULT_NAME="depth_image_cc_wrapper";
+  
 
   
   std_msgs::Header getCurrentHeader();
   
-  std::shared_ptr<PipsCollisionChecker> getCC()
+  std::shared_ptr<pips::collision_testing::TransformingCollisionChecker> getCC()
   {
     return cc_;
   }

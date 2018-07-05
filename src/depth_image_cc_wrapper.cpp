@@ -3,21 +3,28 @@
 namespace pips_trajectory_testing
 {
 
-DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
-    PipsCCWrapper(nh,pnh,"depth_image_cc_wrapper")
+DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const int tamper_prevention, std::shared_ptr<tf2_ros::Buffer> tf_buffer) :
+    PipsCCWrapper(nh,pnh,name,tf_buffer)
 {
+    // If a tfbuffer was not provided by the user, then we need to set up a listener
+    if(tamper_prevention == MAGIC_NUMBER)
+    {
+      tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
+    }
     cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
 
 
-DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer> tf_buffer, const std::string& name) :
+DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name) :
     PipsCCWrapper(nh,pnh,name, tf_buffer)
 {
     cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
 
 bool DepthImageCCWrapper::init()
-{    
+{
+    PipsCCWrapper::init();
+  
     // Get topic names
     std::string depth_image_topic="/camera/depth/image_raw", depth_info_topic= "/camera/depth/camera_info";
     
@@ -29,11 +36,14 @@ bool DepthImageCCWrapper::init()
     pnh_.setParam("depth_info_topic", depth_info_topic );
 
     std::string odom_frame_id = "odom";
-    nh_.getParam("odom_frame_id", odom_frame_id);
-    nh_.setParam("odom_frame_id", odom_frame_id);
-    //   nh_.setParam("odom_frame_id_t", odom_frame_id);
 
-    // TODO: use parameters for base_frame_id and odom_frame_id
+    //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
+    std::string key;
+    if (pnh_.searchParam("odom_frame_id", key))
+    {
+      pnh_.getParam(key, odom_frame_id );
+      pnh_.setParam(key, odom_frame_id );
+    }
     
     ROS_DEBUG_STREAM_NAMED ( name_,  "Setting up publishers and subscribers" );
 

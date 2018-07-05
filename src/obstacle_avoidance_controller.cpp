@@ -190,14 +190,14 @@ namespace kobuki
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
 	  
           std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-          std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+          std::vector<trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           
           bool foundPath = false;
           if(valid_trajs.size() >0)
           {
-            ni_trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
+            trajectory_ptr chosen_traj = TrajectoryGeneratorBridge::getCenterLongestTrajectory(valid_trajs);
 
             ROS_INFO_STREAM_NAMED(name_, "Length of longest trajectory: " << chosen_traj->getDuration());
 
@@ -228,7 +228,7 @@ namespace kobuki
       else if(idle_eval_)
       {
         std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-        std::vector<ni_trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
+        std::vector<trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, curr_odom_);
       }
                   
 
@@ -266,7 +266,7 @@ namespace kobuki
 
     ros::WallTime start = ros::WallTime::now();
     int collision_ind = traj_tester2_->evaluateTrajectory(localTrajectory);
-    ROS_INFO_STREAM_NAMED(name_ + "timing", "Current trajectory evaluated in " <<  (ros::WallTime::now() - start).toSec() * 1e3 << "ms");
+    ROS_DEBUG_STREAM_NAMED(name_ + "timing", "Current trajectory evaluated in " <<  (ros::WallTime::now() - start).toSec() * 1e3 << "ms");
 
     
     bool retval;

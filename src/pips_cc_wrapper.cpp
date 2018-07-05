@@ -20,9 +20,20 @@ namespace pips_trajectory_testing
     name_(name),
     tf_buffer_(tf_buffer)
   {
-      //nh_.getParam("base_frame_id", base_frame_id_ );
-      //nh_.setParam("base_frame_id_t", base_frame_id_ );
 
+  }
+  
+  bool PipsCCWrapper::init()
+  {
+    //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
+    std::string key;
+    if (nh_.searchParam("base_frame_id", key))
+    {
+      nh_.getParam(key, base_frame_id_ );
+      nh_.setParam(key, base_frame_id_ );
+    }
+    
+    return true;
   }
   
   void PipsCCWrapper::setBaseFrame(const std::string& base_frame_id)
@@ -55,6 +66,19 @@ namespace pips_trajectory_testing
           }
       }
       return true;
+  }
+  
+  void PipsCCWrapper::defaultCallback()
+  {
+      if(isReady(getCurrentHeader()))
+      {
+        update();
+      }
+  }
+  
+  void PipsCCWrapper::autoUpdate()
+  {
+    setCallback(boost::bind(&PipsCCWrapper::defaultCallback, this));
   }
   
   void PipsCCWrapper::setCallback(Callback cb)

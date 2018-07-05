@@ -1,7 +1,7 @@
 #ifndef PIPS_CC_WRAPPER_H
 #define PIPS_CC_WRAPPER_H
 
-#include <pips/collision_testing/pips_collision_checker.h>
+#include <pips/collision_testing/transforming_collision_checker.h>
 #include <tf/transform_datatypes.h>
 #include <tf2_ros/transform_listener.h>
 
@@ -30,18 +30,19 @@ namespace pips_trajectory_testing
     PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::make_shared<tf2_ros::Buffer>());
     
     
-    virtual bool init()=0;
+    virtual bool init();
     
     virtual void update()=0;
     
     void setBaseFrame(const std::string& base_frame_id);
 
     
-    virtual std::shared_ptr<PipsCollisionChecker> getCC()=0;
+    virtual std::shared_ptr<pips::collision_testing::TransformingCollisionChecker> getCC()=0;
     
-    virtual bool isReady ( const std_msgs::Header& header );
+    virtual bool isReady( const std_msgs::Header& header );
     
-    void setCallback (Callback cb);
+    void setCallback(Callback cb=0);
+    void autoUpdate();
     
     virtual std_msgs::Header getCurrentHeader()=0;
 
@@ -52,6 +53,8 @@ namespace pips_trajectory_testing
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     
     void doCallback();
+    
+    void defaultCallback();
 
 
   private:
