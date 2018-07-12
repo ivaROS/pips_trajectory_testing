@@ -95,134 +95,91 @@ target_link_libraries(depth_image_cc_wrapper
 )
 
 
-add_executable(depth_image_cc_node
-  src/depth_image_cc_node.cpp
-)
-
-target_compile_options(depth_image_cc_node PUBLIC  -std=c++11)
-
-add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(depth_image_cc_node
-  PUBLIC
-  depth_image_cc_wrapper
-   ${catkin_LIBRARIES}
-)
-
-
+# add_executable(depth_image_cc_node
+#   src/depth_image_cc_node.cpp
+# )
+# 
+# target_compile_options(depth_image_cc_node PUBLIC  -std=c++11)
+# 
+# add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# 
+# ## Specify libraries to link a library or executable target against
+# target_link_libraries(depth_image_cc_node
+#   PUBLIC
+#   depth_image_cc_wrapper
+#    ${catkin_LIBRARIES}
+# )
 
 
-## Declare a cpp library
-add_library(pips_trajectory_tester
-   src/pips_trajectory_tester.cpp
-)
 
-add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
-target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS})
-target_compile_options(pips_trajectory_tester PUBLIC  -std=c++11)
-
-
-##Don't need the next 3 for now
-
-## Declare a cpp library
-#add_library(pips_demo
-#   src/pips_demo.cpp
-#)
-
-## Declare a cpp executable
-#add_executable(pips_demo_node
-#   src/pips_demo_node.cpp
-#)
-
-## Declare a cpp library
-#add_library(pips_demo_nodelet MODULE
-#   src/pips_demo_nodelet.cpp
-#)
-
-## Declare a cpp library
-add_library(obstacle_avoidance_controller
-   src/obstacle_avoidance_controller.cpp
-)
-
-add_dependencies(obstacle_avoidance_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a cpp library
-add_library(pips_controller
-   src/pips_controller.cpp
-)
-
-## Declare a cpp library
-add_library(pips_controller_nodelet MODULE
-   src/pips_controller_nodelet.cpp
-)
-
-## Declare standalone pips trajectory controller
-add_executable(pips_controller_node
-   src/pips_controller_node.cpp
-)
-
-#add_executable(delayed_nodelet 
-#   src/delayed_nodelet.cpp
-#)
-
-add_library(rosbag_publisher_nodelet MODULE
-   src/rosbag_nodelet_publisher.cpp
-)
-
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(pips_trajectory_tester
-  PUBLIC
-   ${catkin_LIBRARIES}
-   PRIVATE
-   ${OpenMP_CXX_FLAGS}
-)
-
-
-#target_link_libraries(pips_demo
-#   ${catkin_LIBRARIES} 
-#   pips_trajectory_tester
-#)
-
-#target_link_libraries(pips_demo_nodelet
-#   ${catkin_LIBRARIES} 
-#   pips_demo
-#)
-
-#target_link_libraries(pips_demo_node
-#   ${catkin_LIBRARIES} 
-#   pips_demo
-#)
-
-
-target_link_libraries(obstacle_avoidance_controller
-   ${catkin_LIBRARIES} 
-   pips_trajectory_tester
-)
-
-target_link_libraries(pips_controller
-    obstacle_avoidance_controller
-   depth_image_cc_wrapper
-   ${catkin_LIBRARIES} 
-)
-
-target_link_libraries(pips_controller_nodelet
-   ${catkin_LIBRARIES} 
-   pips_controller
-)
-
-target_link_libraries(pips_controller_node
-   ${catkin_LIBRARIES} 
-   pips_controller
-)
-
-#target_link_libraries(delayed_nodelet
-#   ${catkin_LIBRARIES}
-#)
-
-target_link_libraries(rosbag_publisher_nodelet
-   ${catkin_LIBRARIES}
-)
+# 
+# ## Declare a cpp library
+# add_library(pips_trajectory_tester
+#    src/pips_trajectory_tester.cpp
+# )
+# 
+# add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
+# target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS})
+# target_compile_options(pips_trajectory_tester PUBLIC  -std=c++11)
+# 
+# ## Declare a cpp library
+# add_library(obstacle_avoidance_controller
+#    src/obstacle_avoidance_controller.cpp
+# )
+# 
+# add_dependencies(obstacle_avoidance_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# 
+# ## Declare a cpp library
+# add_library(pips_controller
+#    src/pips_controller.cpp
+# )
+# 
+# ## Declare a cpp library
+# add_library(pips_controller_nodelet MODULE
+#    src/pips_controller_nodelet.cpp
+# )
+# 
+# ## Declare standalone pips trajectory controller
+# add_executable(pips_controller_node
+#    src/pips_controller_node.cpp
+# )
+# 
+# add_library(rosbag_publisher_nodelet MODULE
+#    src/rosbag_nodelet_publisher.cpp
+# )
+# 
+# 
+# ## Specify libraries to link a library or executable target against
+# target_link_libraries(pips_trajectory_tester
+#   PUBLIC
+#    ${catkin_LIBRARIES}
+#    PRIVATE
+#    ${OpenMP_CXX_FLAGS}
+# )
+# 
+# target_link_libraries(obstacle_avoidance_controller
+#    ${catkin_LIBRARIES} 
+#    pips_trajectory_tester
+# )
+# 
+# target_link_libraries(pips_controller
+#     obstacle_avoidance_controller
+#    depth_image_cc_wrapper
+#    ${catkin_LIBRARIES} 
+# )
+# 
+# target_link_libraries(pips_controller_nodelet
+#    ${catkin_LIBRARIES} 
+#    pips_controller
+# )
+# 
+# target_link_libraries(pips_controller_node
+#    ${catkin_LIBRARIES} 
+#    pips_controller
+# )
+# 
+# target_link_libraries(rosbag_publisher_nodelet
+#    ${catkin_LIBRARIES}
+# )
 
 
