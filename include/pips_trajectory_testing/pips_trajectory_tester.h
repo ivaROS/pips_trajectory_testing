@@ -102,17 +102,18 @@ typedef std::shared_ptr<CollisionChecker> CollisionChecker_ptr;
 
 
 
-template<typename state_type, typename traj_func_type>
+template<typename state_type, typename traj_func_t>
 class GenAndTest
 {
-  typedef trajectory_states<state_type, traj_func_type> TrajectoryStates;
+public:
+  typedef trajectory_states<state_type, traj_func_t> TrajectoryStates;
   typedef std::shared_ptr<TrajectoryStates> trajectory_ptr;
   
   typedef PipsTrajectory<TrajectoryStates> pips_trajectory;
   typedef std::shared_ptr<pips_trajectory> pips_trajectory_ptr;
   
   //typedef pips_trajectory_ptr trajectory_ptr;
-  
+  typedef traj_func_t traj_func_type;
   
   typedef std::shared_ptr<traj_func_type> traj_func_ptr;
   
@@ -122,6 +123,7 @@ class GenAndTest
   typedef typename state_type::trajectory_msg_t trajectory_points;
 
   
+private:
   
   TrajectoryGeneratorBridge_ptr traj_gen_bridge_;
   
