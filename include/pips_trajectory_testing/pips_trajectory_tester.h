@@ -457,7 +457,8 @@ public:
   {
     if(cc_)
     {
-      for(size_t i = 0; i < traj->num_states(); i++)
+      size_t num_states = traj->num_states();
+      for(size_t i = 0; i < num_states; i++)
       {
         
         geometry_msgs::Pose pose = traj->getPose(i);
