@@ -22,6 +22,7 @@
 #include <chrono>
 
 #include <omp.h>
+#include <type_traits>
 
 
 
@@ -207,12 +208,12 @@ public:
   
   
   //This is the lowest level version that is actually run; the rest are for convenience
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, state_type& x0, const std_msgs::Header& header, traj_params_ptr params)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, traj_params_ptr params)
   {
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
     size_t num_paths = trajectory_functions.size();
     
-    std::vector<trajectory_ptr> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
+    std::vector<pips_trajectory_ptr> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -242,7 +243,12 @@ public:
         traj->trajpntr = trajectory_functions[i];
         traj->x0_ = x0;
         
-        traj_gen_bridge_->generate_trajectory(traj);
+        size_t steps = traj_gen_bridge_->generate_trajectory(traj);
+        
+        if(steps == 0)
+        {
+          ROS_ERROR_STREAM_NAMED(name_, "The trajectory has 0 states! Check initial conditions and parameters");
+        }
         
         evaluateTrajectory(traj);
         
@@ -279,9 +285,9 @@ public:
   
   
   //This version is for standard online running
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header)
   {
-    std::vector<trajectory_ptr> trajectories = run(trajectory_functions, x0, header, params_);
+    std::vector<pips_trajectory_ptr> trajectories = run(trajectory_functions, x0, header, params_);
     
     //It is debateable whether path publishing belongs in this class...
     TrajBridge::publishPaths(path_pub_, trajectories);
@@ -299,9 +305,9 @@ public:
     colliding_points.color.a=1;
     colliding_points.color.r=1;
     
-    for(auto ni_traj : trajectories)
+    for(auto traj : trajectories)
     {
-      pips_trajectory_ptr traj= std::static_pointer_cast<PipsTrajectory>(ni_traj);
+      //pips_trajectory_ptr traj= std::static_pointer_cast<PipsTrajectory>(ni_traj);
       
       if(traj->collides())
       {
@@ -315,7 +321,7 @@ public:
   
   
   template <typename M> //For any ros message with a header
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const std::string& base_frame_id, const ros::Time& stamp)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const std::string& base_frame_id, const ros::Time& stamp)
   {
     state_type x0(msg);
     std_msgs::Header header;
@@ -325,13 +331,13 @@ public:
   }
   
   template <typename M>
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const ros::Time& stamp)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const ros::Time& stamp)
   {
     return GenAndTest::run(trajectory_functions, msg, base_frame_id_, stamp);
   }
   
   template <typename M>
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const std_msgs::Header& header)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, const std_msgs::Header& header)
   {
     const M& m = *msg;
     return GenAndTest::run(trajectory_functions, m, base_frame_id_, header.stamp);
@@ -339,31 +345,38 @@ public:
   
   //msg is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
   template <typename M> //For any ros message without a header
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const typename M::ConstPtr msg, const std_msgs::Header& header)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const typename M::ConstPtr msg, const std_msgs::Header& header)
   {
     const M& m = *msg;
     return GenAndTest::run(trajectory_functions, m, header);
   }
   
   // Overload for odometry message since it contains the base frame id
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry& msg)
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const nav_msgs::Odometry& msg, const std_msgs::Header& header)
   {
-    return GenAndTest::run(trajectory_functions, msg, msg.child_frame_id, msg.header.stamp);
+    return GenAndTest::run(trajectory_functions, msg, msg.child_frame_id, header.stamp);
   }
   
-  template <typename M> //For any ros message with a header
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg)
+
+  
+  template<typename T> struct is_shared_ptr : std::false_type {};
+  template<typename T> struct is_shared_ptr<boost::shared_ptr<T>> : std::true_type {};
+  
+  template <typename M>
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, typename std::enable_if<!is_shared_ptr<M>::value>::type* dummy =0 )
   {
     return GenAndTest::run(trajectory_functions, msg, msg.header);
   }
   
-  //msg is not passed as a reference in this instance: we want a copy to be made of the boost::shared_ptr, so that this instance will be constant even if the calling function assigns a new message to curr_odom
-  template <typename M> //For shared_ptr version of ros message with a header
-  std::vector<trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const typename M::ConstPtr msg)
+  //For any ros message with a header
+  template <typename M>
+  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const M& msg, typename std::enable_if<is_shared_ptr<M>::value>::type* dummy =0 )
   {
-    const M& m = *msg;
-    return GenAndTest::run(trajectory_functions, m);
+    return GenAndTest::run(trajectory_functions, *msg);
   }
+
+
+
   
   
   
@@ -432,7 +445,7 @@ public:
   
   void evaluateTrajectory(pips_trajectory_ptr& traj)
   {
-    trajectory_ptr ni_traj= std::static_pointer_cast<TrajectoryStates>(traj);
+    trajectory_ptr ni_traj= traj;
     int collision_ind = GenAndTest::evaluateTrajectory(ni_traj);
     traj->set_collision_ind(collision_ind);
   }

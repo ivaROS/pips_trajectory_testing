@@ -28,7 +28,7 @@
 #include <memory>
 
 
-namespace kobuki
+namespace pips_trajectory_testing
 {
 
 
@@ -142,21 +142,21 @@ protected:
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
           
           std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-          std::vector<trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);
+          auto valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           
           bool foundPath = false;
           if(valid_trajs.size() >0)
           {
-            trajectory_ptr chosen_traj = TrajBridge::getCenterLongestTrajectory(valid_trajs);
+            auto chosen_traj = TrajBridge::getCenterLongestTrajectory(valid_trajs);
             
             ROS_INFO_STREAM_NAMED(name_, "Length of longest trajectory: " << chosen_traj->getDuration());
             
             if(chosen_traj->getDuration() > min_ttc_)
             {
               foundPath = true;
-              trajectory_points msg = chosen_traj->toTrajectoryMsg();
+              trajectory_points msg = chosen_traj->toMsg();
               commanded_trajectory_publisher_.publish(msg);
             }
             else
@@ -180,7 +180,7 @@ protected:
       else if(idle_eval_)
       {
         std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-        std::vector<trajectory_ptr> valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);  //TODO: unless all controllers use odometry message, this should change
+        auto valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);  //TODO: unless all controllers use odometry message, this should change
       }
       
       
@@ -207,7 +207,7 @@ protected:
       boost::mutex::scoped_lock lock(Controller::trajectory_mutex_);
       
       trimmed_trajectory.header = Controller::desired_trajectory_.header;
-      trimmed_trajectory.points = std::vector<pips_trajectory_msgs::trajectory_point>(Controller::desired_trajectory_.points.begin() + Controller::curr_index_, Controller::desired_trajectory_.points.end());
+      trimmed_trajectory.points.insert(trimmed_trajectory.points.begin(), Controller::desired_trajectory_.points.begin() + Controller::curr_index_, Controller::desired_trajectory_.points.end());
     }
     
     trajectory_points localTrajectory;
@@ -294,7 +294,7 @@ public:
 
 };
 
-} //ns kobuki
+} //ns pips_trajectory_testing
 
 #endif /* PIPS_TRAJECTORY_CONTROLLER_H_ */
 
