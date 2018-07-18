@@ -95,20 +95,20 @@ target_link_libraries(depth_image_cc_wrapper
 )
 
 
-# add_executable(depth_image_cc_node
-#   src/depth_image_cc_node.cpp
-# )
-# 
-# target_compile_options(depth_image_cc_node PUBLIC  -std=c++11)
-# 
-# add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# 
-# ## Specify libraries to link a library or executable target against
-# target_link_libraries(depth_image_cc_node
-#   PUBLIC
-#   depth_image_cc_wrapper
-#    ${catkin_LIBRARIES}
-# )
+add_executable(depth_image_cc_node
+  src/depth_image_cc_node.cpp
+)
+
+target_compile_options(depth_image_cc_node PUBLIC  -std=c++11)
+
+add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(depth_image_cc_node
+  PUBLIC
+  depth_image_cc_wrapper
+   ${catkin_LIBRARIES}
+)
 
 
 
