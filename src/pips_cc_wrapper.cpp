@@ -30,7 +30,7 @@ namespace pips_trajectory_testing
     if (nh_.searchParam("base_frame_id", key))
     {
       nh_.getParam(key, base_frame_id_ );
-      nh_.setParam(key, base_frame_id_ );
+      //nh_.setParam(key, base_frame_id_ );
     }
     
     return true;
@@ -41,15 +41,39 @@ namespace pips_trajectory_testing
       base_frame_id_ = base_frame_id;
   }
   
+  bool PipsCCWrapper::isReady()
+  {
+    if(isReadyImpl())
+    {
+      return transformReady(getCurrentHeader());
+    }
+    else
+    {
+      return false;
+    }
+  }
+  
+  bool PipsCCWrapper::isReady(const std_msgs::Header& header)
+  {
+    if(isReadyImpl())
+    {
+      return transformReady(getCurrentHeader(), header);
+    }
+    else
+    {
+      return false;
+    }
+  }
+  
   // Note: I haven't fully thought through other implementations, but this may be generic after all...
   // If so, then this code will probably move back to the main controller but be renamed 'transformReady' or something
-  bool PipsCCWrapper::isReady ( const std_msgs::Header& header )
+  bool PipsCCWrapper::transformReady ( const std_msgs::Header& header )
   {
 
       ros::Duration timeout ( 0 ); //Could be used for transform lookup?
 
       if ( !hasTransform_ ) {
-          ROS_DEBUG_STREAM_ONCE_NAMED ( name_, "Not ready, check for transform..." );
+          ROS_DEBUG_STREAM_THROTTLE_NAMED (1, name_, "Not ready, check for transform..." );
           try {
               //Get the transform that takes a point in the base frame and transforms it to the depth optical
               geometry_msgs::TransformStamped sensor_base_transform = tf_buffer_->lookupTransform ( header.frame_id, base_frame_id_, ros::Time ( 0 ) );
@@ -68,9 +92,35 @@ namespace pips_trajectory_testing
       return true;
   }
   
+  bool PipsCCWrapper::transformReady ( const std_msgs::Header& target_header, const std_msgs::Header& source_header)
+  {
+    
+    ros::Duration timeout ( 0 ); //Could be used for transform lookup?
+    
+    ROS_DEBUG_STREAM_ONCE_NAMED ( name_, "Not ready, check for transform..." );
+    try {
+      //Get the transform that takes a point in the base frame and transforms it to the depth optical
+      geometry_msgs::TransformStamped sensor_base_transform = tf_buffer_->lookupTransform ( target_header.frame_id, target_header.stamp, source_header.frame_id, source_header.stamp, fixed_frame_id_, timeout);
+      getCC()->setTransform ( sensor_base_transform );
+      
+      getCC()->init();
+      
+      ROS_DEBUG_STREAM_NAMED(name_+".transform", "transform: from [" << target_header << "] to [" << source_header << "] : " << toString(sensor_base_transform));
+      
+      
+      ROS_DEBUG_STREAM_NAMED ( name_,  "Transform found! Passing transform to collision checker" );
+      
+    } catch ( tf2::TransformException &ex ) {
+      ROS_WARN_STREAM_THROTTLE_NAMED ( 5, name_, "Problem finding transform:\n" <<ex.what() );
+      return false;
+    }
+    
+    return true;
+  }
+  
   void PipsCCWrapper::defaultCallback()
   {
-      if(isReady(getCurrentHeader()))
+      if(isReady())
       {
         update();
       }

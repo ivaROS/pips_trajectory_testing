@@ -19,6 +19,7 @@ namespace pips_trajectory_testing
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     
     std::string base_frame_id_ = "base_footprint";
+    std::string fixed_frame_id_ = "odom";
     
     Callback cb_=0;
     
@@ -34,12 +35,19 @@ namespace pips_trajectory_testing
     
     virtual void update()=0;
     
-    void setBaseFrame(const std::string& base_frame_id);
+    virtual void setBaseFrame(const std::string& base_frame_id);
 
     
     virtual std::shared_ptr<pips::collision_testing::TransformingCollisionChecker> getCC()=0;
     
-    virtual bool isReady( const std_msgs::Header& header );
+    virtual bool isReady();
+    virtual bool isReady(const std_msgs::Header& header);
+    
+    
+    virtual bool isReadyImpl() { return true;}
+    
+    bool transformReady ( const std_msgs::Header& header);
+    bool transformReady ( const std_msgs::Header& target_header, const std_msgs::Header& source_header);
     
     void setCallback(Callback cb=0);
     void autoUpdate();

@@ -74,11 +74,11 @@ void DepthImageCCWrapper::update()
     cc_->setImage ( current_image, current_camInfo );
 }
 
-    
-bool DepthImageCCWrapper::isReady(const std_msgs::Header& header)
+bool DepthImageCCWrapper::isReadyImpl()
 {
-    return current_camInfo && current_image && PipsCCWrapper::isReady(current_camInfo->header);
+    return current_camInfo && current_image;
 }
+
     
 // TODO: Add a mutex to coordinate 'update' and 'depthImageCb'
 // Could separate the image and camera_info callbacks to allow non synchronized messages

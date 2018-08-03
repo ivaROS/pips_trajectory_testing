@@ -117,7 +117,10 @@ protected:
     
     ROS_DEBUG_STREAM_THROTTLE_NAMED(2, name_,"Sensor Callback rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
     
-    if(isReady(header))
+    std_msgs::Header base_header = Controller::curr_odom_->header;
+    base_header.frame_id = Controller::curr_odom_->child_frame_id;
+    
+    if(Controller::isReady(header) && isReady(base_header))
     {
       
       if(wander_)

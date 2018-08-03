@@ -61,7 +61,7 @@ public:
   
   void update();
   
-  bool isReady(const std_msgs::Header& header);
+  bool isReadyImpl();
 
   
   static constexpr const char* DEFAULT_NAME="depth_image_cc_wrapper";
