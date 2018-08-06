@@ -13,6 +13,8 @@
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
 
+#include <boost/thread/mutex.hpp>
+
 
 namespace pips_trajectory_testing
 {
@@ -43,6 +45,9 @@ private:
   
   
   std::shared_ptr<pips::collision_testing::DepthImageCollisionChecker> cc_;
+  
+  typedef boost::mutex::scoped_lock Lock;
+  boost::mutex mutex_;
   
   void depthImageCb(const sensor_msgs::Image::ConstPtr& image_msg,
                     const sensor_msgs::CameraInfo::ConstPtr& info_msg);

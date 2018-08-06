@@ -16,7 +16,6 @@ namespace pips_trajectory_testing
   private:
     bool hasTransform_=false;
     
-    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     
     std::string base_frame_id_ = "base_footprint";
     std::string fixed_frame_id_ = "odom";
@@ -63,6 +62,8 @@ namespace pips_trajectory_testing
     void doCallback();
     
     void defaultCallback();
+    
+    bool inited_ = false;
 
 
   private:

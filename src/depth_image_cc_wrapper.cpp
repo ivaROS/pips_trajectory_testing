@@ -23,6 +23,8 @@ DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& p
 
 bool DepthImageCCWrapper::init()
 {
+  if(!inited_)
+  {
     PipsCCWrapper::init();
   
     // Get topic names
@@ -62,7 +64,9 @@ bool DepthImageCCWrapper::init()
     // Synchronize Image and CameraInfo callbacks
     image_synchronizer_ = boost::make_shared<time_synchronizer>(time_synchronizer(10),depth_sub_, *info_tf_filter_);
     image_synchronizer_->registerCallback(boost::bind(&DepthImageCCWrapper::depthImageCb, this, _1, _2));
-
+    
+    inited_ = true;
+  }
     return true;
 
 }
@@ -71,6 +75,8 @@ bool DepthImageCCWrapper::init()
 void DepthImageCCWrapper::update()
 {
     ROS_DEBUG_STREAM_NAMED ( name_, "Updating collision checker image" );
+    
+    Lock(mutex_);
     cc_->setImage ( current_image, current_camInfo );
 }
 
@@ -89,9 +95,11 @@ void DepthImageCCWrapper::depthImageCb ( const sensor_msgs::Image::ConstPtr& ima
         return;
     }
 
-
-    current_image = image_msg;
-    current_camInfo = info_msg;
+    {
+      Lock(mutex_);
+      current_image = image_msg;
+      current_camInfo = info_msg;
+    }
 
     doCallback();
 }

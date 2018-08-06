@@ -14,7 +14,7 @@
 #include <pips_trajectory_testing/pips_trajectory_tester.h>
 #include <pips_trajectory_testing/rate_tracker.h>
 #include <pips_trajectory_testing/PipsControllerConfig.h>
-
+#include <tf_utils/odom_to_tf.h>
 
 
 //#include <sensor_msgs/Image.h>
@@ -117,8 +117,12 @@ protected:
     
     ROS_DEBUG_STREAM_THROTTLE_NAMED(2, name_,"Sensor Callback rate: " << image_rate.getRate() << " (" << image_rate.getNumSamples() << " samples). Current delay: " << image_rate.getLastDelay() << "s; Average delay: " << image_rate.getAverageDelay() << "s.");
     
-    std_msgs::Header base_header = Controller::curr_odom_->header;
-    base_header.frame_id = Controller::curr_odom_->child_frame_id;
+    nav_msgs::Odometry::ConstPtr odom = Controller::curr_odom_;
+    
+    tf_utils::AddToBuffer(odom, Controller::tfBuffer_, "odometry_msg");
+    
+    std_msgs::Header base_header = odom->header;
+    base_header.frame_id = odom->child_frame_id;
     
     if(Controller::isReady(header) && isReady(base_header))
     {
@@ -145,7 +149,7 @@ protected:
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
           
           std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-          auto valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);
+          auto valid_trajs = traj_tester_->run(trajectory_functions, odom);
           
           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           
@@ -183,7 +187,7 @@ protected:
       else if(idle_eval_)
       {
         std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-        auto valid_trajs = traj_tester_->run(trajectory_functions, Controller::curr_odom_);  //TODO: unless all controllers use odometry message, this should change
+        auto valid_trajs = traj_tester_->run(trajectory_functions, odom);  //TODO: unless all controllers use odometry message, this should change
       }
       
       
