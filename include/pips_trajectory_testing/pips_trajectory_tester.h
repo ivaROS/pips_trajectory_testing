@@ -208,7 +208,7 @@ public:
   
   
   //This is the lowest level version that is actually run; the rest are for convenience
-  std::vector<pips_trajectory_ptr> run(std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, traj_params_ptr params)
+  std::vector<pips_trajectory_ptr> run(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const traj_params_ptr params)
   {
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
     size_t num_paths = trajectory_functions.size();
@@ -231,41 +231,17 @@ public:
       #ifdef NDEBUG 
       if (omp_get_dynamic())
         omp_set_dynamic(0);
-      #pragma omp parallel for schedule(dynamic) if(parallelism_enabled_) //schedule(dynamic)
+      #pragma omp parallel if(parallelism_enabled_) //schedule(dynamic)
       #endif
-      for(size_t i = 0; i < num_paths; i++)
       {
-        
-        pips_trajectory_ptr traj = std::make_shared<pips_trajectory>();
-        traj->header = header;
-        traj->params = params;
-        
-        traj->trajpntr = trajectory_functions[i];
-        traj->x0_ = x0;
-        
-        size_t steps = traj_gen_bridge_->generate_trajectory(traj);
-        
-        if(steps == 0)
+        #pragma omp single nowait
+        for(size_t i = 0; i < num_paths; i++)
         {
-          ROS_ERROR_STREAM_NAMED(name_, "The trajectory has 0 states! Check initial conditions and parameters");
+          #pragma omp task
+          {
+            trajectories[i] = generateTraj(x0, header, params, trajectory_functions[i]);
+          }
         }
-        
-        evaluateTrajectory(traj);
-        
-        trajectories[i] = traj;
-        
-        #ifdef NDEBUG 
-        if(omp_in_parallel())
-        {
-          int thread_id = omp_get_thread_num();
-          auto t2 = std::chrono::high_resolution_clock::now();
-          std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
-          
-          ROS_DEBUG_STREAM_NAMED(name_,"OpenMP active! Thread # " << thread_id << " completed in " << fp_ms.count() << "ms");
-          
-        }
-        #endif
-        
       }
     }
     else
@@ -281,6 +257,27 @@ public:
     ROS_INFO_STREAM_NAMED(name_, "Generated " << num_paths << " trajectories in " << fp_ms.count() << " ms");
     
     return trajectories;
+  }
+  
+  
+  pips_trajectory_ptr generateTraj(const state_type& x0, const std_msgs::Header& header, traj_params_ptr params, traj_func_ptr traj_func)
+  {
+    pips_trajectory_ptr traj = std::make_shared<pips_trajectory>();
+    traj->header = header;
+    traj->params = params;
+    
+    traj->trajpntr = traj_func;
+    traj->x0_ = x0;
+    
+    size_t steps = traj_gen_bridge_->generate_trajectory(traj);
+    
+    if(steps == 0)
+    {
+      ROS_ERROR_STREAM_NAMED(name_, "The trajectory has 0 states! Check initial conditions and parameters");
+    }
+    
+    evaluateTrajectory(traj);
+    return traj;
   }
   
   
@@ -458,21 +455,16 @@ public:
     if(cc_)
     {
       size_t num_states = traj->num_states();
-      for(size_t i = 0; i < num_states; i++)
+      
+      //return evaluate(traj, num_states, 0);
+      for(int i = 0; i < num_states; i++)
       {
-        
         geometry_msgs::Pose pose = traj->getPose(i);
         
-        if(pose.position.x > min_dist_)
+        if(cc_->testCollision(pose, cc_options_))
         {
-          
-          if(cc_->testCollision(pose, cc_options_))
-          {
-            return i;
-            
-          }
+          return i;
         }
-        
       }
     }
     else
@@ -482,6 +474,33 @@ public:
     
     return -1;
     
+  }
+  
+  int evaluate(const trajectory_ptr& traj, size_t num_states, int ind)
+  {
+    if(ind == num_states)
+    {
+      return -1;
+    }
+    
+    int ret;
+    
+    
+    #pragma omp task shared(traj)
+    {
+      geometry_msgs::Pose pose = traj->getPose(ind);
+      
+      if(cc_->testCollision(pose, cc_options_))
+      {
+        ret = ind;
+      }
+      else
+      {
+        ret = evaluate(traj, num_states, ind+1);
+      }
+    }
+    
+    return ret;
   }
   
   int evaluateTrajectory(const trajectory_points& trajectory)
