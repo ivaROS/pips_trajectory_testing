@@ -137,7 +137,7 @@ private:
   typedef dynamic_reconfigure::Server<pips_trajectory_testing::PipsTrajectoryTesterConfig> ReconfigureServer;
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
 
-  CollisionChecker_ptr cc_;
+  CollisionChecker_ptr cc_, cc2_;
   
   CCOptions cc_options_;
 
@@ -237,7 +237,7 @@ public:
         #pragma omp single nowait
         for(size_t i = 0; i < num_paths; i++)
         {
-          #pragma omp task
+          //#pragma omp task
           {
             trajectories[i] = generateTraj(x0, header, params, trajectory_functions[i]);
           }
@@ -382,6 +382,12 @@ public:
     cc_ = cc;
   }
   
+  void setCollisionChecker(CollisionChecker_ptr cc, CollisionChecker_ptr cc2)
+  {
+    cc_ = cc;
+    cc2_ = cc2;
+  }
+  
   void init()
   {
     if(!initialized_)
@@ -454,6 +460,11 @@ public:
   {
     if(cc_)
     {
+      if(cc2_)
+      {
+        return evaluateTrajectory2(traj);
+      }
+      
       size_t num_states = traj->num_states();
       
       //return evaluate(traj, num_states, 0);
@@ -473,6 +484,72 @@ public:
     }
     
     return -1;
+    
+  }
+  
+  int evaluateTrajectory2(const trajectory_ptr& traj)
+  {
+    int res1 = -1;
+    int res2 = -2;
+    
+
+    const size_t num_states = traj->num_states();
+    
+    std::vector<geometry_msgs::Pose> poses;
+    for(int i = 0; i < num_states; i++)
+    {
+      poses.push_back(traj->getPose(i));
+    }
+    
+    
+    #pragma omp taskgroup
+    {
+      
+      #pragma omp task shared(res1)
+      for(int i = 0; i < num_states; i++)
+      {
+        geometry_msgs::Pose pose = poses[i];
+        
+        if(cc_->testCollision(pose, cc_options_))
+        {
+          #pragma omp critical
+          {
+            res1 = i;
+            ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+          }
+          #pragma omp cancel taskgroup
+        }
+        #pragma omp cancellation point taskgroup
+      }
+      
+      #pragma omp task shared(res2)
+      for(int i = 0; i < num_states; i++)
+      {
+        geometry_msgs::Pose pose = poses[i];
+        
+        if(cc2_->testCollision(pose, cc_options_))
+        {
+          #pragma omp critical
+          {
+            res2 = i;
+            ROS_INFO_STREAM_NAMED(name_, "cc2 detected collision @ " << i);
+          }
+          #pragma omp cancel taskgroup
+        }
+        #pragma omp cancellation point taskgroup
+      }
+    }
+   
+   if(res1>=0 && res1 < res2)
+   {
+     return res1;
+   }
+   else
+   {
+     return res2;
+   }
+    
+    
     
   }
   
