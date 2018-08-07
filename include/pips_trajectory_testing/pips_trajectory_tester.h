@@ -490,10 +490,10 @@ public:
   int evaluateTrajectory2(const trajectory_ptr& traj)
   {
     int res1 = -1;
-    int res2 = -2;
+    int res2 = -1;
     
 
-    const size_t num_states = traj->num_states();
+    size_t num_states = traj->num_states();
     
     std::vector<geometry_msgs::Pose> poses;
     for(int i = 0; i < num_states; i++)
@@ -501,42 +501,51 @@ public:
       poses.push_back(traj->getPose(i));
     }
     
+    //bool early_cancel = omp_get_cancellation();
+    
     
     #pragma omp taskgroup
     {
       
-      #pragma omp task shared(res1)
+      #pragma omp task shared(res1, num_states)
       for(int i = 0; i < num_states; i++)
       {
         geometry_msgs::Pose pose = poses[i];
         
         if(cc_->testCollision(pose, cc_options_))
         {
-          #pragma omp critical
+          #pragma omp atomic write
+          num_states = i;
+          
           {
             res1 = i;
             ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
           }
-          #pragma omp cancel taskgroup
+          break;
+          //#pragma omp cancel taskgroup
         }
-        #pragma omp cancellation point taskgroup
+        //#pragma omp cancellation point taskgroup
       }
       
-      #pragma omp task shared(res2)
+      #pragma omp task shared(res2, num_states)
       for(int i = 0; i < num_states; i++)
       {
         geometry_msgs::Pose pose = poses[i];
         
         if(cc2_->testCollision(pose, cc_options_))
         {
-          #pragma omp critical
+          #pragma omp atomic write
+          num_states = i;
+          
+          //#pragma omp critical
           {
             res2 = i;
             ROS_INFO_STREAM_NAMED(name_, "cc2 detected collision @ " << i);
           }
-          #pragma omp cancel taskgroup
+          break;
+          //#pragma omp cancel taskgroup
         }
-        #pragma omp cancellation point taskgroup
+        //#pragma omp cancellation point taskgroup
       }
     }
    
