@@ -528,7 +528,7 @@ public:
               
               {
                 res1 = i;
-                ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+                ROS_DEBUG_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
               }
               break;
               //#pragma omp cancel taskgroup
@@ -568,7 +568,7 @@ public:
               
               {
                 res2 = i;
-                ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+                ROS_DEBUG_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
               }
               break;
               //#pragma omp cancel taskgroup
@@ -601,37 +601,37 @@ public:
      res= -1;
    }
     
-    ROS_INFO_STREAM_NAMED(name_, "results: res1=" << res1 << ", res2=" << res2 << ", min_res=" << min_res << ", res=" << res);
+    ROS_DEBUG_STREAM_NAMED(name_, "results: res1=" << res1 << ", res2=" << res2 << ", min_res=" << min_res << ", res=" << res);
     
     return res;
   }
   
-  int evaluate(const trajectory_ptr& traj, size_t num_states, int ind)
-  {
-    if(ind == num_states)
-    {
-      return -1;
-    }
-    
-    int ret;
-    
-    
-    #pragma omp task shared(traj)
-    {
-      geometry_msgs::Pose pose = traj->getPose(ind);
-      
-      if(cc_->testCollision(pose, cc_options_))
-      {
-        ret = ind;
-      }
-      else
-      {
-        ret = evaluate(traj, num_states, ind+1);
-      }
-    }
-    
-    return ret;
-  }
+//   int evaluate(const trajectory_ptr& traj, size_t num_states, int ind)
+//   {
+//     if(ind == num_states)
+//     {
+//       return -1;
+//     }
+//     
+//     int ret;
+//     
+//     
+//     #pragma omp task shared(traj)
+//     {
+//       geometry_msgs::Pose pose = traj->getPose(ind);
+//       
+//       if(cc_->testCollision(pose, cc_options_))
+//       {
+//         ret = ind;
+//       }
+//       else
+//       {
+//         ret = evaluate(traj, num_states, ind+1);
+//       }
+//     }
+//     
+//     return ret;
+//   }
   
   int evaluateTrajectory(const trajectory_points& trajectory)
   {
