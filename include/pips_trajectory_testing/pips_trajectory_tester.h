@@ -468,7 +468,7 @@ public:
       size_t num_states = traj->num_states();
       
       //return evaluate(traj, num_states, 0);
-      for(int i = 0; i < num_states; i++)
+      for(size_t i = 0; i < num_states; i++)
       {
         geometry_msgs::Pose pose = traj->getPose(i);
         
@@ -489,14 +489,13 @@ public:
   
   int evaluateTrajectory2(const trajectory_ptr& traj)
   {
-    int res1 = -1;
-    int res2 = -1;
+    const size_t num_states = traj->num_states();
     
-
-    size_t num_states = traj->num_states();
+    size_t res1 = num_states;
+    size_t res2 = num_states;
     
     std::vector<geometry_msgs::Pose> poses;
-    for(int i = 0; i < num_states; i++)
+    for(size_t i = 0; i < num_states; i++)
     {
       poses.push_back(traj->getPose(i));
     }
@@ -506,60 +505,105 @@ public:
     
     #pragma omp taskgroup
     {
-      
-      #pragma omp task shared(res1, num_states)
-      for(int i = 0; i < num_states; i++)
+      size_t max_ind = num_states;
+      #pragma omp task shared(res1, max_ind)
       {
-        geometry_msgs::Pose pose = poses[i];
-        
-        if(cc_->testCollision(pose, cc_options_))
+        size_t i = 0;
+        //for(int i = 0; i < num_states; i++)
+        while(true)
         {
-          #pragma omp atomic write
-          num_states = i;
+          size_t x;
           
+          #pragma omp atomic read
+          x = max_ind;
+          
+          if(i < x)
           {
-            res1 = i;
-            ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+            geometry_msgs::Pose pose = poses[i];
+            
+            if(cc_->testCollision(pose, cc_options_))
+            {
+              #pragma omp atomic write
+              max_ind = i;
+              
+              {
+                res1 = i;
+                ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+              }
+              break;
+              //#pragma omp cancel taskgroup
+            }
+            else
+            {
+              ++i;
+            }
           }
-          break;
-          //#pragma omp cancel taskgroup
+          else
+          {
+            break;
+          }
+          //#pragma omp cancellation point taskgroup
         }
-        //#pragma omp cancellation point taskgroup
       }
       
-      #pragma omp task shared(res2, num_states)
-      for(int i = 0; i < num_states; i++)
+      #pragma omp task shared(res2, max_ind)
       {
-        geometry_msgs::Pose pose = poses[i];
-        
-        if(cc2_->testCollision(pose, cc_options_))
+        size_t i = 0;
+        //for(int i = 0; i < num_states; i++)
+        while(true)
         {
-          #pragma omp atomic write
-          num_states = i;
+          size_t x;
           
-          //#pragma omp critical
+          #pragma omp atomic read
+          x = max_ind;
+          
+          if(i < x)
           {
-            res2 = i;
-            ROS_INFO_STREAM_NAMED(name_, "cc2 detected collision @ " << i);
+            geometry_msgs::Pose pose = poses[i];
+            
+            if(cc2_->testCollision(pose, cc_options_))
+            {
+              #pragma omp atomic write
+              max_ind = i;
+              
+              {
+                res2 = i;
+                ROS_INFO_STREAM_NAMED(name_, "cc1 detected collision @ " << i);
+              }
+              break;
+              //#pragma omp cancel taskgroup
+            }
+            else
+            {
+              ++i;
+            }
           }
-          break;
-          //#pragma omp cancel taskgroup
+          else
+          {
+            break;
+          }
+          //#pragma omp cancellation point taskgroup
         }
-        //#pragma omp cancellation point taskgroup
       }
     }
    
-   if(res1>=0 && res1 < res2)
+   
+   size_t min_res = std::min(res1,res2);
+   
+   int res;
+   
+   if(min_res < num_states)
    {
-     return res1;
+     res= min_res;
    }
    else
    {
-     return res2;
+     res= -1;
    }
     
+    ROS_INFO_STREAM_NAMED(name_, "results: res1=" << res1 << ", res2=" << res2 << ", min_res=" << min_res << ", res=" << res);
     
-    
+    return res;
   }
   
   int evaluate(const trajectory_ptr& traj, size_t num_states, int ind)
