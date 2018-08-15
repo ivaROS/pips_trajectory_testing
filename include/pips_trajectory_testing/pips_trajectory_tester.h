@@ -237,7 +237,7 @@ public:
         #pragma omp single nowait
         for(size_t i = 0; i < num_paths; i++)
         {
-          //#pragma omp task
+          #pragma omp task
           {
             trajectories[i] = generateTraj(x0, header, params, trajectory_functions[i]);
           }

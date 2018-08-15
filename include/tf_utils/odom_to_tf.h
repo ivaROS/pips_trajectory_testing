@@ -1,4 +1,5 @@
-
+#ifndef TF_UTILS_ODOM_TO_TF_H
+#define TF_UTILS_ODOM_TO_TF_H
 
 #include <nav_msgs/Odometry.h>
 #include <tf2/buffer_core.h>
@@ -6,7 +7,7 @@
 
 namespace tf_utils
 {
-
+  inline
   geometry_msgs::TransformStamped toTransform(const nav_msgs::Odometry::ConstPtr& odom)
   {
     geometry_msgs::TransformStamped transform;
@@ -25,6 +26,7 @@ namespace tf_utils
     return transform;
   }
   
+  inline
   bool AddToBuffer(const nav_msgs::Odometry::ConstPtr odom, tf2::BufferCore* buffer, const std::string& authority)
   {
     geometry_msgs::TransformStamped transform = toTransform(odom);
@@ -41,7 +43,7 @@ namespace tf_utils
     }
   }
   
-  
+  inline
   bool AddToBuffer(const nav_msgs::Odometry::ConstPtr odom, std::shared_ptr<tf2::BufferCore> buffer, const std::string& authority)
   {
     geometry_msgs::TransformStamped transform = toTransform(odom);
@@ -65,3 +67,5 @@ namespace tf_utils
   }*/
 
 }
+
+#endif //TF_UTILS_ODOM_TO_TF_H
