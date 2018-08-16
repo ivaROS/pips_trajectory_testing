@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   trajectory_generator
   pips
-  turtlebot_trajectory_controller
   )
 
 ## System dependencies are found with CMake's conventions
@@ -39,8 +38,8 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES obstacle_avoidance_controller pips_trajectory_tester pips_controller pips_cc_wrapper depth_image_cc_wrapper
-  CATKIN_DEPENDS pips trajectory_generator turtlebot_trajectory_controller dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
+  LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper
+  CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
 ##  DEPENDS system_lib
 )
 
