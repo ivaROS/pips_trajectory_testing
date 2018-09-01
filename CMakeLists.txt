@@ -109,7 +109,7 @@ target_link_libraries(depth_image_cc_node
    ${catkin_LIBRARIES}
 )
 
-
+# TODO: Add interface library for trajectory testing to ensure that OMP flags get applied to dependent targets: http://mariobadr.com/creating-a-header-only-library-with-cmake.html
 
 # 
 # ## Declare a cpp library

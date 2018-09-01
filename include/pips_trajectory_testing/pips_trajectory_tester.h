@@ -147,6 +147,7 @@ private:
   std_msgs::Header header_;
 
   bool parallelism_enabled_ = true;
+  int num_threads_;
 
   traj_params_ptr params_;
   
@@ -231,15 +232,16 @@ public:
       #ifdef NDEBUG 
       if (omp_get_dynamic())
         omp_set_dynamic(0);
-      #pragma omp parallel if(parallelism_enabled_) //schedule(dynamic)
+      #pragma omp parallel if(parallelism_enabled_) num_threads(num_threads_) //schedule(dynamic)
       #endif
       {
         #pragma omp single nowait
         for(size_t i = 0; i < num_paths; i++)
         {
-          #pragma omp task
+          auto trajectory = trajectory_functions[i];
+          #pragma omp task shared(header, x0)
           {
-            trajectories[i] = generateTraj(x0, header, params, trajectory_functions[i]);
+            trajectories[i] = generateTraj(x0, header, params, trajectory);
           }
         }
       }
@@ -411,7 +413,7 @@ public:
     ROS_INFO_STREAM_NAMED(name_, "Reconfigure Request: tf=" << config.tf << ", parallelism=" << (config.parallelism?"True":"False") << ", detailed_collisions=" << (config.collision_details?"Enabled":"Disabled"));
     
     parallelism_enabled_ = config.parallelism;
-    //TODO: add option set max number of threads, 0 corresponding to 'auto'
+    num_threads_ = config.num_threads;
     
     cc_options_ = CCOptions(config.collision_details);
     
