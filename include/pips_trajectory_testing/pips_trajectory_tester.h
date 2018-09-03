@@ -156,6 +156,10 @@ private:
   double min_dist_ = .05;// Check this distance first, then don't have to evaluate trajectories closer than that
 
 public:
+  
+  void setParam_TF(double tf_) {
+    params_->tf = tf_;
+  }
 
   
   GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh) :
