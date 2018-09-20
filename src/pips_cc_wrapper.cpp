@@ -32,6 +32,20 @@ namespace pips_trajectory_testing
       nh_.getParam(key, base_frame_id_ );
       //nh_.setParam(key, base_frame_id_ );
     }
+    else
+    {
+      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'base_frame_id'! Using default value: '" << base_frame_id_ << "'");
+    }
+    
+    if (nh_.searchParam("fixed_frame_id", key))
+    {
+      nh_.getParam(key, fixed_frame_id_ );
+      //nh_.setParam(key, base_frame_id_ );
+    }
+    else
+    {
+      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'fixed_frame_id'! Using default value: '" << fixed_frame_id_ << "'");
+    }
     
     return true;
   }

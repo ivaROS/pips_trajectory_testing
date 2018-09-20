@@ -82,11 +82,19 @@ void DepthImageCCWrapper::update()
 
 bool DepthImageCCWrapper::isReadyImpl()
 {
-    return current_camInfo && current_image;
+    if(current_camInfo && current_image)
+    {
+      return true;
+    }
+    else
+    {
+      ROS_ERROR_STREAM_COND_NAMED(!current_camInfo, name_, "No current CameraInfo message!");
+      ROS_ERROR_STREAM_COND_NAMED(!current_image, name_, "No current Image message!");
+    }
+    return false;
 }
 
     
-// TODO: Add a mutex to coordinate 'update' and 'depthImageCb'
 // Could separate the image and camera_info callbacks to allow non synchronized messages
 void DepthImageCCWrapper::depthImageCb ( const sensor_msgs::Image::ConstPtr& image_msg, const sensor_msgs::CameraInfo::ConstPtr& info_msg )
 {
@@ -112,7 +120,8 @@ std_msgs::Header DepthImageCCWrapper::getCurrentHeader()
     }
     else
     {
-        return std_msgs::Header();
+        ROS_ERROR_STREAM_NAMED(name_, "Trying to get current header, but none exists!");
+        return std_msgs::Header();  //TODO: Add a warning here; this really shouldn't happen
     }
 }
 
