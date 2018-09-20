@@ -213,19 +213,23 @@ public:
     
     std::vector<pips_trajectory_ptr> trajectories(num_paths);
     
-    for(size_t i = 0; i < num_paths; i++)
+    #pragma omp taskgroup
     {
-      auto trajectory = trajectory_functions[i];
-      if(use_tasks)
+    
+      for(size_t i = 0; i < num_paths; i++)
       {
-        #pragma omp task shared(trajectories, header, x0) if(use_tasks)
+        auto trajectory = trajectory_functions[i];
+        if(use_tasks)
+        {
+          #pragma omp task shared(trajectories, header, x0) if(use_tasks)
+          {
+            trajectories[i] = generateTraj(x0, header, params, trajectory);
+          }
+        }
+        else
         {
           trajectories[i] = generateTraj(x0, header, params, trajectory);
         }
-      }
-      else
-      {
-        trajectories[i] = generateTraj(x0, header, params, trajectory);
       }
     }
     
