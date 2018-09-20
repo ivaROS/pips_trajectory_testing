@@ -38,7 +38,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper
+  LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #pips_trajectory_tester
   CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
 ##  DEPENDS system_lib
 )
@@ -110,12 +110,19 @@ target_link_libraries(depth_image_cc_node
 )
 
 # TODO: Add interface library for trajectory testing to ensure that OMP flags get applied to dependent targets: http://mariobadr.com/creating-a-header-only-library-with-cmake.html
+# NOTE: The above may not actually be useful, since I can't figure out how to get a dependent target to use the compile flags
 
-# 
 # ## Declare a cpp library
-# add_library(pips_trajectory_tester
-#    src/pips_trajectory_tester.cpp
+# add_library(pips_trajectory_tester src/pips_trajectory_tester.cpp)
+# #target_sources(pips_trajectory_tester PUBLIC "pips_trajectory_tester.h")
+# target_include_directories(pips_trajectory_tester PUBLIC include/)
+# target_compile_options(pips_trajectory_tester PUBLIC -std=c++11 ${OpenMP_CXX_FLAGS})
+# target_link_libraries(pips_trajectory_tester
+#   PUBLIC
+#   ${OpenMP_CXX_FLAGS}
+#    ${catkin_LIBRARIES}
 # )
+ 
 # 
 # add_dependencies(pips_trajectory_tester ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}) 
 # target_compile_options(pips_trajectory_tester PRIVATE -Wall ${OpenMP_CXX_FLAGS})

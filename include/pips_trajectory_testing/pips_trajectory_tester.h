@@ -207,6 +207,30 @@ public:
 //   }
 //   
   
+  std::vector<pips_trajectory_ptr> run_impl(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const traj_params_ptr params, bool use_tasks)
+  {
+    size_t num_paths = trajectory_functions.size();
+    
+    std::vector<pips_trajectory_ptr> trajectories(num_paths);
+    
+    for(size_t i = 0; i < num_paths; i++)
+    {
+      auto trajectory = trajectory_functions[i];
+      if(use_tasks)
+      {
+        #pragma omp task shared(trajectories, header, x0) if(use_tasks)
+        {
+          trajectories[i] = generateTraj(x0, header, params, trajectory);
+        }
+      }
+      else
+      {
+        trajectories[i] = generateTraj(x0, header, params, trajectory);
+      }
+    }
+    
+    return trajectories;
+  }
   
   //This is the lowest level version that is actually run; the rest are for convenience
   std::vector<pips_trajectory_ptr> run(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const traj_params_ptr params)
@@ -214,7 +238,7 @@ public:
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
     size_t num_paths = trajectory_functions.size();
     
-    std::vector<pips_trajectory_ptr> trajectories(num_paths); //std::vector<boost::shared_ptr<PipsTrajectory*>>
+    std::vector<pips_trajectory_ptr> trajectories; //std::vector<boost::shared_ptr<PipsTrajectory*>>
     
     //Start timer
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -226,23 +250,28 @@ public:
       //Perform trajectory generation and collision detection in parallel if enabled
       //Vectors and arrays must be accessed by indicies to ensure thread safe behavior
       
-      
-      
       //To aid in debugging, disable parallel loop completely in debug mode
-      #ifdef NDEBUG 
-      if (omp_get_dynamic())
-        omp_set_dynamic(0);
-      #pragma omp parallel if(parallelism_enabled_) num_threads(num_threads_) //schedule(dynamic)
+      bool disable_parallel=true;
+      #ifdef NDEBUG
+        disable_parallel=false;
       #endif
+        
+        
+      bool in_parallel = omp_in_parallel();
+      ROS_INFO_STREAM("Parallelism: " << parallelism_enabled_ << ", disable_parallel: " << disable_parallel << ", in_parallel: " << in_parallel);
+      
+      if(disable_parallel || in_parallel || !parallelism_enabled_)
       {
-        #pragma omp single nowait
-        for(size_t i = 0; i < num_paths; i++)
+        trajectories = run_impl(trajectory_functions, x0, header, params, !disable_parallel && in_parallel && parallelism_enabled_);
+      }
+      else
+      {
+        if (omp_get_dynamic())
+          omp_set_dynamic(0);
+        #pragma omp parallel if(parallelism_enabled_) num_threads(num_threads_) //schedule(dynamic)
         {
-          auto trajectory = trajectory_functions[i];
-          #pragma omp task shared(header, x0)
-          {
-            trajectories[i] = generateTraj(x0, header, params, trajectory);
-          }
+          #pragma omp single nowait
+          trajectories = run_impl(trajectory_functions, x0, header, params, true);
         }
       }
     }
