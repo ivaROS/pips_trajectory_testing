@@ -241,7 +241,12 @@ public:
         #pragma omp single nowait
         for(size_t i = 0; i < num_paths; i++)
         {
-          #pragma omp task
+          // NOTE
+          // append shared(x0, header, trajectory_functions), according to:
+          // https://stackoverflow.com/questions/43900638/openmp-task-cant-pass-argument-by-reference 
+          //
+          // #pragma omp task
+          #pragma omp task shared(x0, header, trajectory_functions)
           {
             trajectories[i] = generateTraj(x0, header, params, trajectory_functions[i]);
           }
