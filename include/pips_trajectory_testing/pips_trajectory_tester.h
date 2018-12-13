@@ -262,7 +262,7 @@ public:
         
         
       bool in_parallel = omp_in_parallel();
-      ROS_INFO_STREAM("Parallelism: " << parallelism_enabled_ << ", disable_parallel: " << disable_parallel << ", in_parallel: " << in_parallel);
+      ROS_DEBUG_STREAM("Parallelism: " << parallelism_enabled_ << ", disable_parallel: " << disable_parallel << ", in_parallel: " << in_parallel);
       
       if(disable_parallel || in_parallel || !parallelism_enabled_)
       {

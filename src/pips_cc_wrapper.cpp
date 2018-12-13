@@ -27,9 +27,9 @@ namespace pips_trajectory_testing
   {
     //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
     std::string key;
-    if (nh_.searchParam("base_frame_id", key))
+    if (pnh_.searchParam("base_frame_id", key))
     {
-      nh_.getParam(key, base_frame_id_ );
+      pnh_.getParam(key, base_frame_id_ );
       //nh_.setParam(key, base_frame_id_ );
     }
     else
@@ -37,9 +37,9 @@ namespace pips_trajectory_testing
       ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'base_frame_id'! Using default value: '" << base_frame_id_ << "'");
     }
     
-    if (nh_.searchParam("fixed_frame_id", key))
+    if (pnh_.searchParam("fixed_frame_id", key))
     {
-      nh_.getParam(key, fixed_frame_id_ );
+      pnh_.getParam(key, fixed_frame_id_ );
       //nh_.setParam(key, base_frame_id_ );
     }
     else
@@ -119,7 +119,7 @@ namespace pips_trajectory_testing
       
       getCC()->init();
       
-      ROS_DEBUG_STREAM_NAMED(name_+".transform", "transform: from [" << target_header << "] to [" << source_header << "] : " << toString(sensor_base_transform));
+      ROS_DEBUG_STREAM_NAMED(name_+".transform", "transform: from [" << target_header.frame_id << "] at " << target_header.stamp << " to [" << source_header.frame_id << "] at " << source_header.stamp << ": " << toString(sensor_base_transform));
       
       
       ROS_DEBUG_STREAM_NAMED ( name_,  "Transform found! Passing transform to collision checker" );

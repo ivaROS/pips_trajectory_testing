@@ -16,10 +16,6 @@ namespace pips_trajectory_testing
   private:
     bool hasTransform_=false;
     
-    
-    std::string base_frame_id_ = "base_footprint";
-    std::string fixed_frame_id_ = "odom";
-    
     Callback cb_=0;
     
 
@@ -65,9 +61,8 @@ namespace pips_trajectory_testing
     
     bool inited_ = false;
 
-
-  private:
-    
+    std::string base_frame_id_ = "base_footprint";
+    std::string fixed_frame_id_ = "odom";
 
   };
 

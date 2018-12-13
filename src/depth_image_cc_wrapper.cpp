@@ -37,6 +37,7 @@ bool DepthImageCCWrapper::init()
     pnh_.setParam("depth_image_topic", depth_image_topic);
     pnh_.setParam("depth_info_topic", depth_info_topic );
 
+    //TODO: Replace this with the 'fixed_frame_id_' variable from PipsCCWrapper
     std::string odom_frame_id = "odom";
 
     //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
@@ -121,7 +122,7 @@ std_msgs::Header DepthImageCCWrapper::getCurrentHeader()
     else
     {
         ROS_ERROR_STREAM_NAMED(name_, "Trying to get current header, but none exists!");
-        return std_msgs::Header();  //TODO: Add a warning here; this really shouldn't happen
+        return std_msgs::Header();
     }
 }
 
