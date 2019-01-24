@@ -148,29 +148,23 @@ protected:
           ROS_DEBUG_STREAM_COND_NAMED(!Controller::executing_, name_, "Not currently executing, test new trajectories");
           ROS_DEBUG_STREAM_COND_NAMED(replan, name_, "Time to replan");
           
-          std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
-          auto valid_trajs = traj_tester_->run(trajectory_functions, odom);
+//           std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
+//           auto valid_trajs = traj_tester_->run(trajectory_functions, odom);
+//           
+//           ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
           
-          ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
+          auto chosen_traj = findPath(odom);
           
           bool foundPath = false;
-          if(valid_trajs.size() >0)
+          if(chosen_traj && chosen_traj->getDuration() > min_ttc_)
           {
-            auto chosen_traj = TrajBridge::getCenterLongestTrajectory(valid_trajs);
-            
-            ROS_INFO_STREAM_NAMED(name_, "Length of longest trajectory: " << chosen_traj->getDuration());
-            
-            if(chosen_traj->getDuration() > min_ttc_)
-            {
-              foundPath = true;
-              trajectory_points msg = chosen_traj->toMsg();
-              commanded_trajectory_publisher_.publish(msg);
-            }
-            else
-            {
-              ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time to collision (min_ttc) (" << min_ttc_ << ")" );
-            }
-            
+            foundPath = true;
+            trajectory_points msg = chosen_traj->toMsg();
+            commanded_trajectory_publisher_.publish(msg);
+          }
+          else
+          {
+            ROS_WARN_STREAM_NAMED(name_, "The longest found trajectory is shorter than the required minimum time to collision (min_ttc) (" << min_ttc_ << ")" );
           }
           
           //If no satisfactory trajectory was found, then command a halt.
@@ -196,6 +190,25 @@ protected:
     }
   }
   
+  virtual typename TrajBridge::trajectory_ptr findPath(nav_msgs::Odometry::ConstPtr odom )
+  {
+    std::vector<traj_func_ptr> trajectory_functions = getTrajectoryFunctions();
+    auto valid_trajs = traj_tester_->run(trajectory_functions, odom);
+    
+    ROS_DEBUG_STREAM_NAMED(name_, "Found " << valid_trajs.size() << " non colliding  trajectories");
+    
+    if(valid_trajs.size() >0)
+    {
+      auto chosen_traj = TrajBridge::getCenterLongestTrajectory(valid_trajs);
+      
+      ROS_INFO_STREAM_NAMED(name_, "Length of longest trajectory: " << chosen_traj->getDuration());
+
+      return chosen_traj;
+    }
+    
+    return nullptr;
+  }
+  
   
   virtual bool isReady(const std_msgs::Header& header)
   {
@@ -214,6 +227,7 @@ protected:
       boost::mutex::scoped_lock lock(Controller::trajectory_mutex_);
       
       trimmed_trajectory.header = Controller::desired_trajectory_.header;
+      trimmed_trajectory.header.stamp = header.stamp; //This isn't ideal, but without it the difference in time gets too big and the trajectory can't be transformed to base frame. Only works because desired_trajectory_ is in 'odom' frame, which is continuous
       trimmed_trajectory.points.insert(trimmed_trajectory.points.begin(), Controller::desired_trajectory_.points.begin() + Controller::curr_index_, Controller::desired_trajectory_.points.end());
     }
     
