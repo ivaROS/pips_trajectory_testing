@@ -680,7 +680,7 @@ public:
         geometry_msgs::Pose pose;
         pose.position.x = pt.x;
         pose.position.y = pt.y;
-        TrajBridge::yawToQuaternion(pt.theta);
+        pose.orientation = TrajBridge::yawToQuaternion(pt.theta);
         if(cc_->testCollision(pose, cc_options_))
         {
           return i;
