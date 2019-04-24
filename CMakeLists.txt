@@ -7,14 +7,15 @@ project(pips_trajectory_testing)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  visualization_msgs
   image_transport
-#  image_view
   tf
   tf2
+  tf2_ros
   dynamic_reconfigure
-  visualization_msgs
   trajectory_generator
   pips
+  tf2_pips
   )
 
 ## System dependencies are found with CMake's conventions
@@ -39,8 +40,8 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #pips_trajectory_tester
-  CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2
-##  DEPENDS system_lib
+  CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2 tf2_ros pips tf2_pips
+  DEPENDS Boost OpenMP
 )
 
 ###########
@@ -54,13 +55,6 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
-
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ")
-
-
-
 
 
 add_library(pips_cc_wrapper
