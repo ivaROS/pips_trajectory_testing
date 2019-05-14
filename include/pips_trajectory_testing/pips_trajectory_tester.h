@@ -107,7 +107,7 @@ template<typename state_type, typename traj_func_t>
 class GenAndTest
 {
 public:
-  typedef trajectory_states<state_type, traj_func_t> TrajectoryStates;
+  typedef trajectory_generator::trajectory_states<state_type, traj_func_t> TrajectoryStates;
   typedef std::shared_ptr<TrajectoryStates> trajectory_ptr;
   
   typedef PipsTrajectory<TrajectoryStates> pips_trajectory;
@@ -118,7 +118,7 @@ public:
   
   typedef std::shared_ptr<traj_func_type> traj_func_ptr;
   
-  typedef TrajectoryGeneratorBridge<state_type, traj_func_type> TrajBridge;
+  typedef trajectory_generator::TrajectoryGeneratorBridge<state_type, traj_func_type> TrajBridge;
   typedef std::shared_ptr<TrajBridge> TrajectoryGeneratorBridge_ptr;
   
   typedef typename state_type::trajectory_msg_t trajectory_points;
@@ -149,7 +149,7 @@ private:
   bool parallelism_enabled_ = true;
   int num_threads_;
 
-  traj_params_ptr params_;
+  trajectory_generator::traj_params_ptr params_;
   
   bool initialized_ = false;
 
@@ -168,7 +168,7 @@ public:
   pnh_(pnh, name_)
   {
     traj_gen_bridge_ = std::make_shared<TrajBridge>();
-    params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams());  //NOTE: With dynamic reconfigure, this is probably next to pointless
+    params_ = std::make_shared<trajectory_generator::traj_params>(traj_gen_bridge_->getDefaultParams());  //NOTE: With dynamic reconfigure, this is probably next to pointless
   }
   
   GenAndTest(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
@@ -177,7 +177,7 @@ public:
   pnh_(pnh, name_)
   {
     traj_gen_bridge_ = std::make_shared<TrajBridge>();
-    params_ = std::make_shared<traj_params>(traj_gen_bridge_->getDefaultParams()); //NOTE: With dynamic reconfigure, this is probably next to pointless
+    params_ = std::make_shared<trajectory_generator::traj_params>(traj_gen_bridge_->getDefaultParams()); //NOTE: With dynamic reconfigure, this is probably next to pointless
   }
 
 
@@ -211,7 +211,7 @@ public:
 //   }
 //   
   
-  std::vector<pips_trajectory_ptr> run_impl(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const traj_params_ptr params, bool use_tasks)
+  std::vector<pips_trajectory_ptr> run_impl(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const trajectory_generator::traj_params_ptr params, bool use_tasks)
   {
     size_t num_paths = trajectory_functions.size();
     
@@ -241,7 +241,7 @@ public:
   }
   
   //This is the lowest level version that is actually run; the rest are for convenience
-  std::vector<pips_trajectory_ptr> run(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const traj_params_ptr params)
+  std::vector<pips_trajectory_ptr> run(const std::vector<traj_func_ptr>& trajectory_functions, const state_type& x0, const std_msgs::Header& header, const trajectory_generator::traj_params_ptr params)
   {
     ROS_DEBUG_STREAM_NAMED(name_, "Generating Trajectories");
     size_t num_paths = trajectory_functions.size();
@@ -299,7 +299,7 @@ public:
   }
   
   
-  pips_trajectory_ptr generateTraj(const state_type& x0, const std_msgs::Header& header, traj_params_ptr params, traj_func_ptr traj_func)
+  pips_trajectory_ptr generateTraj(const state_type& x0, const std_msgs::Header& header, trajectory_generator::traj_params_ptr params, traj_func_ptr traj_func)
   {
     pips_trajectory_ptr traj = std::make_shared<pips_trajectory>();
     traj->header = header;
