@@ -217,7 +217,7 @@ protected:
   
 
   //Internal methods can pass by reference safely
-  bool checkCurrentTrajectory(const std_msgs::Header& header)
+  bool getCurrentTrajectoryStats(const std_msgs::Header& header, ros::Duration& ttc, ros::Duration& tte)
   {
     trajectory_points trimmed_trajectory;
     
@@ -248,14 +248,28 @@ protected:
     int collision_ind = traj_tester2_->evaluateTrajectory(localTrajectory);
     ROS_DEBUG_STREAM_NAMED(name_ + "timing", "Current trajectory evaluated in " <<  (ros::WallTime::now() - start).toSec() * 1e3 << "ms");
     
+    if(collision_ind >=0)
+    {
+      ttc = (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time); 
+    }
+    tte = localTrajectory.points.back().time - localTrajectory.points.front().time;
+    
+    return collision_ind >=0;
+  }
+  
+  //Internal methods can pass by reference safely
+  bool checkCurrentTrajectory(const std_msgs::Header& header)
+  {
+    ros::Duration ttc, tte;
+    bool collides = getCurrentTrajectoryStats(header, ttc, tte);
     
     bool retval;
-    if((collision_ind >=0) && (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time) < min_ttc_)
+    if(ttc >=ros::Duration(0) && ttc < min_ttc_)
     {
       ROS_WARN_STREAM_NAMED(name_, "Current trajectory collides!");
       retval = true;
     }
-    else if((localTrajectory.points.back().time - localTrajectory.points.front().time) < min_tte_)
+    else if(tte < min_tte_)
     {
       ROS_WARN_NAMED(name_, "No imminent collision, but close to end of trajectory"); //should be debug, but for now making more obvious
       retval = true;
@@ -265,11 +279,11 @@ protected:
       retval = false;
     }
     
-    
-    if(collision_ind >=0)
+/*    
+    if(collides)
     {
       localTrajectory.points.resize(collision_ind);
-    }
+    }*/
     //TODO: publish the noncolliding current trajectory message (probably as visualization msgs, with different colors for colliding/noncolliding
     
     return retval;
