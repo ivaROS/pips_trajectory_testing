@@ -3,7 +3,7 @@
 
 #include <pips/collision_testing/transforming_collision_checker.h>
 #include <tf/transform_datatypes.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf2_utils/transform_manager.h>
 
 #include <tf2_ros/message_filter.h>
 
@@ -23,7 +23,7 @@ namespace pips_trajectory_testing
   public:
     
     //PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name);
-    PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::make_shared<tf2_ros::Buffer>());
+    PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const tf2_utils::TransformManager& tf_buffer = tf2_utils::TransformManager(false));
     
     
     virtual bool init();
@@ -53,7 +53,7 @@ namespace pips_trajectory_testing
   protected:
     ros::NodeHandle nh_, pnh_;
     std::string name_;
-    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+    tf2_utils::TransformManager tfm_;
     
     void doCallback();
     

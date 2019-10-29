@@ -3,20 +3,15 @@
 namespace pips_trajectory_testing
 {
 
-DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const int tamper_prevention, std::shared_ptr<tf2_ros::Buffer> tf_buffer) :
-    PipsCCWrapper(nh,pnh,name,tf_buffer)
+DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, tf2_utils::TransformManager tfm) :
+    PipsCCWrapper(nh,pnh,name,tfm)
 {
-    // If a tfbuffer was not provided by the user, then we need to set up a listener
-    if(tamper_prevention == MAGIC_NUMBER)
-    {
-      tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
-    }
     cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
 
 
-DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name) :
-    PipsCCWrapper(nh,pnh,name, tf_buffer)
+DepthImageCCWrapper::DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, tf2_utils::TransformManager tfm, const std::string& name) :
+    PipsCCWrapper(nh,pnh,name, tfm)
 {
     cc_ = std::make_shared<pips::collision_testing::DepthImageCollisionChecker>(nh, pnh_);
 }
@@ -60,7 +55,7 @@ bool DepthImageCCWrapper::init()
     depth_info_sub_.subscribe ( nh_, depth_info_topic, 3 );    
     
     // Ensure that CameraInfo is transformable
-    info_tf_filter_ = boost::make_shared<tf_filter>(depth_info_sub_, *tf_buffer_, odom_frame_id, 2,nh_);
+    info_tf_filter_ = boost::make_shared<tf_filter>(depth_info_sub_, *tfm_.getBuffer(), odom_frame_id, 2,nh_);
     
     // Synchronize Image and CameraInfo callbacks
     image_synchronizer_ = boost::make_shared<time_synchronizer>(time_synchronizer(10),depth_sub_, *info_tf_filter_);

@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-find_package(OpenMP)
+# find_package(OpenMP)
 
 generate_dynamic_reconfigure_options(
   cfg/PipsController.cfg
@@ -39,7 +39,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #pips_trajectory_tester
+  LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #OpenMP::OpenMP_CXX #pips_trajectory_tester
   CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2 tf2_ros pips tf2_pips
   DEPENDS Boost OpenMP
 )
@@ -102,6 +102,17 @@ target_link_libraries(depth_image_cc_node
   depth_image_cc_wrapper
    ${catkin_LIBRARIES}
 )
+# 
+# if(NOT TARGET OpenMP::OpenMP_CXX)
+#     find_package(Threads REQUIRED)
+#     add_library(OpenMP::OpenMP_CXX IMPORTED INTERFACE)
+#     set_property(TARGET OpenMP::OpenMP_CXX
+#                  PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
+#     # Only works if the same flag is passed to the linker; use CMake 3.9+ otherwise (Intel, AppleClang)
+#     set_property(TARGET OpenMP::OpenMP_CXX
+#                  PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS} Threads::Threads)
+# 
+# endif()
 
 # TODO: Add interface library for trajectory testing to ensure that OMP flags get applied to dependent targets: http://mariobadr.com/creating-a-header-only-library-with-cmake.html
 # NOTE: The above may not actually be useful, since I can't figure out how to get a dependent target to use the compile flags
