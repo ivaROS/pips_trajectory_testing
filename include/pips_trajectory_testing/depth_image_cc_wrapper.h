@@ -50,10 +50,10 @@ private:
   
 public:
   // Use this constructor if you don't have a tfbuffer
-  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name=DEFAULT_NAME, tf2_utils::TransformManager tfm=tf2_utils::TransformManager(false));
+  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name=DEFAULT_NAME, const tf2_utils::TransformManager& tfm=tf2_utils::TransformManager(false));
   
   // Use this constructor if you already have a tfbuffer
-  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, tf2_utils::TransformManager tfm, const std::string& name=DEFAULT_NAME);
+  DepthImageCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const tf2_utils::TransformManager& tfm, const std::string& name=DEFAULT_NAME);
   
   
   bool init();

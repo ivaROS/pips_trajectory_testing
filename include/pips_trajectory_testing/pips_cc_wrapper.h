@@ -61,8 +61,8 @@ namespace pips_trajectory_testing
     
     bool inited_ = false;
 
-    std::string base_frame_id_ = "base_footprint";
-    std::string fixed_frame_id_ = "odom";
+    std::string base_frame_id_;
+    std::string fixed_frame_id_;
 
   };
 

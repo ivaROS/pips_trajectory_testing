@@ -1,4 +1,6 @@
 #include <pips_trajectory_testing/pips_cc_wrapper.h>
+#include <pips/utils/param_utils.h>
+
 
 namespace pips_trajectory_testing
 {
@@ -26,26 +28,8 @@ namespace pips_trajectory_testing
   bool PipsCCWrapper::init()
   {
     //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
-    std::string key;
-    if (pnh_.searchParam("base_frame_id", key))
-    {
-      pnh_.getParam(key, base_frame_id_ );
-      //nh_.setParam(key, base_frame_id_ );
-    }
-    else
-    {
-      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'base_frame_id'! Using default value: '" << base_frame_id_ << "'");
-    }
-    
-    if (pnh_.searchParam("fixed_frame_id", key))
-    {
-      pnh_.getParam(key, fixed_frame_id_ );
-      //nh_.setParam(key, base_frame_id_ );
-    }
-    else
-    {
-      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'fixed_frame_id'! Using default value: '" << fixed_frame_id_ << "'");
-    }
+    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link");
+    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom");
     
     return true;
   }

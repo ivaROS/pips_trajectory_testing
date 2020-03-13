@@ -261,7 +261,7 @@ protected:
   bool checkCurrentTrajectory(const std_msgs::Header& header)
   {
     ros::Duration ttc, tte;
-    bool collides = getCurrentTrajectoryStats(header, ttc, tte);
+    getCurrentTrajectoryStats(header, ttc, tte);
     
     bool retval;
     if(ttc >=ros::Duration(0) && ttc < min_ttc_)
