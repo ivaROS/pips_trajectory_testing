@@ -27,6 +27,16 @@ generate_dynamic_reconfigure_options(
   cfg/PipsTrajectoryTester.cfg
   )
 
+add_service_files(
+  FILES
+  TestCollisionStamped.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+  std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##

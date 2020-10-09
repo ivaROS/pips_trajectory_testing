@@ -6,6 +6,7 @@
 #include <tf2_utils/transform_manager.h>
 
 #include <tf2_ros/message_filter.h>
+#include <pips_trajectory_testing/TestCollisionStamped.h>
 
 namespace pips_trajectory_testing
 {
@@ -15,6 +16,7 @@ namespace pips_trajectory_testing
   {
   private:
     bool hasTransform_=false;
+    ros::ServiceServer collision_testing_service_;
     
     Callback cb_=0;
     
@@ -37,6 +39,7 @@ namespace pips_trajectory_testing
     
     virtual bool isReady();
     virtual bool isReady(const std_msgs::Header& header);
+    virtual bool testCollisionSrv(pips_trajectory_testing::TestCollisionStamped::Request &req, pips_trajectory_testing::TestCollisionStamped::Response &res);
     
     
     virtual bool isReadyImpl() { return true;}

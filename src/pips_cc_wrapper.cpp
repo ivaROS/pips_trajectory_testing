@@ -31,6 +31,8 @@ namespace pips_trajectory_testing
     pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link");
     pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom");
     
+    collision_testing_service_ = pnh_.advertiseService("test_collision_stamped", &PipsCCWrapper::testCollisionSrv, this);
+    
     return true;
   }
   
@@ -56,6 +58,33 @@ namespace pips_trajectory_testing
     if(isReadyImpl())
     {
       return transformReady(getCurrentHeader(), header);
+    }
+    else
+    {
+      return false;
+    }
+  }
+  
+  bool PipsCCWrapper::testCollisionSrv(pips_trajectory_testing::TestCollisionStamped::Request &req, pips_trajectory_testing::TestCollisionStamped::Response &res)
+  {
+    auto cc = getCC();
+    if(!cc)
+    {
+      ROS_ERROR_STREAM("Unable to test collision without a collision checker!");
+      return false;
+    }
+    if(transformReady(getCurrentHeader(), req.header))
+    {
+      for(geometry_msgs::Pose pose : req.poses)
+      {
+        auto cc_result = cc->testCollision(pose);
+        res.collisions.push_back(cc_result);
+        if(cc_result && req.stop_on_collision)
+        {
+          break;
+        }
+      }
+      return true;
     }
     else
     {
