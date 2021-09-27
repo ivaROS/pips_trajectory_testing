@@ -252,6 +252,10 @@ protected:
     {
       ttc = (localTrajectory.points[collision_ind].time - localTrajectory.points.front().time); 
     }
+    else
+    {
+      ttc = ros::Duration(-1);
+    }
     tte = localTrajectory.points.back().time - localTrajectory.points.front().time;
     
     return collision_ind >=0;
@@ -261,7 +265,7 @@ protected:
   bool checkCurrentTrajectory(const std_msgs::Header& header)
   {
     ros::Duration ttc, tte;
-    getCurrentTrajectoryStats(header, ttc, tte);
+    bool collides = getCurrentTrajectoryStats(header, ttc, tte);
     
     bool retval;
     if(ttc >=ros::Duration(0) && ttc < min_ttc_)

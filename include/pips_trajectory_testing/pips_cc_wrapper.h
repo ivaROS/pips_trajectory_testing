@@ -3,7 +3,7 @@
 
 #include <pips/collision_testing/transforming_collision_checker.h>
 #include <tf/transform_datatypes.h>
-#include <tf2_utils/transform_manager.h>
+#include <tf2_ros/transform_listener.h>
 
 #include <tf2_ros/message_filter.h>
 
@@ -23,7 +23,7 @@ namespace pips_trajectory_testing
   public:
     
     //PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name);
-    PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const tf2_utils::TransformManager& tf_buffer = tf2_utils::TransformManager(false));
+    PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::make_shared<tf2_ros::Buffer>());
     
     
     virtual bool init();
@@ -53,7 +53,7 @@ namespace pips_trajectory_testing
   protected:
     ros::NodeHandle nh_, pnh_;
     std::string name_;
-    tf2_utils::TransformManager tfm_;
+    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     
     void doCallback();
     
@@ -61,8 +61,8 @@ namespace pips_trajectory_testing
     
     bool inited_ = false;
 
-    std::string base_frame_id_;
-    std::string fixed_frame_id_;
+    std::string base_frame_id_ = "base_footprint";
+    std::string fixed_frame_id_ = "odom";
 
   };
 

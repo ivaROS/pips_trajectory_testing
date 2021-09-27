@@ -1,6 +1,4 @@
 #include <pips_trajectory_testing/pips_cc_wrapper.h>
-#include <pips/utils/param_utils.h>
-
 
 namespace pips_trajectory_testing
 {
@@ -16,11 +14,11 @@ namespace pips_trajectory_testing
     }
     */
   
-  PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const tf2_utils::TransformManager& tfm) :
+  PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer) :
     nh_(nh),
     pnh_(pnh, name),
     name_(name),
-    tfm_(tfm, nh)
+    tf_buffer_(tf_buffer)
   {
 
   }
@@ -28,8 +26,26 @@ namespace pips_trajectory_testing
   bool PipsCCWrapper::init()
   {
     //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
-    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link");
-    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom");
+    std::string key;
+    if (pnh_.searchParam("base_frame_id", key))
+    {
+      pnh_.getParam(key, base_frame_id_ );
+      //nh_.setParam(key, base_frame_id_ );
+    }
+    else
+    {
+      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'base_frame_id'! Using default value: '" << base_frame_id_ << "'");
+    }
+    
+    if (pnh_.searchParam("fixed_frame_id", key))
+    {
+      pnh_.getParam(key, fixed_frame_id_ );
+      //nh_.setParam(key, base_frame_id_ );
+    }
+    else
+    {
+      ROS_WARN_STREAM_NAMED(name_, "Warning, no entry found on parameter server for 'fixed_frame_id'! Using default value: '" << fixed_frame_id_ << "'");
+    }
     
     return true;
   }
@@ -74,7 +90,7 @@ namespace pips_trajectory_testing
           ROS_DEBUG_STREAM_THROTTLE_NAMED (1, name_, "Not ready, check for transform..." );
           try {
               //Get the transform that takes a point in the base frame and transforms it to the depth optical
-              geometry_msgs::TransformStamped sensor_base_transform = tfm_.getBuffer()->lookupTransform ( header.frame_id, base_frame_id_, ros::Time ( 0 ) );
+              geometry_msgs::TransformStamped sensor_base_transform = tf_buffer_->lookupTransform ( header.frame_id, base_frame_id_, ros::Time ( 0 ) );
               getCC()->setTransform ( sensor_base_transform );
 
               getCC()->init();
@@ -98,7 +114,7 @@ namespace pips_trajectory_testing
     ROS_DEBUG_STREAM_ONCE_NAMED ( name_, "Not ready, check for transform..." );
     try {
       //Get the transform that takes a point in the base frame and transforms it to the depth optical
-      geometry_msgs::TransformStamped sensor_base_transform = tfm_.getBuffer()->lookupTransform ( target_header.frame_id, target_header.stamp, source_header.frame_id, source_header.stamp, fixed_frame_id_, timeout);
+      geometry_msgs::TransformStamped sensor_base_transform = tf_buffer_->lookupTransform ( target_header.frame_id, target_header.stamp, source_header.frame_id, source_header.stamp, fixed_frame_id_, timeout);
       getCC()->setTransform ( sensor_base_transform );
       
       getCC()->init();
