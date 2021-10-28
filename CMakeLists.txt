@@ -51,7 +51,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #OpenMP::OpenMP_CXX #pips_trajectory_tester
   CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2 tf2_ros pips tf2_pips
-  DEPENDS Boost OpenMP
+  DEPENDS Boost
 )
 
 ###########

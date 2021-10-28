@@ -10,10 +10,12 @@
 
 namespace pips_trajectory_testing
 {
-  typedef boost::function<void() > Callback;
 
   class PipsCCWrapper
   {
+  public:
+    typedef boost::function<void() > Callback;
+      
   private:
     bool hasTransform_=false;
     ros::ServiceServer collision_testing_service_;
@@ -52,6 +54,9 @@ namespace pips_trajectory_testing
     
     virtual std_msgs::Header getCurrentHeader()=0;
 
+    std::string getName() const {return name_;}
+    
+    virtual bool publishersExist() {return true;}
     
   protected:
     ros::NodeHandle nh_, pnh_;
@@ -63,6 +68,10 @@ namespace pips_trajectory_testing
     void defaultCallback();
     
     bool inited_ = false;
+    
+    boost::mutex callback_mutex_;
+    using Lock = boost::mutex::scoped_lock;
+    
 
     std::string base_frame_id_;
     std::string fixed_frame_id_;

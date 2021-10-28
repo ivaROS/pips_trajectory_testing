@@ -28,8 +28,8 @@ namespace pips_trajectory_testing
   bool PipsCCWrapper::init()
   {
     //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
-    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link");
-    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom");
+    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link", 100);
+    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom", 100);
     
     collision_testing_service_ = pnh_.advertiseService("test_collision_stamped", &PipsCCWrapper::testCollisionSrv, this);
     
@@ -61,6 +61,7 @@ namespace pips_trajectory_testing
     }
     else
     {
+      ROS_WARN_STREAM_NAMED(name_, "[" << name_ << "]'s isReadyImpl() returned false!");
       return false;
     }
   }
@@ -75,14 +76,23 @@ namespace pips_trajectory_testing
     }
     if(transformReady(getCurrentHeader(), req.header))
     {
-      for(geometry_msgs::Pose pose : req.poses)
+      update();
+      if(req.poses.size()>0)
       {
-        auto cc_result = cc->testCollision(pose);
-        res.collisions.push_back(cc_result);
-        if(cc_result && req.stop_on_collision)
+        for(geometry_msgs::Pose pose : req.poses)
         {
-          break;
+          auto cc_result = cc->testCollision(pose);
+          res.collisions.push_back(cc_result);
+          if(cc_result && req.stop_on_collision)
+          {
+            break;
+          }
         }
+      }
+      else
+      {
+        auto cc_result = cc->testCollision(req.pose);
+        res.collisions.push_back(cc_result);
       }
       return true;
     }
@@ -112,7 +122,7 @@ namespace pips_trajectory_testing
               hasTransform_ = true;
 
           } catch ( tf2::TransformException &ex ) {
-              ROS_WARN_STREAM_THROTTLE_NAMED ( 5, name_, "Problem finding transform:\n" <<ex.what() );
+              ROS_WARN_STREAM_NAMED (name_, "Problem finding transform:\n" <<ex.what() );
               return false;
           }
       }
@@ -138,7 +148,7 @@ namespace pips_trajectory_testing
       ROS_DEBUG_STREAM_NAMED ( name_,  "Transform found! Passing transform to collision checker" );
       
     } catch ( tf2::TransformException &ex ) {
-      ROS_WARN_STREAM_THROTTLE_NAMED ( 5, name_, "Problem finding transform:\n" <<ex.what() );
+      ROS_WARN_STREAM_NAMED (name_, "Problem finding transform:\n" <<ex.what() );
       return false;
     }
     
@@ -160,14 +170,21 @@ namespace pips_trajectory_testing
   
   void PipsCCWrapper::setCallback(Callback cb)
   {
+      Lock lock(callback_mutex_);
       cb_ = cb;
   }
   
   void PipsCCWrapper::doCallback()
   {
-      if(cb_)
+      Callback cb;
       {
-          cb_();
+          Lock lock(callback_mutex_);
+          cb = cb_;
+      }
+      
+      if(cb)
+      {
+          cb();
       }
   }
 
