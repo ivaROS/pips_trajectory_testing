@@ -4,17 +4,6 @@
 
 namespace pips_trajectory_testing
 {
-
-  /*
-  PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name) :
-    nh_(nh),
-    pnh_(pnh, name),
-    name_(name)
-    {
-      tf_buffer_ = std::make_shared<tf2_ros::Buffer>(); //optional parameter: ros::Duration(cache time) (default=10) (though it doesn't seem to accept it!)
-      tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
-    }
-    */
   
   PipsCCWrapper::PipsCCWrapper(ros::NodeHandle& nh, ros::NodeHandle& pnh, const std::string& name, const tf2_utils::TransformManager& tfm) :
     nh_(nh),
@@ -27,7 +16,6 @@ namespace pips_trajectory_testing
   
   bool PipsCCWrapper::init()
   {
-    //NOTE: It isn't clear to me whether it matters if I use pnh_ or nh_
     pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link", 100);
     pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom", 100);
     
