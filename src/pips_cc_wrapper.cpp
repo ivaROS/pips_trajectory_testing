@@ -16,8 +16,8 @@ namespace pips_trajectory_testing
   
   bool PipsCCWrapper::init()
   {
-    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "base_link", 100);
-    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "odom", 100);
+    pips::utils::searchParam(pnh_, "base_frame_id", base_frame_id_, "hummingbird/base_link", 100);
+    pips::utils::searchParam(pnh_, "fixed_frame_id", fixed_frame_id_, "world", 100);
     
     collision_testing_service_ = pnh_.advertiseService("test_collision_stamped", &PipsCCWrapper::testCollisionSrv, this);
     
