@@ -16,6 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_generator
   pips
   tf2_pips
+  message_generation
+  std_msgs
+  geometry_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -34,8 +37,8 @@ add_service_files(
 
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
   std_msgs
+  geometry_msgs
 )
 
 ###################################
@@ -50,7 +53,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES  pips_cc_wrapper depth_image_cc_wrapper #OpenMP::OpenMP_CXX #pips_trajectory_tester
-  CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2 tf2_ros pips tf2_pips
+  CATKIN_DEPENDS pips trajectory_generator dynamic_reconfigure roscpp sensor_msgs image_transport tf tf2 tf2_ros tf2_pips message_runtime std_msgs geometry_msgs
   DEPENDS Boost
 )
 
@@ -71,7 +74,7 @@ add_library(pips_cc_wrapper
    src/pips_cc_wrapper.cpp
 )
 
-target_compile_options(pips_cc_wrapper PUBLIC  -std=c++11)
+target_compile_options(pips_cc_wrapper PUBLIC  -std=c++14)
 
 add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -86,9 +89,9 @@ add_library(depth_image_cc_wrapper
    src/depth_image_cc_wrapper.cpp
 )
 
-target_compile_options(depth_image_cc_wrapper PUBLIC  -std=c++11)
+target_compile_options(depth_image_cc_wrapper PUBLIC  -std=c++14)
 
-add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(pips_cc_wrapper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(depth_image_cc_wrapper
@@ -102,9 +105,9 @@ add_executable(depth_image_cc_node
   src/depth_image_cc_node.cpp
 )
 
-target_compile_options(depth_image_cc_node PUBLIC  -std=c++11)
+target_compile_options(depth_image_cc_node PUBLIC  -std=c++14)
 
-add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(depth_image_cc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(depth_image_cc_node
